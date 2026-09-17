@@ -110,6 +110,11 @@ Sitzung und je Tag, Ausgabenprotokoll — siehe Masterprompt 9a.
   Textparameter mit `string_to_array`.
 - Drizzle nimmt beim Einfügen in eine `vector`-Spalte ein Zahlen-Array, kein
   Literal — das Literal braucht erst die rohe Suchabfrage.
+- **Tests dürfen nicht von einer eingelesenen `.env` abhängen.** `STORAGE_PATH`
+  war in Tag 2 ins Schema gekommen, aber nicht in `vitest.config.ts` und nicht
+  in die CI. Lokal lief alles, weil vor jedem Lauf `.env` eingelesen wurde;
+  in der CI brach die Konfigurationsprüfung ab. Jede Pflichtvariable aus
+  `src/lib/config/env.ts` gehört in beide.
 
 ## Blockiert
 

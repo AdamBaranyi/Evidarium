@@ -91,12 +91,14 @@ jobs:
           TEST_DATABASE_URL: postgres://evidarium_owner:ci@127.0.0.1:5432/evidarium_test
           DATABASE_URL: postgres://evidarium_owner:ci@127.0.0.1:5432/evidarium_test
           APP_ORIGIN: http://localhost:3100
+          STORAGE_PATH: ./storage-ci
         run: bun run test
 
       - name: Build
         env:
           DATABASE_URL: postgres://evidarium_owner:ci@127.0.0.1:5432/evidarium_test
           APP_ORIGIN: http://localhost:3100
+          STORAGE_PATH: ./storage-ci
         run: bun run build
 
       # Abhängigkeiten blockieren ab "hoch". Der tägliche Lauf ist strenger
