@@ -1,0 +1,54 @@
+# Lokale Entwicklung. Beide Dienste hören nur auf 127.0.0.1 — Docker umgeht
+# sonst die Firewall des Hosts.
+#
+# Ports bewusst 5450/5451: Tallyroom belegt auf derselben Maschine 5440/5441.
+#
+# PostgreSQL 18 mit pgvector. Die Hauptversion ist an vps1 angeglichen, wo
+# postgres:18.1-alpine läuft — CI, Entwicklung und Produktion müssen dieselbe
+# Hauptversion fahren.
+#
+# Postgres 18 erwartet den Mount auf /var/lib/postgresql, nicht mehr auf dem
+# Unterverzeichnis data. Mit dem alten Pfad startet der Container in einer
+# Neustartschleife.
+services:
+  db:
+    image: pgvector/pgvector:0.8.6-pg18
+    container_name: evidarium-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: evidarium_owner
+      POSTGRES_PASSWORD: entwicklung-nur-lokal
+      POSTGRES_DB: evidarium
+    ports:
+      - '127.0.0.1:5450:5432'
+    volumes:
+      - evidarium-db-data:/var/lib/postgresql
+      - ./db-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U evidarium_owner -d evidarium']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  db-test:
+    image: pgvector/pgvector:0.8.6-pg18
+    container_name: evidarium-db-test
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: evidarium_owner
+      POSTGRES_PASSWORD: test-nur-lokal
+      POSTGRES_DB: evidarium_test
+    ports:
+      - '127.0.0.1:5451:5432'
+    tmpfs:
+      - /var/lib/postgresql
+    volumes:
+      - ./db-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U evidarium_owner -d evidarium_test']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  evidarium-db-data:

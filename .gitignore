@@ -1,0 +1,17 @@
+node_modules/
+.next/
+out/
+dist/
+coverage/
+
+# Von Next erzeugt, gehoert nicht ins Repository
+next-env.d.ts
+*.tsbuildinfo
+test-results/
+playwright-report/
+.env
+.env.*
+!.env.example
+storage/
+*.local
+.DS_Store

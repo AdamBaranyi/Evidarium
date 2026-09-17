@@ -1,0 +1,105 @@
+name: CI
+
+# Läuft bei jedem Push und jedem Pull Request. Der tägliche Lauf in
+# sicherheit-taeglich.yml deckt die Lücke ohne Commit ab.
+#
+# Keine bezahlten Aufrufe an einen KI-Anbieter: Die Tests laufen gegen den
+# Demo-Adapter. Echte Modell-Evaluation wird ausdrücklich von Hand gestartet.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BUN_VERSION: 1.3.14
+
+jobs:
+  pruefen:
+    name: Format, Regeln, Typen, Tests, Build
+    runs-on: ubuntu-24.04
+
+    # Dieselbe Hauptversion wie auf vps1 (dort postgres:18.1-alpine) und wie
+    # in infra/docker-compose.yml. Eine abweichende Version in der CI prüft
+    # etwas anderes als das, was in Produktion läuft.
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.6-pg18
+        env:
+          POSTGRES_USER: evidarium_owner
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: evidarium_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U evidarium_owner -d evidarium_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # Dieselbe Fassung wie in sicherheit-taeglich.yml — beide zusammen
+      # aktualisieren. Prüfsumme aus dem Release, nicht aus dem Gedächtnis.
+      - name: gitleaks 8.30.1 holen
+        run: |
+          curl -sSfL -o gitleaks.tar.gz https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  gitleaks.tar.gz" | sha256sum --check
+          tar -xzf gitleaks.tar.gz gitleaks
+
+      # Exit-Code nicht durch eine Pipe verschlucken.
+      - name: Secret-Scan über alle Commits
+        run: ./gitleaks git . --no-banner --redact
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - run: bun install --frozen-lockfile
+
+      - name: pgvector bereitstellen
+        env:
+          PGPASSWORD: ci
+        run: psql -h 127.0.0.1 -U evidarium_owner -d evidarium_test -c 'CREATE EXTENSION IF NOT EXISTS vector;'
+
+      - run: bun run format:check
+      - run: bun run check:file-length
+      - run: bun run check:font-floor
+      - run: bun run lint
+      - run: bun run typecheck
+
+      # Das Sitzungsgeheimnis wird je Lauf erzeugt, nicht in diese Datei
+      # geschrieben. Zwei Gründe: Ein fester hochentropischer Wert neben dem
+      # Namen SESSION_SECRET schlägt bei gitleaks als generic-api-key an — zu
+      # Recht, denn die Regel kann echt und Platzhalter nicht unterscheiden.
+      # Und ein Wert je Lauf ist ohnehin besser als ein wiederverwendeter.
+      - name: Testgeheimnis erzeugen
+        run: echo "SESSION_SECRET=$(openssl rand -base64 48)" >> "$GITHUB_ENV"
+
+      - name: Tests
+        env:
+          TEST_DATABASE_URL: postgres://evidarium_owner:ci@127.0.0.1:5432/evidarium_test
+          DATABASE_URL: postgres://evidarium_owner:ci@127.0.0.1:5432/evidarium_test
+          APP_ORIGIN: http://localhost:3100
+        run: bun run test
+
+      - name: Build
+        env:
+          DATABASE_URL: postgres://evidarium_owner:ci@127.0.0.1:5432/evidarium_test
+          APP_ORIGIN: http://localhost:3100
+        run: bun run build
+
+      # Abhängigkeiten blockieren ab "hoch". Der tägliche Lauf ist strenger
+      # (ab "moderat") — dort geht es ums Bemerken, hier ums Durchlassen.
+      - name: Bekannte Schwachstellen
+        run: bun audit --audit-level=high

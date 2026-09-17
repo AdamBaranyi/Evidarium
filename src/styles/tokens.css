@@ -1,0 +1,48 @@
+/*
+ * Grundwerte. Die ausgearbeitete visuelle Identität entsteht an Tag 4, wenn es
+ * etwas zu gestalten gibt. Was hier steht, ist bewusst zurückhaltend und legt
+ * nur fest, was später ohnehin nicht mehr verhandelbar ist.
+ *
+ * Eine Entscheidung ist schon getroffen: Farbe ist für den Beleg reserviert.
+ * Das Produkt verspricht Nachprüfbarkeit — also ist die Fundstelle das
+ * einzige Element, das farblich hervorsticht. Knöpfe tragen Tinte, nicht Farbe.
+ */
+:root {
+  /* Schriftgrössen: Untergrenze 16 px, ohne Ausnahme und auf jeder Breite. */
+  --text-body: 16px;
+  --text-lead: 20px;
+  --text-title: 24px;
+  --text-display: 32px;
+
+  --line-body: 1.6;
+  --line-title: 1.2;
+
+  /* Warmer Grund, kein Blaustich. */
+  --ground: #f4f3ef;
+  --surface: #ffffff;
+  --ink: #16181a;
+  --ink-soft: #4a4f55;
+  --edge: #d9d6cf;
+
+  /* Nur für Belege, Fokusring und aktiven Zustand. Nie für Knöpfe. */
+  --beleg: #0a6b5d;
+
+  --action-bg: #16181a;
+  --action-ink: #f4f3ef;
+
+  --step: 8px;
+  --radius: 4px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground: #121311;
+    --surface: #1b1d1a;
+    --ink: #eceae4;
+    --ink-soft: #a7aba6;
+    --edge: #33362f;
+    --beleg: #4fd1bb;
+    --action-bg: #eceae4;
+    --action-ink: #121311;
+  }
+}
