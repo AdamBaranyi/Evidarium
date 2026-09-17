@@ -5,6 +5,8 @@ import { ProviderFehler, type AntwortProvider } from './provider';
 import type { Kategorie } from './schema';
 import { frageEinbetten } from '@/lib/embeddings/client';
 import { suchen, type Treffer } from '@/lib/search/suchen';
+import { abrechnen, alsUnklarMarkieren, reservieren, type Reservierung } from '@/lib/budget/budget';
+import { env } from '@/lib/config/env';
 
 /*
  * Der vollständige Weg von der Frage zur geprüften Antwort.
@@ -17,7 +19,16 @@ import { suchen, type Treffer } from '@/lib/search/suchen';
 /** Wie viele Fundstellen dem Modell übergeben werden. */
 const KONTEXT_STELLEN = 8;
 
+/*
+ * Obergrenzen für die Reservierung **vor** dem Aufruf. Sie müssen das
+ * Höchstmögliche abdecken, nicht das Wahrscheinliche — sonst reserviert man
+ * zu wenig und der Deckel hält nicht.
+ */
+const MAX_EINGABE_TOKENS = 12_000;
+const MAX_AUSGABE_TOKENS = 1_200;
+
 export type FrageErgebnis =
+  | { art: 'budget'; grund: string; nachricht: string }
   | {
       art: 'antwort';
       kategorie: Kategorie;
@@ -47,6 +58,7 @@ export async function frageBeantworten(
   documentIds: string[],
   frage: string,
   verlauf: { rolle: 'nutzer' | 'assistent'; text: string }[] = [],
+  sessionId: string | null = null,
 ): Promise<FrageErgebnis> {
   // 1. Frage einbetten — das Modell dafür lebt im Worker, nicht hier.
   let vektor: number[];
@@ -74,14 +86,51 @@ export async function frageBeantworten(
   //    allein die Konfiguration.
   const provider: AntwortProvider = providerWaehlen() ?? new DemoProvider();
 
+  /*
+   * Budget **vor** dem Aufruf reservieren, nicht danach prüfen. Der
+   * Demo-Adapter kostet nichts und ist ausgenommen.
+   */
+  let reservierung: Reservierung | null = null;
+  if (!provider.istDemo) {
+    const ergebnisBudget = await reservieren(
+      userId,
+      sessionId,
+      env.AI_CHAT_MODEL,
+      MAX_EINGABE_TOKENS,
+      MAX_AUSGABE_TOKENS,
+    );
+    if ('grund' in ergebnisBudget) {
+      return {
+        art: 'budget',
+        grund: ergebnisBudget.grund,
+        nachricht: ergebnisBudget.nachricht,
+      };
+    }
+    reservierung = ergebnisBudget;
+  }
+
   let ergebnis;
   try {
     ergebnis = await provider.antworten({ frage, abschnitte, verlauf });
   } catch (fehler) {
+    // Die Reservierung bleibt stehen: Fehlende Messwerte sind keine
+    // Nullkosten, und der Anbieter kann die Anfrage verarbeitet haben.
+    if (reservierung) await alsUnklarMarkieren(reservierung);
     if (fehler instanceof ProviderFehler) {
       return { art: 'fehler', code: fehler.code, nachricht: meldung(fehler.code) };
     }
     return { art: 'fehler', code: 'unerwartet', nachricht: meldung('unerwartet') };
+  }
+
+  if (reservierung && ergebnis.verbrauch) {
+    await abrechnen(
+      reservierung,
+      ergebnis.verbrauch.modell,
+      ergebnis.verbrauch.eingabeTokens,
+      ergebnis.verbrauch.ausgabeTokens,
+    );
+  } else if (reservierung) {
+    await alsUnklarMarkieren(reservierung);
   }
 
   // 4. **Belegprüfung.** Was hier durchfällt, wird nicht angezeigt.

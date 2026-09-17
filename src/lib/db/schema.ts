@@ -194,3 +194,45 @@ export const documentChunks = pgTable(
     index('document_chunks_search_en_idx').using('gin', table.searchEn),
   ],
 );
+
+/*
+ * Jeder bezahlte Aufruf hinterlässt eine Zeile — vor dem Aufruf als
+ * Reservierung, danach mit den gemessenen Werten.
+ *
+ * Die Reservierung ist der Schutz gegen parallele Anfragen: Ohne sie könnten
+ * zehn gleichzeitige Fragen den Tagesdeckel gemeinsam überziehen, weil jede
+ * einzelne beim Prüfen noch Luft sieht.
+ *
+ * **Fehlende Messwerte sind keine Nullkosten.** Bricht ein Aufruf nach einer
+ * Zeitüberschreitung ab, bleibt die Reservierung stehen und wird als
+ * `unklar` markiert, statt gelöscht zu werden.
+ */
+export const usageEvents = pgTable(
+  'usage_events',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    sessionId: text('session_id'),
+    operation: text('operation').notNull(),
+    status: text('status').notNull().default('reserviert'),
+    modell: text('modell').notNull(),
+    eingabeTokens: integer('eingabe_tokens'),
+    ausgabeTokens: integer('ausgabe_tokens'),
+    /* In Mikro-Dollar, damit nichts an Rundung verlorengeht. */
+    kostenMikroUsd: integer('kosten_mikro_usd').notNull(),
+    preisstand: text('preisstand').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    check(
+      'usage_events_status_gueltig',
+      sql`${table.status} IN ('reserviert', 'abgerechnet', 'unklar')`,
+    ),
+    check('usage_events_operation_gueltig', sql`${table.operation} IN ('antwort', 'reparatur')`),
+    index('usage_events_zeitraum_idx').on(table.createdAt),
+    index('usage_events_nutzer_idx').on(table.userId, table.createdAt),
+    index('usage_events_sitzung_idx').on(table.sessionId),
+  ],
+);

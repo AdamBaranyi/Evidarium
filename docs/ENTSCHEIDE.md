@@ -177,3 +177,35 @@ Warteschlange wäre es ein Umweg, auf den der Nutzer wartet.
 
 Der Endpunkt hat keine Anmeldung und darf das Gerät darum nie verlassen.
 Geprüft: über die LAN-Adresse nicht erreichbar.
+
+## E18 — Budget wird reserviert, nicht nachgerechnet
+
+_17.09.2026._ Vor jedem bezahlten Aufruf entsteht eine Zeile in `usage_events`
+mit den **Höchstkosten**; nach dem Aufruf wird sie mit den gemessenen Werten
+überschrieben.
+
+Ohne Reservierung sähen gleichzeitige Anfragen beim Prüfen jeweils noch Luft
+und liefen gemeinsam über den Deckel. Serialisiert über
+`pg_advisory_xact_lock` in derselben Transaktion.
+
+**Fehlende Messwerte sind keine Nullkosten.** Endet ein Aufruf ohne
+Nutzungsdaten, bleibt die Reservierung stehen und wird als `unklar` markiert,
+nicht gelöscht — der Anbieter kann die Anfrage verarbeitet haben.
+
+**Fallstrick, gefunden und behoben:** Innerhalb der Transaktion darf keine
+Abfrage über das globale `db` laufen. Das zöge eine zweite Verbindung aus dem
+Pool; bei gleichzeitigen Anfragen belegen die Transaktionen dann den ganzen
+Pool und warten alle auf eine weitere Verbindung, die nie frei wird. Der
+Parallelitätstest lief in die Zeitüberschreitung, der Einzeltest nicht. Die
+Verbindung wird darum überall hereingereicht.
+
+## E19 — Datierte Preistabelle, gesperrt ohne Preis
+
+_17.09.2026._ Preise stehen in `src/lib/budget/preise.ts` mit Datum, nicht
+verstreut in Berechnungen. Ist ein Modell nicht aufgeführt, bleibt der
+Live-Modus gesperrt — lieber keine Antwort als eine, deren Kosten niemand
+kennt.
+
+Gerechnet wird in Mikro-Dollar, weil sich Rundungsfehler über Monate
+summieren. Angezeigt wird ausdrücklich als **Schätzung**: Der Anbieter rechnet
+nach eigenen Regeln ab.
