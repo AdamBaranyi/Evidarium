@@ -63,6 +63,48 @@ Ausnahme weg.
 - Sicherheits-Header in `next.config.ts`
 - Geheimnisse nur in Umgebungsvariablen, `.env*` in `.gitignore`
 
+### GHSA-vwc7-r8mq-g2x9 — adm-zip ≤ 0.6.0 · **befristet bis 18.09.2026**
+
+_Bewertet 17.09.2026. Schweregrad moderat. Update vorhanden, aber noch gesperrt._
+
+**Woher:** `@huggingface/transformers → onnxruntime-node → adm-zip`.
+
+**Was der Befund besagt:** Beim Entpacken folgt adm-zip symbolischen Links im
+Zielpfad; ein präpariertes Archiv kann damit Dateien ausserhalb des
+Zielverzeichnisses überschreiben.
+
+**Warum jetzt nicht behoben:** Behoben in 0.6.1 — veröffentlicht sechs Tage vor
+dieser Bewertung. Die Wartezeit von sieben Tagen aus `bunfig.toml` verweigert
+die Installation, und das ist der Sinn der Wartezeit: Eine frische Fassung
+könnte selbst das Problem sein.
+
+```
+error: Version "adm-zip@0.6.1" was published within minimum release age
+```
+
+**Warum vertretbar:** onnxruntime-node entpackt damit beim Installieren seine
+eigenen vorgebauten Binärdateien aus einer bekannten Quelle. Evidarium entpackt
+zu keinem Zeitpunkt ein Archiv, das ein Nutzer hochgeladen hat.
+
+**Was zu tun ist:** Ab dem **18.09.2026** ist 0.6.1 installierbar. Dann
+`overrides` in `package.json` auf `0.6.1` heben und **diese Ausnahme samt
+`--ignore GHSA-vwc7-r8mq-g2x9` wieder entfernen.** Die Ausnahme ist befristet,
+nicht dauerhaft.
+
+## Behobene Befunde
+
+Nicht ausgenommen, sondern behoben — über eng gefasste `overrides` in
+`package.json`:
+
+| Nummer              | Paket           | Weg                                 | Behoben mit     |
+| ------------------- | --------------- | ----------------------------------- | --------------- |
+| GHSA-f88m-g3jw-g9cj | sharp < 0.35.0  | `@huggingface/transformers → sharp` | `sharp` 0.35.4  |
+| GHSA-rgj7-g3m4-5g8c | sharp < 0.35.0  | dito, libheif                       | `sharp` 0.35.4  |
+| GHSA-xcpc-8h2w-3j85 | adm-zip < 0.6.0 | `onnxruntime-node → adm-zip`        | `adm-zip` 0.6.0 |
+
+Nach dem Anheben geprüft: Das Embedding-Modell lädt weiterhin und liefert
+384 Dimensionen. Ein Override, der die Anwendung bricht, wäre keine Behebung.
+
 ## Schlüssel und Missbrauch
 
 Das grösste Risiko dieser Anwendung ist nicht die Anmeldung, sondern der

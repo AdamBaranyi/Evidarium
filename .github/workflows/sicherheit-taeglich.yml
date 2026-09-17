@@ -81,8 +81,14 @@ jobs:
       # GHSA-67mh-4wv8-2f99: esbuild ≤ 0.24.2 über drizzle-kit und vitest.
       # In docs/SECURITY.md als nicht anwendbar bewertet, kein Update
       # verfügbar. Ohne diese Ausnahme wäre der Lauf ab dem ersten Tag rot.
+      #
+      # GHSA-vwc7-r8mq-g2x9: adm-zip ≤ 0.6.0 über onnxruntime-node.
+      # **Befristet.** Behoben in 0.6.1, die am 17.09.2026 erst sechs Tage alt
+      # war und darum an der Wartezeit aus bunfig.toml scheiterte — genau so
+      # gewollt. Ab dem 18.09.2026 ist sie installierbar: dann `overrides` in
+      # package.json auf 0.6.1 heben und **diese Ausnahme wieder entfernen**.
       - name: Bekannte Schwachstellen, blockierend ab moderat
-        run: bun audit --audit-level=moderate --ignore GHSA-67mh-4wv8-2f99
+        run: bun audit --audit-level=moderate --ignore GHSA-67mh-4wv8-2f99 --ignore GHSA-vwc7-r8mq-g2x9
 
       # Zur Ansicht in der Laufzusammenfassung, auch die ausgenommene Nummer
       # und alles Niedrige. Der Exit-Code fällt hier bewusst weg; geurteilt
