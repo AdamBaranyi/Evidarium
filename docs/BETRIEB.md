@@ -31,8 +31,22 @@ beabsichtigt, siehe `docs/ENTSCHEIDE.md`, E6.
 Es gibt kein öffentliches Registrierungssystem. Konten entstehen über einen
 lokalen Befehl auf der Maschine, auf der die Anwendung läuft:
 
-```bash
+````bash
 bun run konto:anlegen adam@example.test
+
+## Evaluation
+
+```bash
+bun scripts/korpus-erzeugen.ts              # Korpus neu erzeugen (selten noetig)
+bun --env-file=.env scripts/evaluieren.ts   # zwoelf Prueffaelle, schreibt docs/EVALUATION.md
+bun --env-file=.env scripts/evaluieren.ts E09 E10   # einzelne Faelle nachstellen
+````
+
+Der Worker muss laufen: Die Fragevektoren kommen ueber seinen internen
+Endpunkt. Im Live-Modus kostet ein voller Lauf rund 0,04 USD und zaehlt auf
+Tages- und Monatsdeckel. Das Sitzungskontingent gilt nicht — ein Prueflauf ist
+keine Besuchersitzung.
+
 ```
 
 Derselbe Befehl setzt das Passwort eines bestehenden Kontos neu.
@@ -86,3 +100,4 @@ Noch nicht eingerichtet — kommt mit dem Deployment an Tag 5. Zu beachten:
   aber kein Geld — anders als bei Embeddings über eine Schnittstelle.
 - Die Datenbank vor jeder Migration sichern, das Zurückspielen regelmässig
   proben.
+```

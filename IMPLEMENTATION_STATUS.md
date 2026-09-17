@@ -102,6 +102,30 @@ Tag 5: Evaluationsset mit 12 Fällen gegen einen erfundenen Korpus,
 Prompt-Injection-Test, öffentliche Demo mit vorbereitetem Korpus (Upload nur
 für angemeldete Personen), drei Testbreiten, Fallstudie, Deployment auf vps1.
 
+## Tag 5 — Evaluation, Demo, Deployment · **in Arbeit**
+
+| Punkt                                                    | Stand  |
+| -------------------------------------------------------- | ------ |
+| Korpus «Nordstern Digital», reproduzierbar erzeugt       | fertig |
+| Zwölf versionierte Prüffälle                             | fertig |
+| Prüfer als reine Funktion, mit eigenen Tests             | fertig |
+| Prompt-Injection: markiert **und** unmarkiert            | fertig |
+| Protokoll `docs/EVALUATION.md` mit Antworten im Wortlaut | fertig |
+| Öffentliche Demo, Upload nur für angemeldete Personen    | offen  |
+| Drei Prüfbreiten als Test                                | offen  |
+| Fallstudie mit «Bewusst nicht gebaut»                    | offen  |
+| Deployment auf vps1                                      | offen  |
+
+**Nachweis vom 17.09.2026, Live-Modus:** 12 von 12 Fällen bestanden, 48,6 s,
+0,0357 USD. Beide Konfliktfälle nennen 30 **und** 90 Tage mit je eigener
+Quelle und lösen den Widerspruch nicht auf. Kein Vorkommen des Freigabeworts
+aus der unmarkierten Injektion. Gegenprobe: erwartete Seite absichtlich
+verfälscht, Fall scheitert mit «Fundstelle fehlt».
+
+Befehle: `bun scripts/korpus-erzeugen.ts` erzeugt den Korpus,
+`bun --env-file=.env scripts/evaluieren.ts` prüft; einzelne Fälle über
+`… scripts/evaluieren.ts E09 E10`.
+
 ## Nach Tag 5 — Visuelle Identität
 
 Entscheid vom 17.09.2026: **Das Design ist Rohbau und bleibt es bis nach
@@ -112,6 +136,10 @@ Was dabei gilt und was nicht:
 
 - Die **Regel** steht schon: Farbe ist dem Beleg vorbehalten, Knöpfe tragen
   Tinte. Der **Wert** `--beleg: #0a6b5d` ist ein Platzhalter.
+- **Kein KI-Standard**: kein Verlauf-Violett, keine Glaskarten, keine
+  generischen Icon-Reihen. Ein Prüflauf gegen diese Merkmale gehört dazu.
+- Die **Anmeldeseite soll leben** und nicht nur ein Formular sein. Sparsam und
+  selbst gebaut, inhaltlich begründet statt dekorativ.
 - Kein Gewand von einem anderen Portfolio-Projekt übernehmen. Zwei Apps im
   selben Kleid sehen nach Vorlage aus.
 - Die 16-px-Untergrenze und die drei Prüfbreiten gelten unverändert weiter.
