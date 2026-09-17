@@ -60,6 +60,12 @@ Ausnahme weg.
   und Superuser umgehen Row Level Security
 - Konfiguration wird beim Start validiert; fehlt ein Wert, bricht die
   Anwendung ab. Kein Vorgabewert für Zugangsdaten
+- Das Ausgabenprotokoll führt **nicht** die Sitzungs-ID, sondern deren Hash:
+  Das Anmeldegeheimnis gehört in die Sitzungstabelle und sonst nirgendwohin.
+  Die Kennung ist serverseitig abgeleitet, also vom Client nicht wählbar
+- `/api/chat` prüft die Herkunft wie der Upload und antwortet erst nach der
+  Sitzungsprüfung; die Dokumentauswahl aus dem Browser ist ein Wunsch, keine
+  Berechtigung — die Abfragen filtern zusätzlich auf den Nutzer
 - Sicherheits-Header in `next.config.ts`
 - Geheimnisse nur in Umgebungsvariablen, `.env*` in `.gitignore`
 
@@ -124,6 +130,7 @@ Kosten. Dokumentieren statt bauen, was nur hypothetische Nutzer schützt.
 | Ausgaben je Aufruf in `usage_events` protokolliert                             | Datenbank         | Tag 4   |
 | Upload nur für angemeldete Nutzer, Demo fragt an vorbereitetem Korpus          | Server            | Tag 5   |
 | Injektionsabwehr                                                               | Server            | Tag 4/5 |
+| Quellen-ID und Zitat serverseitig geprüft, Metadaten nie aus der Modellausgabe | Server            | Tag 4   |
 
 Der Schlüssel verlässt den Server nie: nicht im Bundle, nicht in einer
 API-Antwort, nicht in einer Fehlermeldung. Eine erreichte Grenze erzeugt eine
@@ -135,4 +142,3 @@ nichts falsch gemacht.
 - Content Security Policy ohne `unsafe-inline` bei Skripten (kommt mit der
   ausgearbeiteten Oberfläche)
 - Prompt-Injection-Testfälle (Tag 5)
-- Abwehr gegen manipulierte Quellen-IDs (Tag 4, mit der Belegprüfung)

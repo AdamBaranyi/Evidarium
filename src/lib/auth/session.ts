@@ -47,3 +47,19 @@ export async function deleteSession(id: string): Promise<void> {
 export function hashOrigin(ip: string): string {
   return createHash('sha256').update(ip).digest('hex');
 }
+
+/**
+ * Stabile Kennung einer Anmeldung für das Fragenkontingent.
+ *
+ * **Nicht die Sitzungs-ID selbst.** Die steht im Cookie und ist das
+ * Anmeldegeheimnis; sie gehört in die Sitzungstabelle und sonst nirgendwohin.
+ * Das Ausgabenprotokoll braucht nur zu wissen, ob zwei Fragen zur selben
+ * Anmeldung gehören — dafür reicht der Hash, und er lässt sich nicht
+ * zurückrechnen.
+ *
+ * Auch nicht vom Client wählbar: Eine Kennung aus dem Browser liesse sich
+ * neu würfeln, und das Kontingent wäre wirkungslos.
+ */
+export function sitzungsKennung(sessionId: string): string {
+  return createHash('sha256').update(sessionId).digest('hex').slice(0, 32);
+}

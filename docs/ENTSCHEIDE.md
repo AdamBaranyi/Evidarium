@@ -209,3 +209,54 @@ kennt.
 Gerechnet wird in Mikro-Dollar, weil sich Rundungsfehler über Monate
 summieren. Angezeigt wird ausdrücklich als **Schätzung**: Der Anbieter rechnet
 nach eigenen Regeln ab.
+
+## E20 — Gestreamt werden Arbeitsschritte, nicht Text
+
+_17.09.2026._ `/api/chat` liefert NDJSON: erst je eine Zeile pro
+Arbeitsschritt, zuletzt genau ein Ergebnis. Die Antwort erscheint vollständig
+oder gar nicht.
+
+Wortweise hereinlaufender Text wäre hier schädlich. Der Text darf erst
+erscheinen, wenn die Belegprüfung ihn freigegeben hat — eine Antwort, die halb
+dasteht und dann verschwindet, weil ein Zitat nicht standhielt, wäre schlimmer
+als eine, die drei Sekunden später vollständig erscheint.
+
+Die angezeigten Zeiten sind **gemessen**, nicht geschätzt: Die Uhr läuft im
+Browser, also einschliesslich Netzweg. Gemessen am 17.09.2026: Einbetten und
+Suche je unter 0,05 s, Modellaufruf 3,9 s, Belegprüfung unter 0,05 s. Die
+Wartezeit ist praktisch vollständig der Modellaufruf, und das steht so da.
+
+**Fallstrick, gefunden und behoben:** Ein `useState`-Updater muss rein sein.
+Die erste Fassung las `Date.now()` **im** Updater; React ruft Updater erneut
+auf, und beim zweiten Lauf stand eine neuere Zeit darin. Alle vier Schritte
+zeigten darum 0,0 s, obwohl der Modellaufruf Sekunden brauchte. Die Uhr wird
+jetzt vor dem Aufruf abgelesen und hereingereicht.
+
+## E21 — Das Sitzungskontingent zählt einen Hash, nicht die Sitzungs-ID
+
+_17.09.2026._ `usage_events.session_id` enthält `sha256(Sitzungs-ID)`, gekürzt
+— nie die Sitzungs-ID selbst.
+
+Die Sitzungs-ID steht im Cookie und ist das Anmeldegeheimnis. Sie gehört in
+die Sitzungstabelle und sonst nirgendwohin; ein Protokoll, das sie mitführt,
+verteilt sie in eine zweite Tabelle mit anderer Aufbewahrungsfrist. Fürs
+Kontingent genügt die Frage, ob zwei Aufrufe zur selben Anmeldung gehören.
+
+Vom Client gewählt werden darf die Kennung nicht: Ein Wert aus dem Browser
+liesse sich neu würfeln, und das Kontingent wäre wirkungslos.
+
+## E22 — Der Beleg steht bei der Aussage, das Panel zeigt den ganzen Abschnitt
+
+_17.09.2026._ Kein Quellenverzeichnis am Ende der Antwort: Eine Sammelliste
+liesse offen, welcher Satz woher stammt, und genau das ist die Frage, die
+dieses Produkt beantwortet.
+
+Ein Klick auf den Beleg öffnet den **ganzen** Abschnitt, mit dem Zitat an
+seiner Stelle markiert. Ein aus dem Zusammenhang gerissener Satz kann richtig
+zitiert und trotzdem irreführend sein; wer den Umgebungstext sieht, merkt das.
+
+Die Markierung sucht mit derselben Toleranz wie die Belegprüfung
+(`src/lib/antwort/hervorheben.ts`) — sonst besteht ein Zitat die Prüfung und
+liesse sich im Abschnitt trotzdem nicht zeigen. Findet die Suche nichts, wird
+nichts markiert: Eine Markierung an der falschen Stelle wäre schlimmer als
+keine.

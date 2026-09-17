@@ -26,6 +26,8 @@
 
   /* Nur für Belege, Fokusring und aktiven Zustand. Nie für Knöpfe. */
   --beleg: #0a6b5d;
+  /* Hinterlegung des Zitats im Quellen-Panel. */
+  --beleg-weich: #d6e9e5;
 
   --action-bg: #16181a;
   --action-ink: #f4f3ef;
@@ -42,6 +44,7 @@
     --ink-soft: #a7aba6;
     --edge: #33362f;
     --beleg: #4fd1bb;
+    --beleg-weich: #15453d;
     --action-bg: #eceae4;
     --action-ink: #121311;
   }

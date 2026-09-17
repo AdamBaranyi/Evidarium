@@ -68,12 +68,39 @@ Auftrag: `../Evidarium-Masterprompt-v1.md`
   nicht erreichbar
 - 26 Tests, davon 7 für die Suche
 
+## Tag 4 — Antwort mit Belegen · **fertig** (17.09.2026)
+
+| Punkt                                                      | Stand  |
+| ---------------------------------------------------------- | ------ |
+| Provider-Schnittstelle, Demo-Adapter ohne stillen Rückfall | fertig |
+| Anthropic-Adapter mit erzwungenem Ausgabeformat            | fertig |
+| **Belegprüfung**: Quellen-ID und Zitat, beide hart         | fertig |
+| Vier Kategorien, Kategorie muss zu den Belegen passen      | fertig |
+| Budget: Reservierung, Tages- und Monatsdeckel, Kontingent  | fertig |
+| Ausgabenprotokoll mit datierter Preistabelle               | fertig |
+| Chat-Oberfläche mit echten Arbeitsschritten                | fertig |
+| Quellen-Panel: ganzer Abschnitt, Zitat markiert            | fertig |
+| Seite «Verbrauch» mit Deckeln und letzten Aufrufen         | fertig |
+
+**Nachweis vom 17.09.2026, im Live-Modus gegen `claude-haiku-4-5`:**
+
+- «Wer betreut neue Mitarbeitende am Anfang?» ergibt _belegt_ mit dem Zitat
+  «Beim Onboarding hilft Mara Keller.» aus `teamhandbuch.pdf`, Seite 2
+- Das Modell schreibt «Zugänge» mit Umlaut, zitiert aber «Zugaenge» — so wie
+  es im Dokument steht. Hätte es geglättet, wäre die Antwort verworfen worden
+- «Welche Regeln gelten für Ferien und Abwesenheiten?» ergibt _keine
+  Grundlage_ statt einer erfundenen Auskunft
+- Gemessene Schritte: Einbetten und Suche je unter 0,05 s, Modellaufruf 3,9 s,
+  Belegprüfung unter 0,05 s
+- Ausgabenprotokoll: 3 Aufrufe, 0,0158 von 2,00 USD am Tag, Kontingent 2 von 10
+- 320 px: kein waagrechter Überlauf, keine Meldung in der Browserkonsole
+- 64 Tests
+
 ## Als Nächstes
 
-Tag 4: Provider-Adapter (Anthropic), strukturierte Antwort mit Belegen,
-**Belegprüfung** (Zitat muss wörtlich im Abschnitt stehen, Quellen-ID muss aus
-der übermittelten Menge stammen), Chat-Oberfläche, Quellen-Drawer, Budget je
-Sitzung und je Tag, Ausgabenprotokoll — siehe Masterprompt 9a.
+Tag 5: Evaluationsset mit 12 Fällen gegen einen erfundenen Korpus,
+Prompt-Injection-Test, öffentliche Demo mit vorbereitetem Korpus (Upload nur
+für angemeldete Personen), drei Testbreiten, Fallstudie, Deployment auf vps1.
 
 ## Aufgefallen
 
@@ -110,6 +137,9 @@ Sitzung und je Tag, Ausgabenprotokoll — siehe Masterprompt 9a.
   Textparameter mit `string_to_array`.
 - Drizzle nimmt beim Einfügen in eine `vector`-Spalte ein Zahlen-Array, kein
   Literal — das Literal braucht erst die rohe Suchabfrage.
+- **Ein `useState`-Updater muss rein sein.** `Date.now()` darin wird beim
+  erneuten Aufruf des Updaters neu ausgewertet; alle gemessenen Schrittzeiten
+  standen darum auf 0,0 s. Die Uhr vor dem Aufruf ablesen. Siehe E20.
 - **Tests dürfen nicht von einer eingelesenen `.env` abhängen.** `STORAGE_PATH`
   war in Tag 2 ins Schema gekommen, aber nicht in `vitest.config.ts` und nicht
   in die CI. Lokal lief alles, weil vor jedem Lauf `.env` eingelesen wurde;

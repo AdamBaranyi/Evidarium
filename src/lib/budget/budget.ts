@@ -1,4 +1,4 @@
-import { and, count, eq, gte, sql } from 'drizzle-orm';
+import { and, count, desc, eq, gte, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { usageEvents } from '@/lib/db/schema';
 import { env } from '@/lib/config/env';
@@ -189,4 +189,54 @@ export async function nutzungsstand(): Promise<Nutzungsstand> {
     tagGrenzeUsd: env.BUDGET_TAG_USD,
     monatGrenzeUsd: env.BUDGET_MONAT_USD,
   };
+}
+
+export type Nutzungszeile = {
+  id: string;
+  createdAt: Date;
+  status: string;
+  modell: string;
+  eingabeTokens: number | null;
+  ausgabeTokens: number | null;
+  kostenUsd: number;
+  preisstand: string;
+};
+
+/**
+ * Das Ausgabenprotokoll dieses Nutzers.
+ *
+ * Auch die Reservierungen stehen drin, nicht nur die abgerechneten Aufrufe:
+ * Ein Protokoll, das nur Erfolge zeigt, erklärt einen Deckel nicht, der durch
+ * Abbrüche erreicht wurde.
+ */
+export async function nutzungsprotokoll(userId: string, grenze = 20): Promise<Nutzungszeile[]> {
+  const zeilen = await db
+    .select({
+      id: usageEvents.id,
+      createdAt: usageEvents.createdAt,
+      status: usageEvents.status,
+      modell: usageEvents.modell,
+      eingabeTokens: usageEvents.eingabeTokens,
+      ausgabeTokens: usageEvents.ausgabeTokens,
+      kostenMikroUsd: usageEvents.kostenMikroUsd,
+      preisstand: usageEvents.preisstand,
+    })
+    .from(usageEvents)
+    .where(eq(usageEvents.userId, userId))
+    .orderBy(desc(usageEvents.createdAt))
+    .limit(grenze);
+
+  return zeilen.map(({ kostenMikroUsd, ...rest }) => ({
+    ...rest,
+    kostenUsd: ausMikro(kostenMikroUsd),
+  }));
+}
+
+/** Wie viele Fragen diese Anmeldung schon gestellt hat. */
+export async function fragenInSitzung(sessionId: string): Promise<number> {
+  const [zeile] = await db
+    .select({ anzahl: count() })
+    .from(usageEvents)
+    .where(and(eq(usageEvents.sessionId, sessionId), eq(usageEvents.operation, 'antwort')));
+  return zeile?.anzahl ?? 0;
 }

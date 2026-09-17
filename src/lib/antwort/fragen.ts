@@ -27,17 +27,51 @@ const KONTEXT_STELLEN = 8;
 const MAX_EINGABE_TOKENS = 12_000;
 const MAX_AUSGABE_TOKENS = 1_200;
 
+/**
+ * Die Arbeitsschritte, über die der Ablauf Auskunft gibt.
+ *
+ * **Jede Meldung steht für Arbeit, die gerade wirklich läuft.** Kein
+ * Fortschrittsbalken, der von selbst weiterrückt, und keine erfundene
+ * Tokenausgabe: Wer sieht, dass «Belege werden geprüft» vier Sekunden dauert,
+ * soll daraus schliessen dürfen, dass die Prüfung vier Sekunden gedauert hat.
+ */
+export type Phase = 'einbetten' | 'suchen' | 'antworten' | 'pruefen';
+
+/** Eine dem Modell übergebene Stelle, wie sie das Quellen-Panel anzeigt. */
+export type Fundstelle = {
+  sourceId: string;
+  documentId: string;
+  filename: string;
+  page: number | null;
+  lineStart: number | null;
+  lineEnd: number | null;
+  text: string;
+};
+
 export type FrageErgebnis =
   | { art: 'budget'; grund: string; nachricht: string }
   | {
       art: 'antwort';
       kategorie: Kategorie;
       aussagen: GeprüfteAussage[];
+      /** Nur die tatsächlich zitierten Stellen — Grundlage des Quellen-Panels. */
+      stellen: Fundstelle[];
       demo: boolean;
       verbrauch: { modell: string; eingabeTokens: number; ausgabeTokens: number } | null;
     }
   | { art: 'keine_treffer' }
   | { art: 'fehler'; code: string; nachricht: string };
+
+export type FrageAuftrag = {
+  userId: string;
+  documentIds: string[];
+  frage: string;
+  /** Begrenzter Gesprächskontext: die letzten Wechsel, schon gekürzt. */
+  verlauf?: { rolle: 'nutzer' | 'assistent'; text: string }[];
+  /** Kennung für das Sitzungskontingent. Nie das Sitzungsgeheimnis selbst. */
+  sessionId?: string | null;
+  melden?: (phase: Phase) => void;
+};
 
 function alsAbschnitt(treffer: Treffer): Abschnitt {
   return {
@@ -53,14 +87,14 @@ function alsAbschnitt(treffer: Treffer): Abschnitt {
   };
 }
 
-export async function frageBeantworten(
-  userId: string,
-  documentIds: string[],
-  frage: string,
-  verlauf: { rolle: 'nutzer' | 'assistent'; text: string }[] = [],
-  sessionId: string | null = null,
-): Promise<FrageErgebnis> {
+export async function frageBeantworten(auftrag: FrageAuftrag): Promise<FrageErgebnis> {
+  const { userId, documentIds, frage } = auftrag;
+  const verlauf = auftrag.verlauf ?? [];
+  const sessionId = auftrag.sessionId ?? null;
+  const melden = auftrag.melden ?? (() => {});
+
   // 1. Frage einbetten — das Modell dafür lebt im Worker, nicht hier.
+  melden('einbetten');
   let vektor: number[];
   try {
     vektor = await frageEinbetten(frage);
@@ -77,6 +111,7 @@ export async function frageBeantworten(
 
   // 2. Hybridsuche. Die Dokumentauswahl ist ein Wunsch, keine Berechtigung —
   //    die Abfragen filtern selbst auf den Nutzer.
+  melden('suchen');
   const treffer = await suchen(userId, documentIds, frage, vektor);
   if (treffer.length === 0) return { art: 'keine_treffer' };
 
@@ -109,6 +144,7 @@ export async function frageBeantworten(
     reservierung = ergebnisBudget;
   }
 
+  melden('antworten');
   let ergebnis;
   try {
     ergebnis = await provider.antworten({ frage, abschnitte, verlauf });
@@ -134,6 +170,7 @@ export async function frageBeantworten(
   }
 
   // 4. **Belegprüfung.** Was hier durchfällt, wird nicht angezeigt.
+  melden('pruefen');
   const geprueft = belegePruefen(ergebnis.antwort, abschnitte);
 
   if (!geprueft.gueltig) {
@@ -153,9 +190,32 @@ export async function frageBeantworten(
     art: 'antwort',
     kategorie: geprueft.kategorie,
     aussagen: geprueft.aussagen,
+    stellen: zitierteStellen(geprueft.aussagen, abschnitte),
     demo: provider.istDemo,
     verbrauch: ergebnis.verbrauch,
   };
+}
+
+/**
+ * Nur die Abschnitte, auf die sich die Antwort wirklich beruft.
+ *
+ * Alle acht mitzuschicken wäre bequemer, gäbe aber Textstellen heraus, die in
+ * der Antwort keine Rolle spielen — und liesse die Antwort breiter belegt
+ * aussehen, als sie ist.
+ */
+function zitierteStellen(aussagen: GeprüfteAussage[], abschnitte: Abschnitt[]): Fundstelle[] {
+  const gebraucht = new Set(aussagen.flatMap((a) => a.belege.map((b) => b.sourceId)));
+  return abschnitte
+    .filter((a) => gebraucht.has(a.sourceId))
+    .map(({ sourceId, documentId, filename, page, lineStart, lineEnd, text }) => ({
+      sourceId,
+      documentId,
+      filename,
+      page,
+      lineStart,
+      lineEnd,
+      text,
+    }));
 }
 
 /**
