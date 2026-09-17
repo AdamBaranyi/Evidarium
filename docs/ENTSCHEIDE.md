@@ -76,3 +76,104 @@ Anmeldeweg neben der lokalen Anmeldung.
 Jede dieser Auslassungen steht mit Begründung in `README.md` unter «Bewusst
 nicht gebaut». Begründete Lücken lesen sich als Urteilsvermögen, ungenannte als
 Unwissen.
+
+## E11 — Jobqueue: pg-boss 12.30.0
+
+_17.09.2026._ Eine Warteschlange im Arbeitsspeicher geht bei jedem Neustart und
+jedem Deploy verloren; Dokumente hängen dann für immer in «wird verarbeitet»,
+ohne dass irgendwo ein Fehler auftaucht.
+
+Gewählt wurde **pg-boss 12.30.0** (MIT) gegenüber `graphile-worker`: einfachere
+Schnittstelle für diesen Zweck, legt seine Tabellen im Schema `pgboss` selbst an
+und wandert selbst durch seine Migrationen. Kein Redis, kein zweiter Dienst.
+
+Nicht die neueste Fassung: 12.33.0 war am Tag der Auswahl null Tage alt und wäre
+an der Sieben-Tage-Wartezeit aus `bunfig.toml` hängen geblieben. pg-boss
+veröffentlicht häufig — Dependabot bündelt das wöchentlich zu einem Sammel-PR.
+
+## E12 — PDF-Extraktion: unpdf 1.8.1
+
+_17.09.2026._ `extractText(pdf, { mergePages: false })` liefert ein Array mit
+einem Eintrag je Seite. Genau das braucht der Beleg: **ohne Seitenzahl gibt es
+keine anklickbare Fundstelle**, und damit kein Produkt.
+
+**Fallstrick, gefunden und abgesichert:** pdf.js übernimmt den übergebenen
+Puffer und koppelt ihn ab — nach dem ersten Aufruf ist `byteLength` null, und
+ein zweiter Aufruf meldet «beschädigt» für eine einwandfreie Datei. Die
+Extraktion übergibt darum eine Kopie. Regressionstest in
+`tests/extraktion.test.ts`.
+
+## E13 — Typerkennung ohne Fremdpaket
+
+_17.09.2026._ Drei Formate, darum keine Bibliothek: PDF an den ersten fünf Bytes
+(`%PDF-`), Text über strikte UTF-8-Dekodierung. Markdown wird am Dateinamen
+unterschieden — es _ist_ Text, der Name entscheidet nur über die Anzeige, nie
+über die Sicherheit.
+
+Erlaubt sind die Steuerzeichen Tabulator, Zeilenumbruch, Wagenrücklauf **und
+Seitenvorschub**. Letzterer ist der klassische Seitentrenner in Textdateien;
+ohne ihn lehnt die Prüfung gültige Dokumente ab — beim ersten eigenen
+Testdokument sofort passiert.
+
+## E14 — Embedding-Modell: intfloat/multilingual-e5-small
+
+_17.09.2026._ MIT, 384 Dimensionen, ONNX vorhanden, Originalquelle statt Kopie.
+
+**`voyageai/voyage-4-nano` fiel aus** — es hat keine ONNX-Fassung und läuft
+darum nicht in `transformers.js`. Für Python stimmt «läuft auf CPU», für Node
+nicht. Ohne ONNX ist ein Modell hier unbrauchbar, egal wie gut es sonst ist.
+
+Gemessen vor der Entscheidung: deutsche Frage gegen deutsche Passage 0.891,
+**englische Frage gegen deutsche Passage 0.868** — sprachübergreifend brauchbar.
+Kontrollsatz ohne Bezug: 0.748.
+
+**Daraus folgt eine Regel für später:** Der Kontrollwert liegt hoch. Ein
+absoluter Schwellwert wie «ab 0.8 ist es ein Treffer» wäre hier wertlos, weil
+auch Unverwandtes solche Werte erreicht. Es zählt die Rangfolge, nicht der
+Betrag. Ein Schwellwert darf erst anhand des Evaluationssets an Tag 5
+kalibriert werden.
+
+Paket: `@huggingface/transformers` 4.2.0. Der frühere Name `@xenova/transformers`
+ist tot — letzte Veröffentlichung vor 840 Tagen.
+
+## E15 — Volltextsuche mit ODER statt UND
+
+_17.09.2026._ `websearch_to_tsquery('german', 'Wer hilft beim Onboarding?')`
+ergibt `'wer' & 'hilft' & 'beim' & 'onboarding'`. Ein Abschnitt müsste **alle
+vier** Wörter enthalten. Bei einer natürlichen Frage trifft das nie.
+
+Gemessen: mit UND null Treffer, mit ODER der richtige Abschnitt auf Platz eins
+und mit doppelter Punktzahl, weil ihn beide Verfahren finden.
+
+**Warum das gefährlich war:** Die semantische Hälfte liefert immer Ergebnisse.
+Die lexikalische Hälfte wäre also tot gewesen, ohne dass es je aufgefallen
+wäre — bis zu dem Fall, für den sie da ist: Eigennamen, Nummern, Abkürzungen,
+die ein Embedding-Modell schlecht abbildet. In der Vorführung hätte alles
+funktioniert.
+
+Umgesetzt über den **geparsten** Ausdruck, nicht über den Rohtext:
+`replace(websearch_to_tsquery(…)::text, '&', '|')::tsquery`. Damit bleibt die
+Maskierung von `websearch_to_tsquery` erhalten und aus der Nutzereingabe
+können keine Operatoren entstehen. Regressionstest in `tests/suche.test.ts`.
+
+## E16 — Zwei Volltextspalten statt Spracherkennung
+
+_17.09.2026._ `search_de` und `search_en` als generierte Spalten, beide mit
+GIN-Index, beide in derselben Abfrage. Die deutsche Konfiguration greift
+schwach auf englischem Text und umgekehrt.
+
+Eine automatische Spracherkennung wäre eine weitere Fehlerquelle, und ein
+falsch erkanntes Dokument verschwände **lautlos** aus der Suche. Zwei Spalten
+kosten Speicher und lösen das Problem ganz.
+
+## E17 — Interner Endpunkt statt Jobqueue für Fragen
+
+_17.09.2026._ Der Web-Prozess holt den Vektor einer Frage über einen
+HTTP-Endpunkt beim Worker, gebunden an `127.0.0.1:3101`.
+
+Nicht über die Queue: Die ist für langlaufende Arbeit da. Eine Frage
+einzubetten dauert 3,7 ms und muss synchron beantwortet werden — über eine
+Warteschlange wäre es ein Umweg, auf den der Nutzer wartet.
+
+Der Endpunkt hat keine Anmeldung und darf das Gerät darum nie verlassen.
+Geprüft: über die LAN-Adresse nicht erreichbar.

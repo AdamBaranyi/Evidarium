@@ -14,6 +14,11 @@ const Schema = z.object({
     .string()
     .min(32, 'SESSION_SECRET braucht mindestens 32 Zeichen. Erzeugen: openssl rand -base64 48'),
   APP_ORIGIN: z.url({ protocol: /^https?$/ }),
+  STORAGE_PATH: z.string().min(1, 'STORAGE_PATH fehlt. Beispiel: ./storage'),
+  // Interner Endpunkt des Workers. Nur 127.0.0.1 — der Endpunkt hat keine
+  // Anmeldung und darf das Gerät nie verlassen.
+  WORKER_INTERN_URL: z.url({ protocol: /^http$/ }).default('http://127.0.0.1:3101'),
+  WORKER_INTERN_PORT: z.coerce.number().int().min(1).max(65535).default(3101),
   TRUST_PROXY: z
     .enum(['true', 'false'])
     .default('false')

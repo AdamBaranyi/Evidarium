@@ -20,19 +20,60 @@ Auftrag: `../Evidarium-Masterprompt-v1.md`
 | CI: Format, Dateilänge, Schrift, Lint, Typen, Tests, Build    | fertig    |
 | **Installation, erste Migration, grüner Durchlauf**           | **offen** |
 
+## Tag 2 — Dokumentpfad · **fertig** (17.09.2026)
+
+| Punkt                                                                | Stand  |
+| -------------------------------------------------------------------- | ------ |
+| Upload als Route Handler, Typ am Inhalt geprüft                      | fertig |
+| Grenzen serverseitig: 10 MiB, 100 Seiten, 300k Zeichen, 50 Dokumente | fertig |
+| Dubletten je Nutzer über Inhaltshash                                 | fertig |
+| Jobqueue in PostgreSQL (pg-boss 12.30.0)                             | fertig |
+| Worker als eigener Prozess, geordnetes Herunterfahren                | fertig |
+| PDF-Extraktion **mit Seitenzahlen**, Text mit Zeilenbereichen        | fertig |
+| Zerlegung mit Überlappung, Dateiname im Abschnitt                    | fertig |
+| Dokumentbibliothek und Dokumentdetail                                | fertig |
+| Verständliche Fehler statt ewigem Ladezustand                        | fertig |
+
+**Nachweis vom 17.09.2026, mit einem echten dreiseitigen PDF:**
+
+- Upload antwortet mit 202, der Worker nimmt den Auftrag und meldet fertig
+- 3 Seiten, 6857 Zeichen, 7 Abschnitte auf die Seiten 1, 2 und 3 verteilt
+- Der versteckte Fakt «Mara Keller» liegt in Abschnitt 3 auf **Seite 2** —
+  genau dort, wo er in der Quelle steht
+- Ein PDF ohne Textschicht endet als `failed` mit `pdf_ohne_textschicht` und
+  zeigt in der Oberfläche die vorgeschriebene Meldung
+- Derselbe Job zweimal eingereiht: weiterhin 7 Abschnitte, **null Dubletten**
+
+## Tag 3 — Suche · **fertig** (17.09.2026)
+
+| Punkt                                                          | Stand                      |
+| -------------------------------------------------------------- | -------------------------- |
+| Lokale Embeddings im Worker, Modell genau einmal geladen       | fertig                     |
+| `vector(384)` mit HNSW-Index, Kosinus                          | fertig                     |
+| Zwei generierte `tsvector`-Spalten (deutsch, englisch) mit GIN | fertig                     |
+| Interner Endpunkt `127.0.0.1:3101` für Fragevektoren           | fertig                     |
+| Hybridsuche mit Reciprocal Rank Fusion, k = 60                 | fertig                     |
+| Kappung nie ohne Sortierung                                    | fertig                     |
+| Messwerte in `docs/BETRIEB.md`                                 | fertig, Zielmaschine offen |
+
+**Nachweis vom 17.09.2026:**
+
+- «Wer hilft beim Onboarding?», «Who helps with onboarding?» und die
+  Umschreibung «Wer betreut neue Mitarbeitende beim Einstieg?» liefern alle
+  denselben Abschnitt auf Platz eins — Seite 2, wo er hingehört
+- Ein Abschnitt, den beide Verfahren finden, bekommt die doppelte Punktzahl
+  und steht klar vorn
+- Fremde Dokument-IDs liefern nichts, auch wenn sie gültig sind
+- Modell lädt genau einmal; der interne Endpunkt ist über die LAN-Adresse
+  nicht erreichbar
+- 26 Tests, davon 7 für die Suche
+
 ## Als Nächstes
 
-Tag 2: Upload, Worker mit Jobqueue, Textextraktion mit Seitenzahlen,
-Chunking, Dokumentbibliothek und Dokumentdetail.
-
-**Vorgemerkt aus dem Sicherheits-Nachtrag vom 17.09.2026** (Masterprompt 9a):
-
-- Tag 4: eigener API-Schlüssel nur serverseitig, Budget je Sitzung (10 Fragen),
-  Tagesdeckel, Monatsdeckel, Ausgabenprotokoll in `usage_events`, freundliche
-  Meldung statt Fehler beim Erreichen einer Grenze.
-- Tag 5: öffentliche Demo mit vorbereitetem Korpus, **Upload nur für angemeldete
-  Nutzer**; optional eigener Schlüssel je Sitzung.
-- Abschnitt «Bewusst nicht gebaut» steht bereits im README.
+Tag 4: Provider-Adapter (Anthropic), strukturierte Antwort mit Belegen,
+**Belegprüfung** (Zitat muss wörtlich im Abschnitt stehen, Quellen-ID muss aus
+der übermittelten Menge stammen), Chat-Oberfläche, Quellen-Drawer, Budget je
+Sitzung und je Tag, Ausgabenprotokoll — siehe Masterprompt 9a.
 
 ## Aufgefallen
 
@@ -50,6 +91,25 @@ Chunking, Dokumentbibliothek und Dokumentdetail.
   belegt. Datenbank auf 5450/5451, weil Tallyroom 5440/5441 hat.
 - Das Init-Skript der Datenbank darf den Datenbanknamen nicht festschreiben —
   Entwicklungs- und Testdatenbank heissen verschieden.
+- **pdf.js koppelt den übergebenen Puffer ab.** Nach dem ersten Aufruf ist
+  `byteLength` null; ein zweiter Aufruf meldet «beschädigt» für eine
+  einwandfreie Datei. Die Extraktion übergibt darum eine Kopie, mit
+  Regressionstest.
+- **Der Seitenvorschub (0x0C) gehört zu gültigem Text.** Die erste Fassung der
+  Typerkennung warf ihn als Steuerzeichen raus und lehnte damit das eigene
+  Testdokument ab.
+- Ein alter Server aus einem Playwright-Lauf hält Port 3100 besetzt
+  (`reuseExistingServer`). Vor dem Prüfen eines neuen Builds beenden.
+- **`websearch_to_tsquery` verknüpft alle Wörter mit UND.** Bei einer
+  natürlichen Frage trifft die Volltextsuche damit nie — und es fällt nicht
+  auf, weil die semantische Hälfte Ergebnisse liefert. Siehe E15.
+- **`voyage-4-nano` hat keine ONNX-Fassung** und läuft darum nicht in
+  transformers.js, obwohl es «auf CPU läuft». Siehe E14.
+- Drizzle entfaltet ein JS-Array im SQL-Template zu einer Parameterliste;
+  daraus wird ein Record, kein Array. `ANY(...)` braucht einen einzelnen
+  Textparameter mit `string_to_array`.
+- Drizzle nimmt beim Einfügen in eine `vector`-Spalte ein Zahlen-Array, kein
+  Literal — das Literal braucht erst die rohe Suchabfrage.
 
 ## Blockiert
 

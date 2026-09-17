@@ -1,0 +1,2 @@
+ALTER TABLE "document_versions" DROP CONSTRAINT "document_versions_status_gueltig";--> statement-breakpoint
+ALTER TABLE "document_versions" ADD CONSTRAINT "document_versions_status_gueltig" CHECK ("document_versions"."status" IN ('pending', 'extracting', 'chunking', 'embedding', 'ready', 'failed'));

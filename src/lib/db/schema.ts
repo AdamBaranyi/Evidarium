@@ -1,12 +1,40 @@
-import { sql } from 'drizzle-orm';
-import { check, index, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { sql, type SQL } from 'drizzle-orm';
+import {
+  check,
+  customType,
+  index,
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+  vector,
+} from 'drizzle-orm/pg-core';
+
+/**
+ * Dimension des Embedding-Modells. Steht hier, weil die Spaltenbreite davon
+ * abhängt: Ein Modellwechsel mit anderer Dimension erzwingt eine Migration,
+ * und das soll auffallen, statt still schiefzugehen.
+ *
+ * 384 = intfloat/multilingual-e5-small. Siehe docs/ENTSCHEIDE.md, E14.
+ */
+export const EMBEDDING_DIMENSIONEN = 384;
+
+/**
+ * PostgreSQL kennt keinen Drizzle-Typ für `tsvector`. Der eigene Typ macht
+ * die Spalte im Schema sichtbar, statt sie als unsichtbare Handarbeit in
+ * einer Migration zu verstecken.
+ */
+const tsvector = customType<{ data: string; driverData: string }>({
+  dataType: () => 'tsvector',
+});
 
 /*
- * Tag 1: nur, was die Anmeldung braucht. Dokumente, Abschnitte, Vektoren und
- * Läufe kommen an den Tagen 2 bis 4 dazu.
- *
  * CHECK statt nativer Enums: Wertemengen wachsen, und ein ALTER COLUMN TYPE
- * auf einer befüllten Spalte bleibt so erspart.
+ * auf einer befüllten Spalte bleibt so erspart. Die Zod-Enums in der
+ * Anwendung halten dieselben Mengen — sonst gibt ungültige Eingabe einen
+ * Datenbankfehler statt einer verständlichen Meldung.
  */
 export const users = pgTable(
   'users',
@@ -20,10 +48,6 @@ export const users = pgTable(
   (table) => [check('users_status_gueltig', sql`${table.status} IN ('active', 'disabled')`)],
 );
 
-/*
- * Sitzungen liegen serverseitig. Das Cookie trägt nur die ID; wer abmeldet,
- * löscht die Zeile, und ein gestohlenes Cookie lässt sich entwerten.
- */
 export const sessions = pgTable(
   'sessions',
   {
@@ -37,13 +61,6 @@ export const sessions = pgTable(
   (table) => [index('sessions_user_idx').on(table.userId)],
 );
 
-/*
- * Rate-Limit-Zähler in der Datenbank, nicht im Prozess: Hinter einem Proxy
- * teilen sich alle Anfragen eine IP, und ein Zähler im Speicher überlebt
- * weder einen Neustart noch eine zweite Instanz.
- *
- * Gespeichert wird nur ein Hash der Herkunft, nie die IP selbst.
- */
 export const loginAttempts = pgTable(
   'login_attempts',
   {
@@ -52,4 +69,128 @@ export const loginAttempts = pgTable(
     attemptedAt: timestamp('attempted_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [index('login_attempts_lookup_idx').on(table.originHash, table.attemptedAt)],
+);
+
+/*
+ * Ein Dokument ist die Sache, die der Nutzer sieht. Was daraus gelesen wurde,
+ * hängt an einer Version — so bleibt die alte Fassung lesbar, während eine
+ * neue entsteht, und ein Modellwechsel wirft nicht alles um.
+ */
+export const documents = pgTable(
+  'documents',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    filename: text('filename').notNull(),
+    kind: text('kind').notNull(),
+    sizeBytes: integer('size_bytes').notNull(),
+    // Für die Dublettenerkennung. Bewusst nur innerhalb eines Nutzers eindeutig:
+    // sonst verrät ein abgelehnter Upload die Existenz fremder Dokumente.
+    contentHash: text('content_hash').notNull(),
+    storagePath: text('storage_path').notNull(),
+    activeVersionId: uuid('active_version_id'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    deletedAt: timestamp('deleted_at', { withTimezone: true }),
+  },
+  (table) => [
+    check('documents_kind_gueltig', sql`${table.kind} IN ('pdf', 'text', 'markdown')`),
+    uniqueIndex('documents_hash_je_nutzer_idx').on(table.userId, table.contentHash),
+    index('documents_user_idx').on(table.userId, table.createdAt),
+  ],
+);
+
+/*
+ * Parser- und Chunker-Version stehen mit in der Zeile: Ändert sich die
+ * Extraktion, ist eine alte Version nicht mehr vergleichbar, und ohne diese
+ * Angabe merkt das später niemand.
+ */
+export const documentVersions = pgTable(
+  'document_versions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    documentId: uuid('document_id')
+      .notNull()
+      .references(() => documents.id, { onDelete: 'cascade' }),
+    parserVersion: text('parser_version').notNull(),
+    chunkerVersion: text('chunker_version').notNull(),
+    status: text('status').notNull().default('pending'),
+    errorCode: text('error_code'),
+    pageCount: integer('page_count'),
+    charCount: integer('char_count'),
+    chunkCount: integer('chunk_count'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    finishedAt: timestamp('finished_at', { withTimezone: true }),
+  },
+  (table) => [
+    check(
+      'document_versions_status_gueltig',
+      sql`${table.status} IN ('pending', 'extracting', 'chunking', 'embedding', 'ready', 'failed')`,
+    ),
+    index('document_versions_document_idx').on(table.documentId, table.createdAt),
+  ],
+);
+
+/*
+ * Ein Abschnitt trägt seine Herkunft mit: Seite bei PDF, Zeilenbereich bei
+ * Text und Markdown. Ohne diese Angaben gäbe es später keinen anklickbaren
+ * Beleg — sie sind der eigentliche Zweck der ganzen Pipeline.
+ *
+ * Der Vektor kommt an Tag 3 dazu, zusammen mit dem Embedding-Modell.
+ */
+export const documentChunks = pgTable(
+  'document_chunks',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    versionId: uuid('version_id')
+      .notNull()
+      .references(() => documentVersions.id, { onDelete: 'cascade' }),
+    documentId: uuid('document_id')
+      .notNull()
+      .references(() => documents.id, { onDelete: 'cascade' }),
+    ordinal: integer('ordinal').notNull(),
+    page: integer('page'),
+    lineStart: integer('line_start'),
+    lineEnd: integer('line_end'),
+    text: text('text').notNull(),
+    charCount: integer('char_count').notNull(),
+
+    /*
+     * Der Vektor und das Modell, das ihn erzeugt hat, stehen zusammen in der
+     * Zeile. Vektoren verschiedener Modelle dürfen nie in derselben Abfrage
+     * verglichen werden — ohne diese Spalte merkt das niemand.
+     *
+     * Null heisst: noch nicht eingebettet.
+     */
+    embedding: vector('embedding', { dimensions: EMBEDDING_DIMENSIONEN }),
+    embeddingModel: text('embedding_model'),
+
+    /*
+     * Zwei Volltextspalten statt einer mit Spracherkennung.
+     *
+     * Die deutsche Konfiguration greift schwach auf englischem Text und
+     * umgekehrt; eine automatische Spracherkennung wäre eine weitere
+     * Fehlerquelle, und ein falsch erkanntes Dokument verschwände lautlos aus
+     * der Suche. Zwei Spalten kosten Speicher und lösen das Problem ganz.
+     */
+    searchDe: tsvector('search_de').generatedAlwaysAs(
+      (): SQL => sql`to_tsvector('german', ${documentChunks.text})`,
+    ),
+    searchEn: tsvector('search_en').generatedAlwaysAs(
+      (): SQL => sql`to_tsvector('english', ${documentChunks.text})`,
+    ),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    // Ein wiederholter Job erzeugt keine doppelten Abschnitte.
+    uniqueIndex('document_chunks_version_ordinal_idx').on(table.versionId, table.ordinal),
+    index('document_chunks_document_idx').on(table.documentId),
+
+    // Kosinus, weil e5 normalisierte Vektoren liefert.
+    index('document_chunks_embedding_idx').using('hnsw', table.embedding.op('vector_cosine_ops')),
+    index('document_chunks_search_de_idx').using('gin', table.searchDe),
+    index('document_chunks_search_en_idx').using('gin', table.searchEn),
+  ],
 );

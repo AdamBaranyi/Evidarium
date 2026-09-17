@@ -38,10 +38,30 @@ Siehe `docs/ENTSCHEIDE.md`, E4.
 
 ## Datenmodell
 
-Stand Tag 1 — Dokumente, Abschnitte und Läufe kommen an den Tagen 2 bis 4.
+Stand Tag 2. Läufe, Belege und Kosten kommen an Tag 4.
 
-| Tabelle          | Inhalt                                 |
-| ---------------- | -------------------------------------- |
-| `users`          | Konto, Argon2id-Hash, Status           |
-| `sessions`       | Serverseitige Sitzung, Ablauf          |
-| `login_attempts` | Fehlversuche je Herkunft, nur als Hash |
+| Tabelle             | Inhalt                                                           |
+| ------------------- | ---------------------------------------------------------------- |
+| `users`             | Konto, Argon2id-Hash, Status                                     |
+| `sessions`          | Serverseitige Sitzung, Ablauf                                    |
+| `login_attempts`    | Fehlversuche je Herkunft, nur als Hash                           |
+| `documents`         | Datei, Typ, Grösse, Inhaltshash, Speicherpfad, aktive Version    |
+| `document_versions` | Parser- und Chunker-Version, Status, Fehlercode, Seiten, Zeichen |
+| `document_chunks`   | Abschnitt mit **Seite** oder **Zeilenbereich**, Text, Nummer     |
+| `pgboss.*`          | Von pg-boss selbst verwaltet, siehe E11                          |
+
+**Die Herkunft eines Abschnitts ist der Kern des Datenmodells.** Bei PDF steht
+die Seite darin, bei Text und Markdown der Zeilenbereich — das eine oder das
+andere, nie beides und nie geraten. Fehlt die Angabe, kann später kein Beleg
+darauf zeigen, und das Produktversprechen fällt in sich zusammen.
+
+Eindeutig ist ein Abschnitt über Version und Nummer. Damit erzeugt ein
+wiederholter Job keine Dubletten, auch wenn er mitten im Schreiben abbricht.
+
+## Dateien
+
+Hochgeladene Dateien liegen auf einem lokalen Volume unter
+`STORAGE_PATH/<nutzer>/<dokument>`. **Der Pfad entsteht serverseitig aus IDs,
+nie aus dem Dateinamen** — ein Name aus dem Browser darf nirgends in einen Pfad
+geraten. Zusätzlich prüft `speicher.ts`, dass das Ziel unterhalb der Wurzel
+bleibt.
