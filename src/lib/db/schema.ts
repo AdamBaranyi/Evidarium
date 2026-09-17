@@ -1,6 +1,7 @@
-import { sql } from 'drizzle-orm';
+import { sql, type SQL } from 'drizzle-orm';
 import {
   check,
+  customType,
   index,
   integer,
   pgTable,
@@ -8,7 +9,26 @@ import {
   timestamp,
   uniqueIndex,
   uuid,
+  vector,
 } from 'drizzle-orm/pg-core';
+
+/**
+ * Dimension des Embedding-Modells. Steht hier, weil die Spaltenbreite davon
+ * abhängt: Ein Modellwechsel mit anderer Dimension erzwingt eine Migration,
+ * und das soll auffallen, statt still schiefzugehen.
+ *
+ * 384 = intfloat/multilingual-e5-small. Siehe docs/ENTSCHEIDE.md, E14.
+ */
+export const EMBEDDING_DIMENSIONEN = 384;
+
+/**
+ * PostgreSQL kennt keinen Drizzle-Typ für `tsvector`. Der eigene Typ macht
+ * die Spalte im Schema sichtbar, statt sie als unsichtbare Handarbeit in
+ * einer Migration zu verstecken.
+ */
+const tsvector = customType<{ data: string; driverData: string }>({
+  dataType: () => 'tsvector',
+});
 
 /*
  * CHECK statt nativer Enums: Wertemengen wachsen, und ein ALTER COLUMN TYPE
@@ -106,7 +126,7 @@ export const documentVersions = pgTable(
   (table) => [
     check(
       'document_versions_status_gueltig',
-      sql`${table.status} IN ('pending', 'extracting', 'chunking', 'ready', 'failed')`,
+      sql`${table.status} IN ('pending', 'extracting', 'chunking', 'embedding', 'ready', 'failed')`,
     ),
     index('document_versions_document_idx').on(table.documentId, table.createdAt),
   ],
@@ -135,11 +155,42 @@ export const documentChunks = pgTable(
     lineEnd: integer('line_end'),
     text: text('text').notNull(),
     charCount: integer('char_count').notNull(),
+
+    /*
+     * Der Vektor und das Modell, das ihn erzeugt hat, stehen zusammen in der
+     * Zeile. Vektoren verschiedener Modelle dürfen nie in derselben Abfrage
+     * verglichen werden — ohne diese Spalte merkt das niemand.
+     *
+     * Null heisst: noch nicht eingebettet.
+     */
+    embedding: vector('embedding', { dimensions: EMBEDDING_DIMENSIONEN }),
+    embeddingModel: text('embedding_model'),
+
+    /*
+     * Zwei Volltextspalten statt einer mit Spracherkennung.
+     *
+     * Die deutsche Konfiguration greift schwach auf englischem Text und
+     * umgekehrt; eine automatische Spracherkennung wäre eine weitere
+     * Fehlerquelle, und ein falsch erkanntes Dokument verschwände lautlos aus
+     * der Suche. Zwei Spalten kosten Speicher und lösen das Problem ganz.
+     */
+    searchDe: tsvector('search_de').generatedAlwaysAs(
+      (): SQL => sql`to_tsvector('german', ${documentChunks.text})`,
+    ),
+    searchEn: tsvector('search_en').generatedAlwaysAs(
+      (): SQL => sql`to_tsvector('english', ${documentChunks.text})`,
+    ),
+
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
     // Ein wiederholter Job erzeugt keine doppelten Abschnitte.
     uniqueIndex('document_chunks_version_ordinal_idx').on(table.versionId, table.ordinal),
     index('document_chunks_document_idx').on(table.documentId),
+
+    // Kosinus, weil e5 normalisierte Vektoren liefert.
+    index('document_chunks_embedding_idx').using('hnsw', table.embedding.op('vector_cosine_ops')),
+    index('document_chunks_search_de_idx').using('gin', table.searchDe),
+    index('document_chunks_search_en_idx').using('gin', table.searchEn),
   ],
 );

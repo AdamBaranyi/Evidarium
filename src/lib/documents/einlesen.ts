@@ -5,6 +5,17 @@ import { erkenneTyp } from './dateityp';
 import { ExtraktionsFehler, extrahieren } from './extrahieren';
 import { lesen } from './speicher';
 import { zerlegen } from './zerlegen';
+import { EMBEDDING_MODELL } from '@/lib/embeddings/modell';
+
+/**
+ * Die Einbettungsfunktion wird hereingereicht, nicht importiert.
+ *
+ * Das ist kein Stilentscheid: Diese Datei läuft im Worker, aber sie liegt in
+ * der gemeinsamen Bibliothek. Würde sie das Modell selbst importieren, könnte
+ * jeder künftige Aufruf aus dem Web-Prozess eine zweite Modellinstanz laden —
+ * genau das, was E4 verhindern soll. So gibt es gar keinen Weg dorthin.
+ */
+export type Einbetter = (texte: string[], art: 'abschnitt') => Promise<number[][]>;
 
 /**
  * Der eigentliche Einlesevorgang. Läuft im Worker, nie in einer Web-Anfrage.
@@ -22,6 +33,7 @@ async function statusSetzen(versionId: string, status: string): Promise<void> {
 export async function dokumentEinlesen(
   documentId: string,
   versionId: string,
+  einbetten: Einbetter,
 ): Promise<EinleseErgebnis> {
   const [dokument] = await db.select().from(documents).where(eq(documents.id, documentId)).limit(1);
 
@@ -54,6 +66,17 @@ export async function dokumentEinlesen(
     const abschnitte = zerlegen(extraktion.stellen, dokument.filename);
     if (abschnitte.length === 0) return await scheitern(versionId, 'leer', true);
 
+    await statusSetzen(versionId, 'embedding');
+    const vektoren = await einbetten(
+      abschnitte.map((a) => a.text),
+      'abschnitt',
+    );
+    if (vektoren.length !== abschnitte.length) {
+      throw new Error(
+        `Einbettung liefert ${vektoren.length} Vektoren für ${abschnitte.length} Abschnitte`,
+      );
+    }
+
     /*
      * Alles in einer Transaktion: Abschnitte schreiben, Version fertigmelden,
      * Dokument auf diese Version zeigen lassen. Bricht etwas ab, bleibt die
@@ -65,7 +88,7 @@ export async function dokumentEinlesen(
     await db.transaction(async (tx) => {
       await tx.delete(documentChunks).where(eq(documentChunks.versionId, versionId));
       await tx.insert(documentChunks).values(
-        abschnitte.map((a) => ({
+        abschnitte.map((a, i) => ({
           versionId,
           documentId,
           ordinal: a.ordinal,
@@ -74,6 +97,10 @@ export async function dokumentEinlesen(
           lineEnd: a.lineEnd,
           text: a.text,
           charCount: a.text.length,
+          // Vektor und Modellname zusammen: Ohne den Namen liesse sich später
+          // nicht sagen, welche Vektoren noch vergleichbar sind.
+          embedding: vektoren[i] ?? null,
+          embeddingModel: EMBEDDING_MODELL,
         })),
       );
       await tx

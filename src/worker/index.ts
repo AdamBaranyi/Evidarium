@@ -1,4 +1,5 @@
 import type { Job } from 'pg-boss';
+import { env } from '@/lib/config/env';
 import { dokumentEinlesen } from '@/lib/documents/einlesen';
 import {
   QUEUE_DOKUMENT_EINLESEN,
@@ -6,6 +7,8 @@ import {
   queueStoppen,
   type EinlesenAuftrag,
 } from '@/lib/jobs/queue';
+import { einbetten, modellBereit } from './embeddings';
+import { internenEndpunktStarten } from './http';
 
 /*
  * Eigener Prozess, bewusst nicht im Web-Server.
@@ -18,6 +21,14 @@ import {
  * Start: bun run worker
  */
 async function main(): Promise<void> {
+  /*
+   * Das Modell vor dem ersten Auftrag laden, nicht beim ersten. Sonst wartet
+   * die erste Frage des Tages 15 Sekunden auf etwas, das mit ihr nichts zu
+   * tun hat.
+   */
+  await modellBereit();
+  internenEndpunktStarten(env.WORKER_INTERN_PORT);
+
   const boss = await queue();
   console.log('[worker] bereit, wartet auf Aufträge');
 
@@ -28,7 +39,7 @@ async function main(): Promise<void> {
       const { documentId, versionId } = job.data;
       console.log(`[worker] lese ein: ${documentId} (Version ${versionId})`);
 
-      const ergebnis = await dokumentEinlesen(documentId, versionId);
+      const ergebnis = await dokumentEinlesen(documentId, versionId, einbetten);
 
       if (ergebnis.ok) {
         console.log(`[worker] fertig: ${documentId}`);

@@ -13,5 +13,9 @@ playwright-report/
 .env.*
 !.env.example
 storage/
+
+# Modell-Cache von transformers.js. Wird beim ersten Start geladen und
+# gehoert nicht ins Repository.
+.modelle/
 *.local
 .DS_Store

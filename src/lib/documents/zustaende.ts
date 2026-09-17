@@ -7,6 +7,7 @@ export const STATUS_TEXT: Record<string, string> = {
   pending: 'Wartet auf Verarbeitung',
   extracting: 'Text wird gelesen',
   chunking: 'Wird in Abschnitte geteilt',
+  embedding: 'Wird durchsuchbar gemacht',
   ready: 'Bereit',
   failed: 'Nicht verarbeitbar',
 };

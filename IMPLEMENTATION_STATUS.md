@@ -44,11 +44,36 @@ Auftrag: `../Evidarium-Masterprompt-v1.md`
   zeigt in der Oberfläche die vorgeschriebene Meldung
 - Derselbe Job zweimal eingereiht: weiterhin 7 Abschnitte, **null Dubletten**
 
+## Tag 3 — Suche · **fertig** (17.09.2026)
+
+| Punkt                                                          | Stand                      |
+| -------------------------------------------------------------- | -------------------------- |
+| Lokale Embeddings im Worker, Modell genau einmal geladen       | fertig                     |
+| `vector(384)` mit HNSW-Index, Kosinus                          | fertig                     |
+| Zwei generierte `tsvector`-Spalten (deutsch, englisch) mit GIN | fertig                     |
+| Interner Endpunkt `127.0.0.1:3101` für Fragevektoren           | fertig                     |
+| Hybridsuche mit Reciprocal Rank Fusion, k = 60                 | fertig                     |
+| Kappung nie ohne Sortierung                                    | fertig                     |
+| Messwerte in `docs/BETRIEB.md`                                 | fertig, Zielmaschine offen |
+
+**Nachweis vom 17.09.2026:**
+
+- «Wer hilft beim Onboarding?», «Who helps with onboarding?» und die
+  Umschreibung «Wer betreut neue Mitarbeitende beim Einstieg?» liefern alle
+  denselben Abschnitt auf Platz eins — Seite 2, wo er hingehört
+- Ein Abschnitt, den beide Verfahren finden, bekommt die doppelte Punktzahl
+  und steht klar vorn
+- Fremde Dokument-IDs liefern nichts, auch wenn sie gültig sind
+- Modell lädt genau einmal; der interne Endpunkt ist über die LAN-Adresse
+  nicht erreichbar
+- 26 Tests, davon 7 für die Suche
+
 ## Als Nächstes
 
-Tag 3: lokale Embeddings über `transformers.js` im Worker, Vektorspalte und
-pgvector-Index, deutsche und englische Volltextsuche, Hybrid mit Reciprocal
-Rank Fusion, Messwerte in `docs/BETRIEB.md`.
+Tag 4: Provider-Adapter (Anthropic), strukturierte Antwort mit Belegen,
+**Belegprüfung** (Zitat muss wörtlich im Abschnitt stehen, Quellen-ID muss aus
+der übermittelten Menge stammen), Chat-Oberfläche, Quellen-Drawer, Budget je
+Sitzung und je Tag, Ausgabenprotokoll — siehe Masterprompt 9a.
 
 ## Aufgefallen
 
@@ -75,6 +100,16 @@ Rank Fusion, Messwerte in `docs/BETRIEB.md`.
   Testdokument ab.
 - Ein alter Server aus einem Playwright-Lauf hält Port 3100 besetzt
   (`reuseExistingServer`). Vor dem Prüfen eines neuen Builds beenden.
+- **`websearch_to_tsquery` verknüpft alle Wörter mit UND.** Bei einer
+  natürlichen Frage trifft die Volltextsuche damit nie — und es fällt nicht
+  auf, weil die semantische Hälfte Ergebnisse liefert. Siehe E15.
+- **`voyage-4-nano` hat keine ONNX-Fassung** und läuft darum nicht in
+  transformers.js, obwohl es «auf CPU läuft». Siehe E14.
+- Drizzle entfaltet ein JS-Array im SQL-Template zu einer Parameterliste;
+  daraus wird ein Record, kein Array. `ANY(...)` braucht einen einzelnen
+  Textparameter mit `string_to_array`.
+- Drizzle nimmt beim Einfügen in eine `vector`-Spalte ein Zahlen-Array, kein
+  Literal — das Literal braucht erst die rohe Suchabfrage.
 
 ## Blockiert
 
