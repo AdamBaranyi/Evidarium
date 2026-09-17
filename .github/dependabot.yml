@@ -85,10 +85,17 @@ updates:
 
   # -------------------------------------------------------------- Docker ----
   # Die Images aus infra/docker-compose.yml, heute pgvector/pgvector.
+  #
+  # Das Ökosystem heisst `docker-compose`, nicht `docker`: `docker` liest
+  # Dockerfiles, `docker-compose` liest Compose-Dateien. Mit `docker` auf
+  # einem Verzeichnis ohne Dockerfile scheitert der Lauf (beobachtet
+  # 17.09.2026, Lauf 35193707729). Ein Dockerfile gibt es hier noch nicht;
+  # sobald eines dazukommt, bekommt es einen eigenen Eintrag.
+  #
   # Ein Tag wie 0.8.6-pg18 wird vom Hersteller unter derselben Nummer neu
   # gebaut — Dependabot sieht nur Nummern und deckt das nie ab. Darum
   # zusätzlich die monatliche Erneuerung von Hand, siehe docs/BETRIEB.md.
-  - package-ecosystem: docker
+  - package-ecosystem: docker-compose
     directory: '/infra'
     schedule:
       interval: monthly
