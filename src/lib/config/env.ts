@@ -14,6 +14,7 @@ const Schema = z.object({
     .string()
     .min(32, 'SESSION_SECRET braucht mindestens 32 Zeichen. Erzeugen: openssl rand -base64 48'),
   APP_ORIGIN: z.url({ protocol: /^https?$/ }),
+  STORAGE_PATH: z.string().min(1, 'STORAGE_PATH fehlt. Beispiel: ./storage'),
   TRUST_PROXY: z
     .enum(['true', 'false'])
     .default('false')

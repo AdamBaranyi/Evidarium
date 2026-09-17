@@ -3,19 +3,12 @@ import { redirect } from 'next/navigation';
 import { readSession, SESSION_COOKIE } from '@/lib/auth/session';
 
 /*
- * Die Prüfung steht hier, nicht nur in proxy.ts: Der Proxy hält Besucher ohne
- * Cookie ab, aber ob die Sitzung gültig ist, weiss nur die Datenbank. Jede
- * geschützte Seite prüft selbst.
+ * Der Einstieg nach der Anmeldung ist die Dokumentbibliothek. Die
+ * Sitzungsprüfung steht trotzdem hier: proxy.ts sieht nur, ob ein Cookie da
+ * ist, nicht ob es gilt.
  */
 export default async function AppPage() {
-  const id = (await cookies()).get(SESSION_COOKIE)?.value;
-  const sitzung = await readSession(id);
+  const sitzung = await readSession((await cookies()).get(SESSION_COOKIE)?.value);
   if (!sitzung) redirect('/login');
-
-  return (
-    <main className="mx-auto flex min-h-dvh max-w-2xl flex-col justify-center gap-4 px-4 py-12">
-      <h1 className="text-2xl leading-tight">Angemeldet</h1>
-      <p className="text-ink-soft">{sitzung.email}</p>
-    </main>
-  );
+  redirect('/app/documents');
 }

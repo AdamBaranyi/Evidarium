@@ -20,19 +20,35 @@ Auftrag: `../Evidarium-Masterprompt-v1.md`
 | CI: Format, Dateilänge, Schrift, Lint, Typen, Tests, Build    | fertig    |
 | **Installation, erste Migration, grüner Durchlauf**           | **offen** |
 
+## Tag 2 — Dokumentpfad · **fertig** (17.09.2026)
+
+| Punkt                                                                | Stand  |
+| -------------------------------------------------------------------- | ------ |
+| Upload als Route Handler, Typ am Inhalt geprüft                      | fertig |
+| Grenzen serverseitig: 10 MiB, 100 Seiten, 300k Zeichen, 50 Dokumente | fertig |
+| Dubletten je Nutzer über Inhaltshash                                 | fertig |
+| Jobqueue in PostgreSQL (pg-boss 12.30.0)                             | fertig |
+| Worker als eigener Prozess, geordnetes Herunterfahren                | fertig |
+| PDF-Extraktion **mit Seitenzahlen**, Text mit Zeilenbereichen        | fertig |
+| Zerlegung mit Überlappung, Dateiname im Abschnitt                    | fertig |
+| Dokumentbibliothek und Dokumentdetail                                | fertig |
+| Verständliche Fehler statt ewigem Ladezustand                        | fertig |
+
+**Nachweis vom 17.09.2026, mit einem echten dreiseitigen PDF:**
+
+- Upload antwortet mit 202, der Worker nimmt den Auftrag und meldet fertig
+- 3 Seiten, 6857 Zeichen, 7 Abschnitte auf die Seiten 1, 2 und 3 verteilt
+- Der versteckte Fakt «Mara Keller» liegt in Abschnitt 3 auf **Seite 2** —
+  genau dort, wo er in der Quelle steht
+- Ein PDF ohne Textschicht endet als `failed` mit `pdf_ohne_textschicht` und
+  zeigt in der Oberfläche die vorgeschriebene Meldung
+- Derselbe Job zweimal eingereiht: weiterhin 7 Abschnitte, **null Dubletten**
+
 ## Als Nächstes
 
-Tag 2: Upload, Worker mit Jobqueue, Textextraktion mit Seitenzahlen,
-Chunking, Dokumentbibliothek und Dokumentdetail.
-
-**Vorgemerkt aus dem Sicherheits-Nachtrag vom 17.09.2026** (Masterprompt 9a):
-
-- Tag 4: eigener API-Schlüssel nur serverseitig, Budget je Sitzung (10 Fragen),
-  Tagesdeckel, Monatsdeckel, Ausgabenprotokoll in `usage_events`, freundliche
-  Meldung statt Fehler beim Erreichen einer Grenze.
-- Tag 5: öffentliche Demo mit vorbereitetem Korpus, **Upload nur für angemeldete
-  Nutzer**; optional eigener Schlüssel je Sitzung.
-- Abschnitt «Bewusst nicht gebaut» steht bereits im README.
+Tag 3: lokale Embeddings über `transformers.js` im Worker, Vektorspalte und
+pgvector-Index, deutsche und englische Volltextsuche, Hybrid mit Reciprocal
+Rank Fusion, Messwerte in `docs/BETRIEB.md`.
 
 ## Aufgefallen
 
@@ -50,6 +66,15 @@ Chunking, Dokumentbibliothek und Dokumentdetail.
   belegt. Datenbank auf 5450/5451, weil Tallyroom 5440/5441 hat.
 - Das Init-Skript der Datenbank darf den Datenbanknamen nicht festschreiben —
   Entwicklungs- und Testdatenbank heissen verschieden.
+- **pdf.js koppelt den übergebenen Puffer ab.** Nach dem ersten Aufruf ist
+  `byteLength` null; ein zweiter Aufruf meldet «beschädigt» für eine
+  einwandfreie Datei. Die Extraktion übergibt darum eine Kopie, mit
+  Regressionstest.
+- **Der Seitenvorschub (0x0C) gehört zu gültigem Text.** Die erste Fassung der
+  Typerkennung warf ihn als Steuerzeichen raus und lehnte damit das eigene
+  Testdokument ab.
+- Ein alter Server aus einem Playwright-Lauf hält Port 3100 besetzt
+  (`reuseExistingServer`). Vor dem Prüfen eines neuen Builds beenden.
 
 ## Blockiert
 
