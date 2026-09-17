@@ -1,7 +1,10 @@
 /*
- * Grundwerte. Die ausgearbeitete visuelle Identität entsteht an Tag 4, wenn es
- * etwas zu gestalten gibt. Was hier steht, ist bewusst zurückhaltend und legt
- * nur fest, was später ohnehin nicht mehr verhandelbar ist.
+ * Grundwerte, bewusst zurückhaltend. Hier steht nur, was später ohnehin nicht
+ * mehr verhandelbar ist.
+ *
+ * **Die ausgearbeitete visuelle Identität kommt nach Tag 5** (Entscheid
+ * 17.09.2026): eigene Farbe, eigene Schrift, eigenes Raster, in einem eigenen
+ * Durchgang. Der Wert von `--beleg` ist bis dahin ein Platzhalter.
  *
  * Eine Entscheidung ist schon getroffen: Farbe ist für den Beleg reserviert.
  * Das Produkt verspricht Nachprüfbarkeit — also ist die Fundstelle das

@@ -102,6 +102,20 @@ Tag 5: Evaluationsset mit 12 Fällen gegen einen erfundenen Korpus,
 Prompt-Injection-Test, öffentliche Demo mit vorbereitetem Korpus (Upload nur
 für angemeldete Personen), drei Testbreiten, Fallstudie, Deployment auf vps1.
 
+## Nach Tag 5 — Visuelle Identität
+
+Entscheid vom 17.09.2026: **Das Design ist Rohbau und bleibt es bis nach
+Tag 5.** Erst Evaluation, Injektionstest, Demo, Fallstudie und Deployment;
+danach ein eigener Durchgang für eigene Farbe, eigene Schrift, eigenes Raster.
+
+Was dabei gilt und was nicht:
+
+- Die **Regel** steht schon: Farbe ist dem Beleg vorbehalten, Knöpfe tragen
+  Tinte. Der **Wert** `--beleg: #0a6b5d` ist ein Platzhalter.
+- Kein Gewand von einem anderen Portfolio-Projekt übernehmen. Zwei Apps im
+  selben Kleid sehen nach Vorlage aus.
+- Die 16-px-Untergrenze und die drei Prüfbreiten gelten unverändert weiter.
+
 ## Aufgefallen
 
 - Next 16 nennt die frühere `middleware.ts` jetzt `proxy.ts`.
