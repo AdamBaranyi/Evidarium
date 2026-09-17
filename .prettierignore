@@ -1,0 +1,7 @@
+bun.lock
+.next/
+out/
+coverage/
+playwright-report/
+test-results/
+src/lib/db/migrations/

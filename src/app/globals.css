@@ -1,0 +1,62 @@
+@import 'tailwindcss';
+@import '../styles/tokens.css';
+
+/*
+ * Tailwind-Stufen unter 16 px abschalten, statt sich auf Disziplin zu
+ * verlassen: Auf `initial` gesetzt entstehen die Klassen gar nicht erst,
+ * und `text-sm` ist dann ein Lint-Fehler statt einer stillen 14-px-Stelle.
+ */
+@theme {
+  --text-xs: initial;
+  --text-sm: initial;
+  --text-base: var(--text-body);
+  --text-lg: var(--text-lead);
+  --text-xl: var(--text-title);
+  --text-2xl: var(--text-display);
+
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-edge: var(--edge);
+  --color-beleg: var(--beleg);
+}
+
+html {
+  font-size: var(--text-body);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  line-height: var(--line-body);
+}
+
+:focus-visible {
+  outline: 2px solid var(--beleg);
+  outline-offset: 2px;
+}
+
+/* Lange Dateinamen dürfen die Bedienung bei 320 px nicht verschieben. */
+:where(h1, h2, h3, p, li, td, th) {
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

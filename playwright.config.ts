@@ -1,0 +1,43 @@
+import { defineConfig, devices } from '@playwright/test';
+
+/*
+ * Drei Prüfbreiten: 320 (kleinstes Telefon, harte Vorgabe), 768 (Tablet),
+ * 1440 (Schreibtisch). Browser-Emulation ist kein Beweis für ein bestimmtes
+ * Gerät — geprüft wird das Layout, nicht das Telefon.
+ */
+export default defineConfig({
+  testDir: './e2e',
+  fullyParallel: false,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 1 : 0,
+  // Alle Läufer teilen sich in der CI eine IP; das Login-Rate-Limit greift
+  // sonst quer durch die Tests.
+  workers: 1,
+  reporter: process.env.CI ? 'github' : 'list',
+  use: {
+    baseURL: 'http://localhost:3100',
+    locale: 'de-CH',
+    timezoneId: 'Europe/Zurich',
+    trace: 'on-first-retry',
+  },
+  projects: [
+    {
+      name: 'schmal-320',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 320, height: 568 } },
+    },
+    {
+      name: 'mittel-768',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 768, height: 1024 } },
+    },
+    {
+      name: 'breit-1440',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
+    },
+  ],
+  webServer: {
+    command: 'bun run build && bun run start',
+    url: 'http://localhost:3100',
+    reuseExistingServer: !process.env.CI,
+    timeout: 180_000,
+  },
+});
