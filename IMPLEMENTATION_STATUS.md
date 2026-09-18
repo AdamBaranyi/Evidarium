@@ -113,7 +113,8 @@ für angemeldete Personen), drei Testbreiten, Fallstudie, Deployment auf vps1.
 | Protokoll `docs/EVALUATION.md` mit Antworten im Wortlaut | fertig |
 | Öffentliche Demo, Upload nur für angemeldete Personen    | fertig |
 | Drei Prüfbreiten als Test, auch in der CI                | fertig |
-| Fallstudie mit «Bewusst nicht gebaut»                    | offen  |
+| Löschkaskade für Dokumente, mit Oberfläche               | fertig |
+| Fallstudie `docs/FALLSTUDIE.md`                          | fertig |
 | Deployment auf vps1                                      | offen  |
 
 **Nachweis vom 17.09.2026, Live-Modus:** 12 von 12 Fällen bestanden, 48,6 s,
@@ -187,6 +188,10 @@ Was dabei gilt und was nicht:
   Textparameter mit `string_to_array`.
 - Drizzle nimmt beim Einfügen in eine `vector`-Spalte ein Zahlen-Array, kein
   Literal — das Literal braucht erst die rohe Suchabfrage.
+- **Eine Behauptung in der Dokumentation ist kein Nachweis.** Das README
+  nannte die Löschkaskade seit Tag 1 «gebaut und getestet»; gebaut war nur die
+  Spalte `deleted_at`. Aufgefallen beim Nachprüfen der eigenen Sätze vor dem
+  Veröffentlichen der Fallstudie. Siehe E28.
 - **Ein `useState`-Updater muss rein sein.** `Date.now()` darin wird beim
   erneuten Aufruf des Updaters neu ausgewertet; alle gemessenen Schrittzeiten
   standen darum auf 0,0 s. Die Uhr vor dem Aufruf ablesen. Siehe E20.

@@ -70,11 +70,13 @@ lokalen Anmeldung, damit der Rundgang unabhängig bleibt.
 
 ## Dokumentation
 
-| Datei                      | Inhalt                                               |
-| -------------------------- | ---------------------------------------------------- |
-| `IMPLEMENTATION_STATUS.md` | Aktueller Stand, offene Punkte — zuerst lesen        |
-| `docs/ARCHITEKTUR.md`      | Datenmodell und Ablauf vom Dokument bis zur Antwort  |
-| `docs/CODE-QUALITY.md`     | 400-Zeilen-Regel, Schriftuntergrenze, wo was liegt   |
-| `docs/SECURITY.md`         | Sicherheitsmassnahmen, bewertete Befunde, Ausnahmen  |
-| `docs/BETRIEB.md`          | Migrationen, Sicherung, Wiederherstellung, Messwerte |
-| `docs/ENTSCHEIDE.md`       | Nummerierte Entscheidungen mit Begründung            |
+| Datei                      | Inhalt                                                |
+| -------------------------- | ----------------------------------------------------- |
+| `IMPLEMENTATION_STATUS.md` | Aktueller Stand, offene Punkte — zuerst lesen         |
+| `docs/ARCHITEKTUR.md`      | Datenmodell und Ablauf vom Dokument bis zur Antwort   |
+| `docs/CODE-QUALITY.md`     | 400-Zeilen-Regel, Schriftuntergrenze, wo was liegt    |
+| `docs/SECURITY.md`         | Sicherheitsmassnahmen, bewertete Befunde, Ausnahmen   |
+| `docs/BETRIEB.md`          | Migrationen, Sicherung, Wiederherstellung, Messwerte  |
+| `docs/ENTSCHEIDE.md`       | Nummerierte Entscheidungen mit Begründung             |
+| `docs/EVALUATION.md`       | Ergebnis des letzten Prüflaufs, Antworten im Wortlaut |
+| `docs/FALLSTUDIE.md`       | Die Fallstudie für die Portfolio-Seite                |

@@ -369,3 +369,36 @@ das Produkt dort funktioniert, wo es niemand prüft.
 
 Die Seite sagt darum ausdrücklich, dass zwei Dokumente sich widersprechen und
 eines eine untergeschobene Anweisung enthält, und lädt zum Ausprobieren ein.
+
+## E28 — Löschen heisst löschen, nicht ausblenden
+
+_18.09.2026._ Beim Löschen eines Dokuments verschwinden Zeile, Versionen,
+Abschnitte, Vektoren und die Datei auf dem Datenträger.
+
+Ein Dokument, das nur aus der Liste verschwindet, dessen Abschnitte aber
+liegen bleiben, taucht in der nächsten Antwort wieder auf — als Beleg zu einem
+Dokument, das es angeblich nicht mehr gibt. Das wäre schlimmer als gar keine
+Löschfunktion, weil es Vertrauen missbraucht.
+
+Die Reihenfolge ist absichtlich gewählt: zuerst `deleted_at` setzen — ab da
+ist das Dokument für jede Abfrage weg, auch wenn der Rest scheitert —, dann
+die Versionen löschen (die Abschnitte hängen per `ON DELETE CASCADE` daran),
+dann die Datei entfernen, zuletzt die Zeile. Bricht es in der Mitte ab, bleibt
+ein unsichtbares, wiederholbar löschbares Dokument zurück. Das ist die richtige
+Richtung zum Scheitern: lieber unsichtbar als wieder sichtbar.
+
+Die Zeile bleibt am Ende **nicht** als Grabstein stehen. Sonst meldete der
+Inhaltshash beim erneuten Hochladen derselben Datei «schon vorhanden».
+
+Bestätigt wird in zwei Schritten auf der Seite selbst, nicht mit `confirm()`:
+Der Browserdialog lässt sich nicht gestalten, nicht übersetzen und in manchen
+Browsern unterdrücken — und die eigene Warnung kann sagen, was tatsächlich
+passiert.
+
+**Fund beim Schreiben der Fallstudie:** Das README behauptete diese
+Löschkaskade seit Tag 1 als «gebaut und getestet». Gebaut war nur die Spalte
+`deleted_at`. Aufgefallen ist es beim Nachprüfen der eigenen Behauptungen vor
+dem Veröffentlichen — nicht beim Programmieren. Seither steht sie wirklich,
+mit vier Tests: Zeile, Abschnitte und Datei verschwinden, die Suche findet das
+Dokument nicht mehr, fremde Dokumente bleiben unberührt, ein zweiter Versuch
+meldet «nicht gefunden».

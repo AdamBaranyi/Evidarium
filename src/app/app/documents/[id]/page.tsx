@@ -4,6 +4,7 @@ import { notFound, redirect } from 'next/navigation';
 import { readSession, SESSION_COOKIE } from '@/lib/auth/session';
 import { abschnitteHolen, dokumentHolen } from '@/lib/documents/abfragen';
 import { fehlerText, groesseText, statusText } from '@/lib/documents/zustaende';
+import { LoeschenForm } from './loeschen-form';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,6 +46,8 @@ export default async function DokumentDetail({ params }: { params: Promise<{ id:
           {fehler}
         </p>
       )}
+
+      <LoeschenForm documentId={dokument.id} dateiname={dokument.filename} />
 
       {dokument.status === 'ready' && (
         <section className="flex flex-col gap-4">
