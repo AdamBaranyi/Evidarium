@@ -19,6 +19,7 @@ services:
       POSTGRES_USER: evidarium_owner
       POSTGRES_PASSWORD: entwicklung-nur-lokal
       POSTGRES_DB: evidarium
+      APP_ROLE_PASSWORD: entwicklung-nur-lokal
     ports:
       - '127.0.0.1:5450:5432'
     volumes:
@@ -38,6 +39,7 @@ services:
       POSTGRES_USER: evidarium_owner
       POSTGRES_PASSWORD: test-nur-lokal
       POSTGRES_DB: evidarium_test
+      APP_ROLE_PASSWORD: test-nur-lokal
     ports:
       - '127.0.0.1:5451:5432'
     tmpfs:

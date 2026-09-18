@@ -2,6 +2,7 @@ import { createServer, type Server } from 'node:http';
 import { z } from 'zod';
 import { EMBEDDING_DIMENSIONEN, EMBEDDING_MODELL } from '@/lib/embeddings/modell';
 import { einbetten } from './embeddings';
+import { env } from '@/lib/config/env';
 
 /*
  * Interner Endpunkt, damit der Web-Prozess den Vektor einer Frage bekommt,
@@ -11,9 +12,10 @@ import { einbetten } from './embeddings';
  * Eine Frage einzubetten dauert Millisekunden und muss synchron beantwortet
  * werden, sonst wartet der Nutzer auf einen Umweg.
  *
- * Gebunden an 127.0.0.1. Der Endpunkt hat keine Anmeldung und darf deshalb
- * das Gerät nie verlassen; im Docker-Netz übernimmt das die Bindung, nach
- * aussen die Firewall.
+ * Der Endpunkt hat **keine Anmeldung** und darf deshalb nie öffentlich
+ * erreichbar sein. Vorgabe ist die Bindung an 127.0.0.1; im Containerbetrieb
+ * schützt stattdessen das eigene Compose-Netz ohne veröffentlichten Port
+ * (siehe WORKER_INTERN_HOST in src/lib/config/env.ts).
  */
 
 const Anfrage = z.object({
@@ -71,8 +73,8 @@ export function internenEndpunktStarten(port: number): Server {
     });
   });
 
-  server.listen(port, '127.0.0.1', () => {
-    console.log(`[worker/http] interner Endpunkt auf 127.0.0.1:${port}`);
+  server.listen(port, env.WORKER_INTERN_HOST, () => {
+    console.log(`[worker/http] interner Endpunkt auf ${env.WORKER_INTERN_HOST}:${port}`);
   });
 
   return server;

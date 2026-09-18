@@ -3,18 +3,10 @@
 -- Testdatenbank heissen verschieden, dasselbe Skript bedient beide.
 CREATE EXTENSION IF NOT EXISTS vector;
 
--- Zwei Rollen, weil Eigentümer und Superuser Row Level Security umgehen.
--- Der Eigentümer wandert durch die Migrationen, die Anwendung arbeitet mit
--- der eingeschränkten Rolle.
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'evidarium_app') THEN
-    CREATE ROLE evidarium_app LOGIN PASSWORD 'entwicklung-nur-lokal';
-  END IF;
-
-  EXECUTE format('GRANT CONNECT ON DATABASE %I TO evidarium_app', current_database());
-END
-$$;
+-- Die Rolle `evidarium_app` legt 01-anwendungsrolle.sh an; ihr Passwort kommt
+-- aus der Umgebung. Zwei Rollen, weil Eigentümer und Superuser Row Level
+-- Security umgehen: Der Eigentümer wandert durch die Migrationen, die
+-- Anwendung arbeitet mit der eingeschränkten Rolle.
 
 GRANT USAGE ON SCHEMA public TO evidarium_app;
 

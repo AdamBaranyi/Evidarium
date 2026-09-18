@@ -34,6 +34,44 @@ lokalen Befehl auf der Maschine, auf der die Anwendung läuft:
 ````bash
 bun run konto:anlegen adam@example.test
 
+## Deployment auf vps1
+
+Checkout nach `/opt/evidarium` (oeffentliches Repository, kein Deploy-Key),
+dann:
+
+```bash
+sudo /opt/evidarium/infra/deploy.sh          # Stand `main`
+sudo /opt/evidarium/infra/deploy.sh <commit> # bestimmter Stand
+```
+
+Der erste Lauf legt `infra/.env.production` an (erzeugte Passwoerter, `chmod
+600`) und hoert dort auf. Darin pruefen: `APP_ORIGIN`, und falls echte
+Antworten gewuenscht sind, `ANTHROPIC_API_KEY` eintragen und `AI_MODE=live`
+setzen. Danach denselben Befehl noch einmal.
+
+Jeder weitere Lauf: Stand holen, Abbild bauen, **Datenbank sichern**, dann
+migrieren und neu starten. Die Sicherung entsteht vor der Migration, nicht
+danach — eine Sicherung nach dem Schemaumbau hilft beim Zurueckrollen nicht.
+Sie liegt unter `/var/backups/evidarium`.
+
+Danach:
+
+```bash
+docker compose -f infra/compose.prod.yml --env-file infra/.env.production \
+  exec web bun scripts/konto-anlegen.ts <e-mail>
+docker compose -f infra/compose.prod.yml --env-file infra/.env.production \
+  exec worker bun scripts/demo-korpus-laden.ts
+```
+
+Caddy: `infra/caddy/evidarium.caddy` in die Konfiguration des gemeinsamen
+Caddy aufnehmen. `flush_interval -1` ist noetig, sonst puffert der Proxy den
+Antwortstrom und die Schrittanzeige kommt am Stueck.
+
+**Fallstrick:** `docker compose --env-file` ueberschreibt nichts, was schon in
+der Umgebung steht. Wer vorher `.env` eingelesen hat, faehrt still gegen die
+falsche Datenbank. `deploy.sh` entfernt die betroffenen Variablen darum
+selbst.
+
 ## Oeffentliche Demo
 
 ```bash

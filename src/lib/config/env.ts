@@ -7,9 +7,22 @@ import { z } from 'zod';
  * Konfigurationsfehler eine stille Verbindung mit einem im Repository
  * stehenden Passwort. Fehlt ein Wert, bricht die Anwendung ab.
  */
+/**
+ * Eine **leere** Umgebungsvariable heisst «nicht gesetzt», nicht «leerer Wert».
+ *
+ * `docker compose` setzt `ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}` auch dann,
+ * wenn nichts hinterlegt ist — als leere Zeichenkette. Ohne diese Umwandlung
+ * scheitert `min(1)`, und die Anwendung startet im Demo-Modus gar nicht erst.
+ * Gefunden am 18.09.2026 im ersten Produktionslauf; lokal fiel es nie auf,
+ * weil dort ein Schlüssel gesetzt ist.
+ */
+function leerIstFehlend<T extends z.ZodTypeAny>(schema: T) {
+  return z.preprocess((wert) => (wert === '' ? undefined : wert), schema);
+}
+
 const Schema = z.object({
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
-  DATABASE_URL_OWNER: z.url({ protocol: /^postgres(ql)?$/ }).optional(),
+  DATABASE_URL_OWNER: leerIstFehlend(z.url({ protocol: /^postgres(ql)?$/ }).optional()),
   SESSION_SECRET: z
     .string()
     .min(32, 'SESSION_SECRET braucht mindestens 32 Zeichen. Erzeugen: openssl rand -base64 48'),
@@ -19,6 +32,17 @@ const Schema = z.object({
   // Anmeldung und darf das Gerät nie verlassen.
   WORKER_INTERN_URL: z.url({ protocol: /^http$/ }).default('http://127.0.0.1:3101'),
   WORKER_INTERN_PORT: z.coerce.number().int().min(1).max(65535).default(3101),
+  /*
+   * Adresse, auf der der Worker seinen internen Endpunkt anbietet.
+   *
+   * Vorgabe `127.0.0.1`: auf einem Einzelrechner richtig und die sichere
+   * Voreinstellung. Im Containerbetrieb laufen Web und Worker in **getrennten**
+   * Netz-Namensräumen — dort erreicht `127.0.0.1` nur den Worker selbst, und
+   * die Weboberfläche bekommt ECONNREFUSED. Dann `0.0.0.0`, zusammen mit einem
+   * eigenen Compose-Netz und **ohne** veröffentlichten Port: Der Endpunkt ist
+   * nur aus den Containern desselben Netzes erreichbar.
+   */
+  WORKER_INTERN_HOST: z.string().min(1).default('127.0.0.1'),
 
   /*
    * `demo` ruft kein Modell auf und kostet nichts. `live` braucht einen
@@ -29,7 +53,7 @@ const Schema = z.object({
    * Frage um, mit einer Meldung, die nach einem Produktfehler aussieht.
    */
   AI_MODE: z.enum(['demo', 'live']).default('demo'),
-  ANTHROPIC_API_KEY: z.string().min(1).optional(),
+  ANTHROPIC_API_KEY: leerIstFehlend(z.string().min(1).optional()),
   AI_CHAT_MODEL: z.string().min(1).default('claude-haiku-4-5'),
 
   /* Harte Deckel. Siehe Masterprompt 9a und docs/SECURITY.md. */

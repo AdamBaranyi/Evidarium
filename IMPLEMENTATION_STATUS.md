@@ -115,7 +115,8 @@ für angemeldete Personen), drei Testbreiten, Fallstudie, Deployment auf vps1.
 | Drei Prüfbreiten als Test, auch in der CI                | fertig |
 | Löschkaskade für Dokumente, mit Oberfläche               | fertig |
 | Fallstudie `docs/FALLSTUDIE.md`                          | fertig |
-| Deployment auf vps1                                      | offen  |
+| Produktionsabbild, Compose, Deploy-Skript, Caddy         | fertig |
+| Deployment auf vps1 ausgefuehrt                          | offen  |
 
 **Nachweis vom 17.09.2026, Live-Modus:** 12 von 12 Fällen bestanden, 48,6 s,
 0,0357 USD. Beide Konfliktfälle nennen 30 **und** 90 Tage mit je eigener

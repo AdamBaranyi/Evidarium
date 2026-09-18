@@ -1,0 +1,26 @@
+# Ausschnitt für den gemeinsamen Caddy auf vps1.
+#
+# Caddy hat als Einziges Ports 80 und 443; die Container hängen an
+# 127.0.0.1. Docker schreibt eigene iptables-Regeln und umgeht ufw — ein
+# veröffentlichter Port ohne 127.0.0.1 wäre trotz Firewall offen.
+evidarium.adambaranyi.xyz {
+	encode zstd gzip
+
+	# Der Antwortstrom darf nicht gepuffert werden: Die Schrittanzeige lebt
+	# davon, dass jede Zeile sofort ankommt.
+	reverse_proxy 127.0.0.1:3100 {
+		flush_interval -1
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+
+	log {
+		output file /var/log/caddy/evidarium.log {
+			roll_size 10MiB
+			roll_keep 5
+		}
+	}
+}

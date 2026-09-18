@@ -402,3 +402,50 @@ dem Veröffentlichen — nicht beim Programmieren. Seither steht sie wirklich,
 mit vier Tests: Zeile, Abschnitte und Datei verschwinden, die Suche findet das
 Dokument nicht mehr, fremde Dokumente bleiben unberührt, ein zweiter Versuch
 meldet «nicht gefunden».
+
+## E29 — Ein Abbild, zwei Prozesse, zwei Laufzeiten
+
+_18.09.2026._ Weboberfläche und Worker laufen aus **demselben** Abbild, mit
+verschiedenem Startbefehl. Node führt Next aus, Bun den Worker.
+
+Zwei Abbilder könnten auseinanderlaufen — und dann stimmen Abschnitts-IDs und
+Vektoren nicht mehr zu dem, was die Oberfläche anzeigt. Node für Next, weil
+Bun als Laufzeit dort mehrfache Rebuilds auslöst; Bun für den Worker, weil er
+damit ohne Übersetzungsschritt direkt aus TypeScript startet.
+
+Migrationen laufen über `scripts/migrieren.ts` mit dem Migrator aus
+`drizzle-orm`, nicht über `drizzle-kit`: Ein Entwicklungspaket hat im
+Produktionsabbild nichts zu suchen. Erzeugt werden die Dateien weiterhin auf
+dem Entwicklungsrechner.
+
+**Vier Fehler, die erst der Produktionslauf gezeigt hat** — alle vier auf dem
+Entwicklungsrechner unsichtbar:
+
+1. **Eine leere Umgebungsvariable ist nicht «nicht gesetzt».**
+   `ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}` setzt eine leere Zeichenkette;
+   `min(1)` scheitert daran, und die Anwendung startete im Demo-Modus gar
+   nicht erst. Lokal fiel es nie auf, weil dort ein Schlüssel gesetzt ist.
+   Leere Werte gelten jetzt als fehlend.
+2. **Die Warteschlange legt ihr Schema selbst an** — und die Anwendungsrolle
+   darf das nicht. «permission denied for database evidarium», der Worker in
+   einer Neustartschleife. Der Eigentümer richtet das Schema jetzt beim
+   Migrieren ein und gibt der Anwendungsrolle darauf Rechte, einschliesslich
+   `CREATE` **nur in `pgboss`** — pg-boss legt je Warteschlange eine Partition
+   an. In `public` darf sie weiterhin nichts anlegen; nachgemessen.
+3. **`127.0.0.1` ist im Container nicht der Nachbarcontainer.** Der interne
+   Endpunkt des Workers war für die Weboberfläche unerreichbar
+   (ECONNREFUSED). Die Adresse ist jetzt über `WORKER_INTERN_HOST`
+   einstellbar, Vorgabe bleibt `127.0.0.1`; im Compose-Netz `0.0.0.0` — ohne
+   veröffentlichten Port ist der Endpunkt nur aus demselben Netz erreichbar.
+4. **`docker compose --env-file` überschreibt nichts, was schon in der
+   Umgebung steht.** Beim Test hatte ich `.env` in derselben Zeile eingelesen;
+   der Container lief still gegen die Entwicklungsdatenbank. `deploy.sh`
+   entfernt die betroffenen Variablen darum ausdrücklich.
+
+Das Init-Skript der Datenbank schrieb ausserdem das Passwort der
+Anwendungsrolle fest — lokal harmlos, in Produktion ein Passwort im
+öffentlichen Repository. Es kommt jetzt aus der Umgebung, ohne Vorgabewert.
+Dabei noch eine Falle: **psql ersetzt seine Variablen nicht innerhalb von
+`$$`-Blöcken.** Die erste Fassung lief auf «syntax error at or near ":"», das
+Init brach ab, und die Erweiterung `vector` aus der nächsten Datei wurde nie
+angelegt — sichtbar wurde das erst drei Schritte später beim Migrieren.

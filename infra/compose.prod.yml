@@ -1,0 +1,84 @@
+# Produktionsbetrieb auf vps1.
+#
+# Alle veröffentlichten Ports hängen an 127.0.0.1: Docker schreibt eigene
+# iptables-Regeln und umgeht ufw. Erreichbar von aussen ist allein Caddy.
+name: evidarium
+
+services:
+  db:
+    image: pgvector/pgvector:0.8.6-pg18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: evidarium_owner
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD fehlt}
+      POSTGRES_DB: evidarium
+      APP_ROLE_PASSWORD: ${APP_ROLE_PASSWORD:?APP_ROLE_PASSWORD fehlt}
+    volumes:
+      - db-data:/var/lib/postgresql
+      - ./db-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U evidarium_owner -d evidarium']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  web:
+    image: evidarium:${EVIDARIUM_VERSION:-lokal}
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL fehlt}
+      SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET fehlt}
+      APP_ORIGIN: ${APP_ORIGIN:?APP_ORIGIN fehlt}
+      STORAGE_PATH: /app/storage
+      WORKER_INTERN_URL: http://worker:3101
+      TRUST_PROXY: 'true'
+      AI_MODE: ${AI_MODE:-demo}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      AI_CHAT_MODEL: ${AI_CHAT_MODEL:-claude-haiku-4-5}
+      BUDGET_MONAT_USD: ${BUDGET_MONAT_USD:-10}
+      BUDGET_TAG_USD: ${BUDGET_TAG_USD:-2}
+      FRAGEN_JE_SITZUNG: ${FRAGEN_JE_SITZUNG:-10}
+      DEMO_AKTIV: ${DEMO_AKTIV:-false}
+      DEMO_KONTO: ${DEMO_KONTO:-demo@nordstern.test}
+      DEMO_FRAGEN_JE_HERKUNFT_TAG: ${DEMO_FRAGEN_JE_HERKUNFT_TAG:-30}
+    volumes:
+      - storage:/app/storage
+    ports:
+      - '127.0.0.1:3100:3100'
+
+  worker:
+    image: evidarium:${EVIDARIUM_VERSION:-lokal}
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    command: ['bun', 'src/worker/index.ts']
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL fehlt}
+      SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET fehlt}
+      APP_ORIGIN: ${APP_ORIGIN:?APP_ORIGIN fehlt}
+      STORAGE_PATH: /app/storage
+      # Der interne Endpunkt. Web und Worker haben getrennte Netz-Namensräume;
+      # mit der Vorgabe 127.0.0.1 erreichte die Weboberfläche ihn nicht
+      # (ECONNREFUSED, gefunden am 18.09.2026 im ersten Produktionslauf).
+      #
+      # 0.0.0.0 heisst hier **nicht** «öffentlich»: Der Port wird nirgends
+      # veröffentlicht, das Compose-Netz ist eigen, und Docker macht nur
+      # veröffentlichte Ports nach aussen sichtbar.
+      WORKER_INTERN_HOST: '0.0.0.0'
+      WORKER_INTERN_PORT: '3101'
+      AI_MODE: ${AI_MODE:-demo}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    volumes:
+      - storage:/app/storage
+      - modelle:/app/.modelle
+    # Der PDF-Parser kann bei grossen Dateien gegen 1 GB laufen; das Modell
+    # belegt rund 1,5 GB. Ohne Grenze nimmt ein Ausreisser den ganzen Server
+    # mit.
+    mem_limit: 3g
+
+volumes:
+  db-data:
+  storage:
+  modelle:

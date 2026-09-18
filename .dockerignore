@@ -1,0 +1,16 @@
+# Was im Abbild nichts zu suchen hat. Ohne diese Datei wandert der ganze
+# Arbeitsordner in den Build-Kontext — samt .env und storage.
+.git
+.github
+.next
+node_modules
+storage
+storage-*
+.modelle
+.env
+.env.*
+!.env.example
+e2e
+playwright-report
+test-results
+*.log

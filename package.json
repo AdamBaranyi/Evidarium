@@ -23,6 +23,7 @@
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "db:migrate:prod": "bun scripts/migrieren.ts",
     "konto:anlegen": "bun --env-file=.env scripts/konto-anlegen.ts",
     "worker": "bun --env-file=.env src/worker/index.ts",
     "dev:all": "bun run worker & bun run dev"
