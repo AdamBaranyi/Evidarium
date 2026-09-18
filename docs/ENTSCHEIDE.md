@@ -494,3 +494,37 @@ eine Einblendung darauf wäre Zappeln.
 
 Nicht gebaut: kein wortweises Tickern, kein Scroll-Effekt, kein
 Hintergrundbild, keine Hover-Bewegung auf Karten.
+
+## E31 — Die Startseite führt das Produkt vor
+
+_18.09.2026._ Rechts auf der Startseite läuft eine Frage wirklich durch:
+einbetten, suchen, antworten, Belege prüfen — bis die Antwort mit ihrem Blatt
+dasteht. Das Blatt liegt dabei **überlappend** auf dem Fenster, weil das das
+Verhältnis ist, um das es geht: Die Antwort steht im Fenster, der Beleg liegt
+darauf.
+
+Ein Standbild hätte dasselbe gezeigt und das Wesentliche verschwiegen: dass
+zwischen Frage und Antwort Arbeit liegt, und wie viel. Die angezeigten Zeiten
+sind die gemessenen aus dem Betrieb — der Modellaufruf dauert Sekunden, alles
+andere ist sofort da. Wer das sieht, weiss, wofür er wartet.
+
+**Warum hier Bewegung ohne Handlung erlaubt ist**, obwohl sonst nichts von
+allein läuft: Es ist erklärende Bewegung auf einer Startseite, der einzige
+Ort, an dem der `animate`-Skill sie vorsieht. Dazu drei Bedingungen, alle
+erfüllt: Sie läuft nicht, wenn sie niemand sieht (IntersectionObserver); sie
+läuft nicht bei `prefers-reduced-motion`, dann steht sofort das fertige Bild
+da; und sie behauptet nichts, was nicht im Korpus steht.
+
+Das fertige Bild steht dreimal so lange wie der Durchlauf. Es ist das, was
+jemand sieht, der die Seite öffnet — und das, was auf einem Bildschirmfoto
+landet. Am Ende blendet der Durchlauf aus, statt hart zurückzuspringen: Ohne
+das Ausblenden stand das Fenster einen Moment leer und sah kaputt aus.
+
+**Anlass**, Adam am 18.09.2026: «die Startseite sieht von 1998 aus». Zutreffend
+— flach, statisch, kleine Schrift, keine Tiefe. Recherchiert statt geraten:
+Linear trägt die Seite mit dem Produktfenster selbst und legt ein zweites
+Panel überlappend darauf; Elicit macht das Gegenteil, zentriert mit
+Deko-Textur und schwebender Suchleiste, und landet damit im Cluster, den
+`frontend-design` beschreibt. Übernommen wurde das Prinzip, nicht die
+Ausführung: Fenster, Überlagerung, Licht als Tiefe statt Farbverlauf als
+Schmuck.

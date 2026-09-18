@@ -1,0 +1,175 @@
+/*
+ * Die Vorführung auf der Startseite.
+ *
+ * Aufbau: ein Fenster mit eigener Kante, und darüber liegt — überlappend —
+ * das Blatt. Die Überlagerung ist nicht Zierde: Sie zeigt das Verhältnis, um
+ * das es geht. Die Antwort steht im Fenster, der Beleg liegt darauf.
+ *
+ * Das Licht hinter dem Fenster ist eine Lichtquelle, kein Farbverlauf als
+ * Dekor: Es hebt den Körper vom Grund ab, damit er im Raum steht.
+ */
+
+.vorfuehrung {
+  position: relative;
+  isolation: isolate;
+}
+
+.vorfuehrung::before {
+  content: '';
+  position: absolute;
+  inset: -12% -8% -18% -8%;
+  z-index: -1;
+  background: radial-gradient(60% 55% at 45% 30%, rgb(255 252 244 / 0.09), transparent 70%);
+  pointer-events: none;
+}
+
+/*
+ * Am Ende des Durchlaufs verblasst alles gemeinsam, dann beginnt er von
+ * vorn. Nur Deckkraft, kein Weg: Es ist kein Auftritt, sondern ein Abgang.
+ */
+.vorfuehrung .vorfuehrung-inhalt,
+.vorfuehrung .vorfuehrung-blatt {
+  transition-property: opacity, transform;
+}
+
+.vorfuehrung.geht .vorfuehrung-inhalt,
+.vorfuehrung.geht .vorfuehrung-blatt {
+  opacity: 0;
+  transition: opacity var(--dauer-mittel) var(--ease-out);
+}
+
+.vorfuehrung-fenster {
+  background: var(--flaeche-tief);
+  border: 1px solid var(--kante);
+  border-radius: 10px;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.04) inset,
+    0 24px 60px -30px rgb(0 0 0 / 0.75);
+  overflow: hidden;
+}
+
+.vorfuehrung-leiste {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.1rem;
+  border-bottom: 1px solid var(--kante);
+  background: var(--flaeche);
+}
+
+.vorfuehrung-inhalt {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  /*
+   * Viel Luft unten: Dort liegt das Blatt auf. Ohne sie verdeckte es genau
+   * den Satz, den es belegen soll — gesehen am 18.09.2026.
+   */
+  padding: 1.5rem 1.1rem 2rem;
+  min-height: 17rem;
+}
+
+/*
+ * Jeder Teil tritt gleich ein: 200 ms, starke Ease-out-Kurve, Deckkraft und
+ * ein kurzer Weg von unten. Übergänge, keine Keyframes — die Schleife setzt
+ * die Zustände zurück, und ein Übergang findet von dort aus zurück, statt
+ * neu zu starten.
+ */
+.vorfuehrung-frage,
+.vorfuehrung-aussage,
+.vorfuehrung-schritte > li,
+.vorfuehrung-blatt {
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity var(--dauer-mittel) var(--ease-out),
+    transform var(--dauer-mittel) var(--ease-out);
+}
+
+.vorfuehrung-frage.ist-da,
+.vorfuehrung-aussage.ist-da,
+.vorfuehrung-schritte > li.ist-da,
+.vorfuehrung-blatt.ist-da {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.vorfuehrung-frage {
+  font-size: var(--text-title);
+  line-height: var(--line-title);
+  max-width: 22ch;
+}
+
+.vorfuehrung-schritte {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  border-left: 1px solid var(--kante-stark);
+  padding: 0.25rem 0 0.25rem 1rem;
+  max-width: 26rem;
+}
+
+.vorfuehrung-schritte > li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.vorfuehrung-aussage {
+  font-size: var(--text-lead);
+  /* Schmal genug, dass das aufliegende Blatt den Satz nicht schneidet. */
+  max-width: 24ch;
+}
+
+/*
+ * Das Blatt liegt auf dem Fenster und ragt rechts darüber hinaus. Erst ab
+ * Tablettbreite: Darunter fehlt der Platz, und ein überlappendes Blatt
+ * verdeckte den Ablauf, den es belegen soll.
+ */
+.vorfuehrung-blatt {
+  margin-top: 1rem;
+  padding: 1.1rem 1.25rem;
+}
+
+@media (min-width: 48rem) {
+  .vorfuehrung-blatt {
+    position: absolute;
+    right: -1.5rem;
+    bottom: -3.5rem;
+    width: 22rem;
+    margin-top: 0;
+    box-shadow:
+      0 2px 0 rgb(0 0 0 / 0.2),
+      0 26px 50px -24px rgb(0 0 0 / 0.75);
+  }
+}
+
+/* Die Markierung setzt sich als Letztes — der Beleg wird gefunden. */
+.vorfuehrung-blatt mark {
+  background: transparent;
+  color: inherit;
+  transition:
+    background-color var(--dauer-mittel) var(--ease-out),
+    color var(--dauer-mittel) var(--ease-out);
+}
+
+.vorfuehrung-blatt mark.ist-da {
+  background: var(--blatt-markierung);
+  color: var(--blatt-tinte);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /*
+   * Kein Weg, keine Schleife: Die Vorführung steht dann als fertiges Bild da.
+   * Die Komponente liefert in diesem Fall ohnehin den Endzustand.
+   */
+  .vorfuehrung-frage,
+  .vorfuehrung-aussage,
+  .vorfuehrung-schritte > li,
+  .vorfuehrung-blatt,
+  .vorfuehrung-blatt mark {
+    transition: none;
+    transform: none;
+  }
+}
