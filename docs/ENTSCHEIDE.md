@@ -634,3 +634,21 @@ Ein Zeitgeber im Prozess stirbt mit ihm, und niemand merkt es; ein Plan in der
 Datenbank überlebt einen Neustart und holt Versäumtes nach. Der Lauf
 protokolliert auch die Null — wer im Log nichts sieht, weiss sonst nicht, ob
 nichts fällig war oder nichts lief.
+
+## E35 — Der Punkt in der Seitenspalte
+
+_18.09.2026._ Der Chat hat dieselbe Fensterform wie die Vorführung auf der
+Startseite: Seitenspalte links, Arbeit rechts, eine Leiste darüber. Wer vom
+Schaufenster in die Anwendung geht, soll keinen Bruch merken.
+
+Neu in der Seitenspalte: **ein Punkt je Dokument, der sich nach einer Antwort
+in der Farbe des Urteils färbt, wenn das Dokument sie getragen hat.** Der
+Dateiname steht dann in voller Tinte, die übrigen treten zurück.
+
+Das ist kein Schmuck, sondern die Antwort auf eine Frage, die man sonst durch
+alle Belege hindurch nachzählen müsste: **Worauf steht diese Antwort?** Bei
+einem Widerspruch leuchten zwei Punkte, bei «keine Grundlage» keiner — und
+das ist selbst eine Auskunft.
+
+Farbe bleibt dabei Zugabe: Neben jedem Punkt steht der Dateiname, und das
+Urteil steht in der Antwort als Wort.

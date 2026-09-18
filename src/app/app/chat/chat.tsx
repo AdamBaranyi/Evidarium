@@ -6,7 +6,14 @@ import { AntwortKarte } from './antwort-karte';
 import { QuellenPanel, type PanelInhalt } from './quellen-panel';
 import { DokumentWahl } from './dokument-wahl';
 import { Schrittanzeige } from './schrittanzeige';
-import type { Dokument, Eintrag, Schritt, StromZeile } from './typen';
+import {
+  belegteDokumente,
+  KATEGORIEWERT,
+  type Dokument,
+  type Eintrag,
+  type Schritt,
+  type StromZeile,
+} from './typen';
 
 /*
  * Die Oberfläche hält bewusst wenig Zustand: Fragen und Antworten stehen
@@ -115,82 +122,100 @@ export function Chat({
     );
   }
 
+  /*
+   * Worauf die letzte Antwort steht. Die Seitenspalte zeigt es als Punkt in
+   * der Farbe des Urteils — sonst müsste man durch alle Belege hindurch
+   * nachzählen, welche Dokumente überhaupt beigetragen haben.
+   */
+  const letzte = [...eintraege].reverse().find((e) => e.art === 'antwort');
+  const belegt = letzte ? belegteDokumente(letzte.antwort) : undefined;
+  const farbe = letzte ? KATEGORIEWERT[letzte.antwort.kategorie] : undefined;
+
   return (
-    /*
-     * Zwei Spuren, sobald Platz ist: die Unterhaltung trägt die Seite, der
-     * Zusammenhang steht daneben. Untereinander schöbe die Dokumentliste die
-     * Frage nach unten — und die Frage ist, wofür man hier ist.
-     */
-    <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_17rem]">
-      <div className="flex min-w-0 flex-col gap-8 lg:order-1">
-        <ol className="flex flex-col gap-10">
-          {eintraege.map((eintrag) => (
-            <li key={eintrag.id}>
-              {eintrag.art === 'frage' && (
-                /* Die Frage steht als Frage da, in der Schrift der Oberfläche
-                 und ohne Sprechblase — es ist ein Arbeitsplatz, kein Chat. */
-                <p className="max-w-[var(--mass)] text-xl leading-tight">{eintrag.text}</p>
-              )}
-              {eintrag.art === 'antwort' && (
-                <AntwortKarte antwort={eintrag.antwort} oeffnen={setPanel} />
-              )}
-              {eintrag.art === 'hinweis' && (
-                <p
-                  role={eintrag.ton === 'fehler' ? 'alert' : undefined}
-                  className="max-w-[var(--mass)] panel p-4"
-                >
-                  {eintrag.nachricht}
-                </p>
-              )}
-            </li>
-          ))}
-        </ol>
+    <div className="flex flex-col gap-4">
+      {/*
+       * Ein Fenster, wie auf der Startseite: Seitenspalte links, Arbeit
+       * rechts. Dasselbe Material, damit der Übergang vom Schaufenster in
+       * die Anwendung keiner ist.
+       */}
+      <div className="panel overflow-hidden">
+        <div className="panel-leiste">
+          <span className="font-blatt text-tinte">Evidarium</span>
+          <span>
+            {letzte
+              ? `${letzte.antwort.stellen.length === 1 ? '1 Quelle' : `${letzte.antwort.stellen.length} Quellen`} geprüft`
+              : `${dokumente.length === 1 ? '1 Dokument' : `${dokumente.length} Dokumente`} bereit`}
+          </span>
+        </div>
 
-        <Schrittanzeige schritte={schritte} laeuft={laeuft} />
-
-        <form action={fragen} className="flex max-w-[var(--mass-blatt)] flex-col gap-3 panel p-4">
-          <label className="flex min-w-0 flex-col gap-2">
-            <span>{auswaehlbar ? 'Frage an die ausgewählten Dokumente' : 'Deine Frage'}</span>
-            <textarea
-              ref={feld}
-              name="frage"
-              rows={3}
-              required
-              maxLength={2000}
-              /*
-               * `w-full`, sonst bestimmt die Voreinstellung `cols` die Breite:
-               * Das Feld schrumpft dann nicht unter rund 350 px und schiebt
-               * bei 320 px die ganze Seite in die Breite.
-               */
-              className="w-full border border-kante bg-flaeche-tief p-3 text-base"
+        <div className="grid lg:grid-cols-[18rem_minmax(0,1fr)]">
+          <aside className="flex min-w-0 flex-col gap-4 border-b border-kante bg-flaeche p-4 lg:border-r lg:border-b-0">
+            <DokumentWahl
+              dokumente={dokumente}
+              gewaehlt={gewaehlt}
+              setzen={setGewaehlt}
+              auswaehlbar={auswaehlbar}
+              belegt={belegt}
+              farbe={farbe}
             />
-          </label>
+            {seitenhinweis}
+          </aside>
 
-          <button
-            type="submit"
-            disabled={laeuft || (auswaehlbar && gewaehlt.length === 0)}
-            className="min-h-11 self-start bg-aktion-grund px-5 py-2 text-aktion-tinte transition-opacity duration-[var(--dauer-kurz)] disabled:opacity-55"
-          >
-            {laeuft ? 'Wird beantwortet …' : 'Frage stellen'}
-          </button>
-        </form>
-      </div>
-
-      <aside className="flex min-w-0 flex-col gap-4 lg:order-2">
-        {auswaehlbar ? (
-          <DokumentWahl dokumente={dokumente} gewaehlt={gewaehlt} setzen={setGewaehlt} />
-        ) : (
-          <section className="panel p-4">
-            <h2 className="text-tinte-leise">Durchsucht wird in</h2>
-            <ul className="mt-1 flex flex-col gap-1">
-              {dokumente.map((dokument) => (
-                <li key={dokument.id}>{dokument.filename}</li>
+          <div className="flex min-w-0 flex-col gap-8 p-5">
+            <ol className="flex flex-col gap-10">
+              {eintraege.map((eintrag) => (
+                <li key={eintrag.id}>
+                  {eintrag.art === 'frage' && (
+                    /* Die Frage steht als Frage da, ohne Sprechblase — es ist
+                       ein Arbeitsplatz, kein Chat. */
+                    <p className="max-w-[var(--mass)] text-xl leading-tight">{eintrag.text}</p>
+                  )}
+                  {eintrag.art === 'antwort' && (
+                    <AntwortKarte antwort={eintrag.antwort} oeffnen={setPanel} />
+                  )}
+                  {eintrag.art === 'hinweis' && (
+                    <p
+                      role={eintrag.ton === 'fehler' ? 'alert' : undefined}
+                      className="max-w-[var(--mass)] border border-kante bg-flaeche-tief p-4"
+                    >
+                      {eintrag.nachricht}
+                    </p>
+                  )}
+                </li>
               ))}
-            </ul>
-          </section>
-        )}
-        {seitenhinweis}
-      </aside>
+            </ol>
+
+            <Schrittanzeige schritte={schritte} laeuft={laeuft} />
+
+            <form action={fragen} className="flex max-w-[var(--mass-blatt)] flex-col gap-3">
+              <label className="flex min-w-0 flex-col gap-2">
+                <span>{auswaehlbar ? 'Frage an die ausgewählten Dokumente' : 'Deine Frage'}</span>
+                <textarea
+                  ref={feld}
+                  name="frage"
+                  rows={3}
+                  required
+                  maxLength={2000}
+                  /*
+                   * `w-full`, sonst bestimmt die Voreinstellung `cols` die
+                   * Breite: Das Feld schrumpft dann nicht unter rund 350 px
+                   * und schiebt bei 320 px die ganze Seite in die Breite.
+                   */
+                  className="w-full border border-kante bg-flaeche-tief p-3 text-base"
+                />
+              </label>
+
+              <button
+                type="submit"
+                disabled={laeuft || (auswaehlbar && gewaehlt.length === 0)}
+                className="min-h-11 self-start bg-aktion-grund px-5 py-2 text-aktion-tinte transition-opacity duration-[var(--dauer-kurz)] disabled:opacity-55"
+              >
+                {laeuft ? 'Wird beantwortet …' : 'Frage stellen'}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
 
       <QuellenPanel inhalt={panel} schliessen={() => setPanel(null)} />
     </div>

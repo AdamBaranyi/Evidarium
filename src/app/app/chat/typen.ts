@@ -67,3 +67,16 @@ export const KATEGORIEFARBE: Record<Antwort['kategorie'], string> = {
   keine_grundlage: 'bg-urteil-keine',
   widerspruch: 'bg-urteil-widerspruch',
 };
+
+/** Die CSS-Farbe eines Urteils, für Punkte und Balken ausserhalb von Tailwind. */
+export const KATEGORIEWERT: Record<Antwort['kategorie'], string> = {
+  belegt: 'var(--urteil-belegt)',
+  teilweise_belegt: 'var(--urteil-teilweise)',
+  keine_grundlage: 'var(--urteil-keine)',
+  widerspruch: 'var(--urteil-widerspruch)',
+};
+
+/** Die Dokumente, auf die sich eine Antwort stützt. */
+export function belegteDokumente(antwort: Antwort): Set<string> {
+  return new Set(antwort.stellen.map((stelle) => stelle.documentId));
+}
