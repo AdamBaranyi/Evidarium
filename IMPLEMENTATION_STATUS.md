@@ -137,6 +137,32 @@ Befehle: `bun scripts/korpus-erzeugen.ts` erzeugt den Korpus,
 `… scripts/evaluieren.ts E09 E10`.
 `bun --env-file=.env scripts/demo-korpus-laden.ts` befüllt das Demo-Konto.
 
+## Abnahmeliste — womit jeder Punkt belegt ist
+
+Nicht «erledigt», sondern **wodurch nachprüfbar**. Punkte, die nur einmal von
+Hand vorgeführt wurden, stehen auch so da: Das galt an einem Tag, auf einem
+Rechner.
+
+| Punkt aus Abschnitt 14 des Masterprompts                      | Belegt durch                                                          |
+| ------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Ganzer Weg bis zum anklickbaren Beleg, im Live-Modus          | einmal vorgeführt 17.09., Protokoll `docs/EVALUATION.md`              |
+| Zweiter Benutzer sieht nichts vom ersten, auch per API        | `tests/suche.test.ts`, `tests/abnahme.test.ts`, `e2e/zugriff.spec.ts` |
+| Wiederholte Jobs erzeugen keine doppelten Abschnitte          | `tests/abnahme.test.ts`                                               |
+| Löschen entfernt auch Ableitungen                             | `tests/loeschen.test.ts`                                              |
+| Zitate verweisen auf echte Seiten, keine erfundenen Metadaten | `tests/belegpruefung.test.ts`, Evaluation                             |
+| Prompt Injection löst nichts aus                              | Evaluation, zwei Versuche (markiert und unmarkiert)                   |
+| Kein Providerfehler aktiviert den Demo-Adapter                | `tests/abnahme.test.ts`, Code ohne Rückfallpfad                       |
+| Paralleles Senden überzieht das Budget nicht                  | `tests/budget.test.ts`                                                |
+| Nicht angemeldet kein Upload, auch per API                    | `e2e/zugriff.spec.ts`                                                 |
+| Sitzung, Tag und Monat greifen unabhängig                     | `tests/budget.test.ts`, `tests/abnahme.test.ts`                       |
+| Schlüssel taucht nirgends auf                                 | `tests/abnahme.test.ts`, gitleaks im täglichen Lauf                   |
+| Hauptablauf bei 320, 768, 1440                                | 39 Playwright-Prüfungen, auch in der CI                               |
+| Keine Datei über 400 Zeilen, Format, Lint, Typen              | `bun run verify`, CI                                                  |
+| Täglicher Sicherheitslauf grün oder begründete Ausnahme       | `.github/workflows/sicherheit-taeglich.yml`                           |
+
+**Offen:** Messung von Antwort- und Retrievalzeit auf vps1. Die Zahlen in
+`docs/BETRIEB.md` stammen vom Entwicklungsrechner und sagen darüber nichts.
+
 ## Nach Tag 5 — Visuelle Identität
 
 Entscheid vom 17.09.2026: **Das Design ist Rohbau und bleibt es bis nach
