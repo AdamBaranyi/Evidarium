@@ -35,7 +35,7 @@ export function UploadForm() {
   }
 
   return (
-    <form action={senden} className="flex flex-col gap-3 border border-kante bg-flaeche-hoch p-4">
+    <form action={senden} className="flex flex-col gap-3 panel p-4">
       <label className="flex flex-col gap-2">
         <span>Dokument hinzufügen</span>
         <input

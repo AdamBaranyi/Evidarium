@@ -93,6 +93,37 @@ body {
 }
 
 /*
+ * **Das Panel** — die Fläche, auf der die Anwendung arbeitet.
+ *
+ * Dieselbe Kante, dasselbe Licht und derselbe Schatten wie das Fenster der
+ * Vorführung auf der Startseite. Wer von dort in die Anwendung kommt, sieht
+ * dasselbe Material weiter; der Unterschied zwischen Schaufenster und
+ * Programm soll keiner sein.
+ */
+.panel {
+  background: var(--flaeche-hoch);
+  border: 1px solid var(--kante);
+  border-radius: 10px;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.05) inset,
+    0 18px 44px -28px rgb(0 0 0 / 0.7);
+}
+
+/* Eine Kopfzeile im Panel, wie die Fensterleiste. */
+.panel-leiste {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.1rem;
+  border-bottom: 1px solid var(--kante);
+  background: var(--flaeche);
+  border-radius: 10px 10px 0 0;
+  color: var(--tinte-leise);
+}
+
+/*
  * **Das Blatt.** Der einzige Ort im Entwurf mit Papierfarbe, Rundung und
  * Schatten. Alles andere ist flach und kantig — darum fällt das Blatt auf,
  * ohne dass es leuchten muss.

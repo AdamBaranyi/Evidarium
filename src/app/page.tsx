@@ -29,9 +29,9 @@ export default async function StartPage() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center gap-14 px-6 py-14 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-center lg:gap-16">
-        <div className="flex flex-col gap-7">
-          <h1 className="max-w-[15ch] text-2xl leading-[var(--line-title)]">
+      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-12 px-6 py-14">
+        <div className="flex max-w-[52rem] flex-col gap-7">
+          <h1 className="max-w-[20ch] text-2xl leading-[var(--line-title)]">
             Antworten aus deinen Dokumenten, mit Quellen zum Nachlesen.
           </h1>
 
@@ -58,7 +58,7 @@ export default async function StartPage() {
 
         <section aria-label="Evidarium bei der Arbeit" className="flex flex-col gap-4">
           <Vorfuehrung />
-          <p className="pt-2 text-tinte-leise lg:pt-10">
+          <p className="pt-2 text-tinte-leise md:pt-12">
             Beispiel aus dem Korpus der erfundenen Firma Nordstern Digital, gegen den auch die
             Evaluation läuft.
           </p>

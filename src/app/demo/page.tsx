@@ -52,7 +52,7 @@ export default async function DemoPage() {
           endpunkt="/api/demo/chat"
           auswaehlbar={false}
           seitenhinweis={
-            <p className="border border-kante p-4 text-tinte-leise">
+            <p className="panel p-4 text-tinte-leise">
               Fragen ja, Hochladen nein: Eigene Dokumente kann laden, wer angemeldet ist. Der
               Betrieb kostet Geld, darum gilt ein Kontingent von {env.FRAGEN_JE_SITZUNG} Fragen je
               Besuch.

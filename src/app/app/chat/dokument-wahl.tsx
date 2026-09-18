@@ -26,7 +26,7 @@ export function DokumentWahl({
   }
 
   return (
-    <fieldset className="flex flex-col gap-1 border border-kante bg-flaeche-hoch p-4">
+    <fieldset className="flex flex-col gap-1 panel p-4">
       <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
         <legend className="text-tinte-leise">Durchsucht wird in</legend>
         <button

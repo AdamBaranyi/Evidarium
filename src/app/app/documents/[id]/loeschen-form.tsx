@@ -30,7 +30,7 @@ export function LoeschenForm({ documentId, dateiname }: { documentId: string; da
   }
 
   return (
-    <form action={absenden} className="flex flex-col gap-3 border border-kante bg-flaeche-hoch p-4">
+    <form action={absenden} className="flex flex-col gap-3 panel p-4">
       <input type="hidden" name="documentId" value={documentId} />
 
       <p>

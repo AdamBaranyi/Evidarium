@@ -33,7 +33,7 @@ export default async function ChatPage() {
         dokumente={dokumente}
         seitenhinweis={
           env.AI_MODE === 'demo' ? (
-            <p className="border border-kante p-4 text-tinte-leise">
+            <p className="panel p-4 text-tinte-leise">
               Demo-Modus: Es wird kein Modell aufgerufen. Die Antworten stammen aus einem festen
               Adapter, durchlaufen aber dieselbe Belegprüfung.
             </p>

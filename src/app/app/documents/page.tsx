@@ -34,7 +34,7 @@ export default async function DokumentePage() {
           {dokumente.map((dokument) => {
             const fehler = fehlerText(dokument.errorCode);
             return (
-              <li key={dokument.id} className="border border-kante bg-flaeche-hoch p-4">
+              <li key={dokument.id} className="panel p-4">
                 <Link
                   href={`/app/documents/${dokument.id}`}
                   className="underline underline-offset-4"

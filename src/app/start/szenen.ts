@@ -20,6 +20,8 @@ export type Blatt = {
 
 export type Szene = {
   frage: string;
+  /** Welche Dokumente für diese Antwort zählten — für die Seitenleiste. */
+  benutzt: string[];
   /** Dauer des Modellaufrufs, wie gemessen. */
   modellDauer: string;
   urteil: string;
@@ -31,6 +33,7 @@ export type Szene = {
 export const SZENEN: Szene[] = [
   {
     frage: 'Wer hilft beim Onboarding?',
+    benutzt: ['Teamhandbuch.pdf'],
     modellDauer: '2.4 s',
     urteil: 'Belegt',
     farbe: 'var(--urteil-belegt)',
@@ -47,6 +50,7 @@ export const SZENEN: Szene[] = [
   },
   {
     frage: 'Wie lange werden Sicherungen aufbewahrt?',
+    benutzt: ['Backup_Richtlinie_A.pdf', 'Backup_Richtlinie_B.pdf'],
     modellDauer: '3.0 s',
     urteil: 'Widerspruch zwischen Quellen',
     farbe: 'var(--urteil-widerspruch)',
@@ -69,6 +73,16 @@ export const SZENEN: Szene[] = [
     ],
   },
 ];
+
+/** Der Korpus in der Seitenleiste des Fensters — dieselben sechs Dokumente. */
+export const KORPUS = [
+  'Teamhandbuch.pdf',
+  'Supportprozess.pdf',
+  'Backup_Richtlinie_A.pdf',
+  'Backup_Richtlinie_B.pdf',
+  'Projekt_Atlas.md',
+  'Besprechungsnotiz.txt',
+] as const;
 
 export const SCHRITTE = [
   'Frage wird eingebettet',

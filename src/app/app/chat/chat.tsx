@@ -105,7 +105,7 @@ export function Chat({
 
   if (dokumente.length === 0) {
     return (
-      <p className="max-w-[var(--mass)] border border-kante bg-flaeche-hoch p-4">
+      <p className="max-w-[var(--mass)] panel p-4">
         Hier ist noch nichts zu durchsuchen.{' '}
         <Link href="/app/documents" className="underline underline-offset-4">
           Lade zuerst ein Dokument hoch
@@ -137,7 +137,7 @@ export function Chat({
               {eintrag.art === 'hinweis' && (
                 <p
                   role={eintrag.ton === 'fehler' ? 'alert' : undefined}
-                  className="max-w-[var(--mass)] border border-kante bg-flaeche-hoch p-4"
+                  className="max-w-[var(--mass)] panel p-4"
                 >
                   {eintrag.nachricht}
                 </p>
@@ -148,10 +148,7 @@ export function Chat({
 
         <Schrittanzeige schritte={schritte} laeuft={laeuft} />
 
-        <form
-          action={fragen}
-          className="flex max-w-[var(--mass-blatt)] flex-col gap-3 border border-kante bg-flaeche-hoch p-4"
-        >
+        <form action={fragen} className="flex max-w-[var(--mass-blatt)] flex-col gap-3 panel p-4">
           <label className="flex flex-col gap-2">
             <span>{auswaehlbar ? 'Frage an die ausgewählten Dokumente' : 'Deine Frage'}</span>
             <textarea
@@ -178,7 +175,7 @@ export function Chat({
         {auswaehlbar ? (
           <DokumentWahl dokumente={dokumente} gewaehlt={gewaehlt} setzen={setGewaehlt} />
         ) : (
-          <section className="border border-kante bg-flaeche-hoch p-4">
+          <section className="panel p-4">
             <h2 className="text-tinte-leise">Durchsucht wird in</h2>
             <ul className="mt-1 flex flex-col gap-1">
               {dokumente.map((dokument) => (

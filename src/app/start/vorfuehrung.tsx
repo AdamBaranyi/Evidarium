@@ -2,29 +2,29 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useWenigerBewegung } from '@/lib/ui/bewegung';
-import { SCHRITTE, SZENEN, TAKT } from './szenen';
+import { KORPUS, SCHRITTE, SZENEN, TAKT } from './szenen';
 
 /*
- * Die Vorführung auf der Startseite: ein Fenster, in dem Fragen tatsächlich
- * durchlaufen — einbetten, suchen, antworten, Belege prüfen —, bis die
- * Antwort mit ihren Blättern dasteht.
+ * Die Vorführung auf der Startseite: **das Programmfenster selbst**, dicht
+ * und vollständig — Seitenleiste mit dem Korpus, Hauptspalte mit dem
+ * Durchlauf, und darüber die Blätter mit den Fundstellen.
+ *
+ * Eine frühere Fassung zeigte sechs Zeilen auf leerer Fläche und wirkte
+ * darum dünn. Was starke Produktseiten gemeinsam haben, ist nicht ein
+ * Effekt, sondern **Dichte**: eine echte Oberfläche mit ihren kleinen,
+ * wahren Einzelheiten.
  *
  * Zwei Fälle im Wechsel, und der zweite ist der Punkt: Widersprechen sich
  * zwei Dokumente, zeigt Evidarium beide und löst nichts auf.
  *
- * **Warum das hier laufen darf, obwohl sonst nichts von allein läuft:** Es ist
- * erklärende Bewegung auf einer Startseite, der einzige Ort, an dem der
- * `animate`-Skill sie vorsieht. Sie läuft nicht, wenn sie niemand sieht, und
- * nicht bei `prefers-reduced-motion` — dann steht sofort das fertige Bild da.
+ * Bewegung ohne Handlung ist hier erlaubt, weil es erklärende Bewegung auf
+ * einer Startseite ist. Sie läuft nicht, wenn sie niemand sieht, und nicht
+ * bei `prefers-reduced-motion` — dann steht sofort das fertige Bild da.
  */
 export function Vorfuehrung() {
   /*
-   * **Eine** Uhr, und die Szene wird daraus berechnet.
-   *
-   * Die erste Fassung schaltete die Szene im Updater von `setZeit` weiter —
-   * ein Zustandswechsel im Updater eines anderen Zustands. Updater müssen
-   * rein sein; der Wechsel kam nie an. Derselbe Fehler wie am 17.09.2026 bei
-   * den Schrittzeiten, nur an anderer Stelle.
+   * **Eine** Uhr, und die Szene wird daraus berechnet. Ein Zustandswechsel
+   * im Updater eines anderen Zustands wäre unrein und käme nie an.
    */
   const [uhr, setUhr] = useState(0);
   const [sichtbar, setSichtbar] = useState(false);
@@ -58,11 +58,20 @@ export function Vorfuehrung() {
 
   return (
     <div ref={bereich} className={`vorfuehrung ${geht ? 'geht' : ''}`}>
+      {/*
+       * Das Archiv lebt, aber nicht für sich: Jedes angedeutete Blatt steht
+       * für ein Dokument im Korpus, und die Blätter, die zur laufenden
+       * Antwort beitragen, treten hervor. Der Hintergrund zeigt damit
+       * dasselbe wie die Seitenleiste — nur als Raum statt als Liste.
+       */}
       <div aria-hidden className="archiv">
-        <span />
-        <span />
-        <span />
-        <span />
+        {KORPUS.map((datei, i) => (
+          <span
+            key={datei}
+            className={da(TAKT.urteil) && fall.benutzt.includes(datei) ? 'zaehlt' : ''}
+            style={{ animationDelay: `${i * -3.5}s` }}
+          />
+        ))}
       </div>
 
       <div className="vorfuehrung-fenster">
@@ -75,28 +84,49 @@ export function Vorfuehrung() {
           </span>
         </div>
 
-        <div className="vorfuehrung-inhalt">
-          <p className={`vorfuehrung-frage ${da(TAKT.frage) ? 'ist-da' : ''}`}>{fall.frage}</p>
+        <div className="vorfuehrung-rumpf">
+          {/* Die Seitenleiste zeigt den Korpus und hebt hervor, was zählte. */}
+          <aside aria-hidden className="vorfuehrung-spalte">
+            <p className="vorfuehrung-spalte-titel">Durchsucht wird in</p>
+            <ul>
+              {KORPUS.map((datei) => {
+                const zaehlt = da(TAKT.urteil) && fall.benutzt.includes(datei);
+                return (
+                  <li key={datei} className={zaehlt ? 'zaehlt' : ''}>
+                    <span
+                      className="vorfuehrung-punkt"
+                      style={zaehlt ? { background: fall.farbe } : undefined}
+                    />
+                    {datei}
+                  </li>
+                );
+              })}
+            </ul>
+          </aside>
 
-          <ol className="vorfuehrung-schritte">
-            {SCHRITTE.map((schritt, i) => {
-              const beginn = TAKT.schritt[i] ?? 0;
-              const fertig = TAKT.fertig[i] ?? 0;
-              const dauer = i === 2 ? fall.modellDauer : '0.0 s';
-              return (
-                <li key={schritt} className={da(beginn) ? 'ist-da' : ''}>
-                  <span className={da(fertig) ? 'text-tinte-leise' : ''}>{schritt}</span>
-                  <span className="text-tinte-leise">{da(fertig) ? dauer : '…'}</span>
-                </li>
-              );
-            })}
-          </ol>
+          <div className="vorfuehrung-inhalt">
+            <p className={`vorfuehrung-frage ${da(TAKT.frage) ? 'ist-da' : ''}`}>{fall.frage}</p>
 
-          <div className={`vorfuehrung-urteil ${da(TAKT.urteil) ? 'ist-da' : ''}`}>
-            <span aria-hidden className="vorfuehrung-balken" style={{ background: fall.farbe }} />
-            <div>
-              <p className="text-tinte-leise">{fall.urteil}</p>
-              <p className="vorfuehrung-aussage-text">{fall.aussage}</p>
+            <ol className="vorfuehrung-schritte">
+              {SCHRITTE.map((schritt, i) => {
+                const beginn = TAKT.schritt[i] ?? 0;
+                const fertig = TAKT.fertig[i] ?? 0;
+                const dauer = i === 2 ? fall.modellDauer : '0.0 s';
+                return (
+                  <li key={schritt} className={da(beginn) ? 'ist-da' : ''}>
+                    <span className={da(fertig) ? 'text-tinte-leise' : ''}>{schritt}</span>
+                    <span className="text-tinte-leise">{da(fertig) ? dauer : '…'}</span>
+                  </li>
+                );
+              })}
+            </ol>
+
+            <div className={`vorfuehrung-urteil ${da(TAKT.urteil) ? 'ist-da' : ''}`}>
+              <span aria-hidden className="vorfuehrung-balken" style={{ background: fall.farbe }} />
+              <div>
+                <p className="text-tinte-leise">{fall.urteil}</p>
+                <p className="vorfuehrung-aussage-text">{fall.aussage}</p>
+              </div>
             </div>
           </div>
         </div>

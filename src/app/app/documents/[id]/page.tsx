@@ -42,7 +42,7 @@ export default async function DokumentDetail({ params }: { params: Promise<{ id:
       </header>
 
       {fehler !== null && (
-        <p role="alert" className="border border-kante bg-flaeche-hoch p-4">
+        <p role="alert" className="panel p-4">
           {fehler}
         </p>
       )}

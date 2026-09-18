@@ -56,7 +56,7 @@
   .archiv {
     display: block;
     position: absolute;
-    inset: -22% -16% -26% -16%;
+    inset: -26% -18% -30% -18%;
     z-index: -1;
     pointer-events: none;
   }
@@ -67,42 +67,85 @@
     background: var(--blatt);
     border-radius: 3px;
     filter: blur(3px);
+    opacity: 0.05;
+    /*
+     * Ein sehr langsames Schweben, jedes Blatt zeitversetzt. 26 Sekunden und
+     * wenige Pixel: Man sieht es nicht arbeiten, man merkt nur, dass der
+     * Raum nicht tot ist.
+     */
+    animation: archiv-schweben 26s var(--ease-in-out) infinite alternate;
+    transition:
+      opacity var(--dauer-lang, 320ms) var(--ease-out),
+      transform var(--dauer-lang, 320ms) var(--ease-out);
+  }
+
+  /* Ein Blatt, das zur Antwort beiträgt, kommt nach vorn. */
+  .archiv span.zaehlt {
+    opacity: 0.16;
+    filter: blur(1.5px);
   }
 
   .archiv span:nth-child(1) {
-    width: 30%;
-    height: 62%;
-    top: 4%;
-    left: -2%;
-    opacity: 0.11;
+    width: 26%;
+    height: 58%;
+    top: 2%;
+    left: -3%;
     transform: rotate(-9deg);
   }
 
   .archiv span:nth-child(2) {
-    width: 26%;
-    height: 54%;
-    top: 22%;
-    right: 0%;
-    opacity: 0.08;
-    transform: rotate(7deg);
+    width: 22%;
+    height: 50%;
+    top: 26%;
+    left: 6%;
+    transform: rotate(5deg);
   }
 
   .archiv span:nth-child(3) {
-    width: 34%;
-    height: 46%;
-    bottom: 2%;
-    left: 16%;
-    opacity: 0.06;
-    transform: rotate(-3deg);
+    width: 24%;
+    height: 52%;
+    bottom: 0%;
+    left: -1%;
+    transform: rotate(-4deg);
   }
 
   .archiv span:nth-child(4) {
+    width: 24%;
+    height: 54%;
+    top: 4%;
+    right: -2%;
+    transform: rotate(8deg);
+  }
+
+  .archiv span:nth-child(5) {
     width: 20%;
+    height: 44%;
+    bottom: 4%;
+    right: 3%;
+    transform: rotate(-6deg);
+  }
+
+  .archiv span:nth-child(6) {
+    width: 18%;
     height: 40%;
-    bottom: 12%;
-    right: 18%;
-    opacity: 0.05;
-    transform: rotate(12deg);
+    bottom: 16%;
+    right: 20%;
+    transform: rotate(11deg);
+  }
+}
+
+@keyframes archiv-schweben {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 -14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archiv span {
+    animation: none;
   }
 }
 
@@ -111,8 +154,9 @@
   border: 1px solid var(--kante);
   border-radius: 10px;
   box-shadow:
-    0 1px 0 rgb(255 255 255 / 0.04) inset,
-    0 24px 60px -30px rgb(0 0 0 / 0.75);
+    0 1px 0 rgb(255 255 255 / 0.06) inset,
+    0 0 0 1px rgb(0 0 0 / 0.35),
+    0 30px 70px -32px rgb(0 0 0 / 0.85);
   overflow: hidden;
 }
 
@@ -126,6 +170,68 @@
   background: var(--flaeche);
 }
 
+/*
+ * Seitenleiste und Hauptspalte wie in der Anwendung selbst. Die Dichte ist
+ * der Punkt: Ein Fenster mit sechs Zeilen auf leerer Fläche wirkt dünn,
+ * eines mit seiner echten Gliederung wirkt wie ein Programm.
+ */
+.vorfuehrung-rumpf {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 40rem) {
+  .vorfuehrung-rumpf {
+    grid-template-columns: 13.5rem minmax(0, 1fr);
+  }
+}
+
+.vorfuehrung-spalte {
+  display: none;
+  border-right: 1px solid var(--kante);
+  background: var(--flaeche);
+  padding: 1.1rem 1rem;
+}
+
+@media (min-width: 40rem) {
+  .vorfuehrung-spalte {
+    display: block;
+  }
+}
+
+.vorfuehrung-spalte-titel {
+  color: var(--tinte-leise);
+  margin-bottom: 0.7rem;
+}
+
+.vorfuehrung-spalte ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.vorfuehrung-spalte li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--tinte-leise);
+  transition: color var(--dauer-mittel) var(--ease-out);
+}
+
+.vorfuehrung-spalte li.zaehlt {
+  color: var(--tinte);
+}
+
+/* Der Punkt färbt sich in der Farbe des Urteils, sobald das Dokument zählt. */
+.vorfuehrung-punkt {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--kante-stark);
+  transition: background-color var(--dauer-mittel) var(--ease-out);
+}
+
 .vorfuehrung-inhalt {
   display: flex;
   flex-direction: column;
@@ -134,8 +240,8 @@
    * Viel Luft unten: Dort liegt das Blatt auf. Ohne sie verdeckte es genau
    * den Satz, den es belegen soll — gesehen am 18.09.2026.
    */
-  padding: 1.5rem 1.1rem 2rem;
-  min-height: 17rem;
+  padding: 1.5rem 1.4rem 2rem;
+  min-height: 19rem;
 }
 
 /*

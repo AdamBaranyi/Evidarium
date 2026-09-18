@@ -45,7 +45,7 @@ export default async function VerbrauchPage() {
         kosten weniger.
       </p>
 
-      <section className="flex max-w-[var(--mass-blatt)] flex-col gap-5 border border-kante bg-flaeche-hoch p-5">
+      <section className="flex max-w-[var(--mass-blatt)] flex-col gap-5 panel p-5">
         <h2 className="text-lg leading-tight">Deckel</h2>
         <Balken
           name="Heute"

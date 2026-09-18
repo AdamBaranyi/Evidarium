@@ -566,3 +566,33 @@ Wechsel stand im Updater von `setZeit` — ein Zustandswechsel im Updater eines
 anderen Zustands, also unrein, und er kam nie an. Jetzt läuft **eine** Uhr,
 und die Szene wird daraus berechnet. Derselbe Fehlertyp wie bei den
 Schrittzeiten am 17.09.2026.
+
+## E33 — Dichte statt Effekt, und ein Archiv, das mitarbeitet
+
+_18.09.2026._ Zweite Revision der Startseite. Adams Befund: besser, aber
+«immer noch nicht diese moderne Richtung».
+
+Angesehen wurden Linear, Cursor und Vercel. Ihr gemeinsamer Zug ist kein
+Effekt, sondern **Dichte**: Alle drei tragen die Seite mit einem grossen,
+**vollständigen** Programmfenster — Seitenleiste, mehrere Spalten, viele
+kleine echte Einzelheiten — und legen ein zweites Panel überlappend darauf.
+Die Vorführung hier zeigte dagegen sechs Zeilen auf leerer Fläche; daher
+wirkte sie dünn, obwohl die Richtung stimmte.
+
+Geändert:
+
+- Das Fenster hat jetzt die **Gliederung der Anwendung**: Seitenleiste mit dem
+  Korpus, Hauptspalte mit dem Durchlauf, Blätter darüber. Die Punkte in der
+  Seitenleiste färben sich in der Farbe des Urteils, sobald ein Dokument zur
+  Antwort beiträgt.
+- Überschrift oben, Fenster breit darunter, unten angeschnitten — statt der
+  Zweiteilung nebeneinander.
+- **Das Archiv lebt.** Sechs angedeutete Blätter, eines je Dokument,
+  schweben sehr langsam (26 s, wenige Pixel, versetzt) und **treten hervor,
+  wenn ihr Dokument zur laufenden Antwort beiträgt**. Damit ist der
+  Hintergrund kein Muster, das überall ginge, sondern zeigt dasselbe wie die
+  Seitenleiste — nur als Raum statt als Liste. Bei `prefers-reduced-motion`
+  steht er still.
+- `.panel` als gemeinsames Material: dieselbe Kante, dasselbe Licht, derselbe
+  Schatten in der ganzen Anwendung. Wer von der Startseite hineingeht, sieht
+  dasselbe Material weiter.
