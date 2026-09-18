@@ -13,6 +13,20 @@ export type AnlegenErgebnis =
   { ok: true; documentId: string; versionId: string } | { ok: false; fehler: AnlegenFehler };
 
 /**
+ * Zusätze für Dateien aus der öffentlichen Demo.
+ *
+ * `besucherHash` trennt die Ablage eines Besuchs von der des Korpus, ohne
+ * dass ein zweites Konto nötig wäre; `ablaufAm` sagt, wann sie automatisch
+ * verschwindet. Bei angemeldeten Konten bleibt beides ungesetzt.
+ */
+export type AnlegenOptionen = {
+  besucherHash?: string;
+  ablaufAm?: Date;
+  maxBytes?: number;
+  maxDateien?: number;
+};
+
+/**
  * Nimmt eine hochgeladene Datei an und legt Dokument und erste Version an.
  *
  * Wartet **nicht** auf die Verarbeitung: Der Aufrufer reiht danach einen Job
@@ -22,19 +36,35 @@ export async function dokumentAnlegen(
   userId: string,
   dateiname: string,
   bytes: Uint8Array,
+  optionen: AnlegenOptionen = {},
 ): Promise<AnlegenErgebnis> {
-  if (bytes.byteLength > GRENZEN.maxBytes) return { ok: false, fehler: 'zu_gross' };
+  const besucherHash = optionen.besucherHash ?? '';
+  const maxBytes = optionen.maxBytes ?? GRENZEN.maxBytes;
+  const maxDateien = optionen.maxDateien ?? GRENZEN.maxDokumenteJeNutzer;
+
+  if (bytes.byteLength > maxBytes) return { ok: false, fehler: 'zu_gross' };
 
   // Typ am Inhalt, nicht am Namen und nicht am behaupteten MIME-Typ.
   const typ = erkenneTyp(bytes, dateiname);
   if (typ === null) return { ok: false, fehler: 'typ_nicht_unterstuetzt' };
 
+  /*
+   * Gezählt wird innerhalb desselben Bereichs: bei einem angemeldeten Konto
+   * dessen Dokumente, bei einem Besuch nur dessen eigene. Sonst sperrte der
+   * vorbereitete Korpus die Demo für alle.
+   */
   const [bestand] = await db
     .select({ anzahl: count() })
     .from(documents)
-    .where(and(eq(documents.userId, userId), isNull(documents.deletedAt)));
+    .where(
+      and(
+        eq(documents.userId, userId),
+        eq(documents.besucherHash, besucherHash),
+        isNull(documents.deletedAt),
+      ),
+    );
 
-  if ((bestand?.anzahl ?? 0) >= GRENZEN.maxDokumenteJeNutzer) {
+  if ((bestand?.anzahl ?? 0) >= maxDateien) {
     return { ok: false, fehler: 'zu_viele_dokumente' };
   }
 
@@ -45,7 +75,13 @@ export async function dokumentAnlegen(
   const [doppelt] = await db
     .select({ id: documents.id })
     .from(documents)
-    .where(and(eq(documents.userId, userId), eq(documents.contentHash, contentHash)))
+    .where(
+      and(
+        eq(documents.userId, userId),
+        eq(documents.contentHash, contentHash),
+        eq(documents.besucherHash, besucherHash),
+      ),
+    )
     .limit(1);
 
   if (doppelt) return { ok: false, fehler: 'schon_vorhanden' };
@@ -63,6 +99,8 @@ export async function dokumentAnlegen(
       sizeBytes: bytes.byteLength,
       contentHash,
       storagePath,
+      besucherHash,
+      ablaufAm: optionen.ablaufAm ?? null,
     });
     const [version] = await tx
       .insert(documentVersions)

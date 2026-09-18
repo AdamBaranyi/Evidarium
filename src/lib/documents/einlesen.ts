@@ -2,6 +2,7 @@ import { eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { documentChunks, documentVersions, documents } from '@/lib/db/schema';
 import { erkenneTyp } from './dateityp';
+import { DEMO_GRENZEN } from '@/lib/demo/grenzen';
 import { ExtraktionsFehler, extrahieren } from './extrahieren';
 import { lesen } from './speicher';
 import { zerlegen } from './zerlegen';
@@ -61,6 +62,19 @@ export async function dokumentEinlesen(
     if (typ === null) return await scheitern(versionId, 'typ_nicht_unterstuetzt', true);
 
     const extraktion = await extrahieren(bytes, typ);
+
+    /*
+     * Für Dateien aus der öffentlichen Demo gilt eine engere Seitengrenze.
+     * Sie lässt sich erst hier prüfen: Wie viele Seiten ein PDF hat, steht
+     * nicht in seiner Grösse.
+     */
+    if (
+      dokument.besucherHash !== '' &&
+      extraktion.pageCount !== null &&
+      extraktion.pageCount > DEMO_GRENZEN.maxSeiten
+    ) {
+      return await scheitern(versionId, 'demo_zu_viele_seiten', true);
+    }
 
     await statusSetzen(versionId, 'chunking');
     const abschnitte = zerlegen(extraktion.stellen, dokument.filename);

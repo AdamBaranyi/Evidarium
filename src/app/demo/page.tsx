@@ -1,8 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { Chat } from '@/app/app/chat/chat';
 import { demoKorpus } from '@/lib/demo/korpus';
+import { eigeneDokumente } from '@/lib/demo/besucher-dokumente';
+import { besucherKennung, DEMO_COOKIE } from '@/lib/demo/besucher';
+import { EigeneDateien } from './eigene-dateien';
 import { env } from '@/lib/config/env';
 
 export const metadata: Metadata = { title: 'Demo – Evidarium' };
@@ -20,6 +24,14 @@ export default async function DemoPage() {
 
   const korpus = await demoKorpus();
   if (!korpus) notFound();
+
+  // Eigene Dateien des Besuchs; ohne Cookie gibt es noch keine.
+  const cookie = (await cookies()).get(DEMO_COOKIE)?.value;
+  const eigene = cookie ? await eigeneDokumente(korpus.userId, besucherKennung(cookie)) : [];
+  const auswahl = [
+    ...korpus.dokumente,
+    ...eigene.filter((d) => d.status === 'ready').map((d) => ({ id: d.id, filename: d.filename })),
+  ];
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -43,20 +55,22 @@ export default async function DemoPage() {
           <p className="max-w-[var(--mass)] text-tinte-leise">
             Jede Aussage trägt ein wörtliches Zitat, ein Klick öffnet die Stelle im Dokument. Zwei
             der Dokumente widersprechen sich absichtlich, und in einem steckt eine untergeschobene
-            Anweisung — beides darfst du ausprobieren.
+            Anweisung — beides darfst du ausprobieren. Du kannst auch eigene Dateien mitbringen.
           </p>
         </div>
 
         <Chat
-          dokumente={korpus.dokumente}
+          dokumente={auswahl}
           endpunkt="/api/demo/chat"
           auswaehlbar={false}
           seitenhinweis={
-            <p className="panel p-4 text-tinte-leise">
-              Fragen ja, Hochladen nein: Eigene Dokumente kann laden, wer angemeldet ist. Der
-              Betrieb kostet Geld, darum gilt ein Kontingent von {env.FRAGEN_JE_SITZUNG} Fragen je
-              Besuch.
-            </p>
+            <>
+              <EigeneDateien dokumente={eigene} />
+              <p className="panel p-4 text-tinte-leise">
+                Der Betrieb kostet Geld, darum gilt ein Kontingent von {env.FRAGEN_JE_SITZUNG}{' '}
+                Fragen je Besuch.
+              </p>
+            </>
           }
         />
       </main>

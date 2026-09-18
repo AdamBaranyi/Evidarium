@@ -13,6 +13,15 @@ import { env } from '@/lib/config/env';
  */
 export const QUEUE_DOKUMENT_EINLESEN = 'dokument-einlesen';
 
+/**
+ * Räumt abgelaufene Dateien aus der öffentlichen Demo weg.
+ *
+ * Als geplanter Auftrag in der Warteschlange und nicht als Zeitgeber im
+ * Prozess: Ein `setInterval` stirbt mit dem Prozess, und niemand merkt es.
+ * Ein Plan in der Datenbank überlebt einen Neustart und holt Versäumtes nach.
+ */
+export const QUEUE_DEMO_AUFRAEUMEN = 'demo-aufraeumen';
+
 /*
  * Wiederholungen: höchstens drei, mit exponentiellem Backoff und Jitter.
  * Vorübergehende Fehler (Datei kurz nicht lesbar, Datenbank überlastet)
@@ -43,6 +52,7 @@ export async function queue(): Promise<PgBoss> {
   });
   await neu.start();
   await neu.createQueue(QUEUE_DOKUMENT_EINLESEN, WIEDERHOLUNGEN);
+  await neu.createQueue(QUEUE_DEMO_AUFRAEUMEN);
   boss = neu;
   return neu;
 }

@@ -72,6 +72,11 @@ Ausnahme weg.
   Hash — weder IP noch Cookie-Wert landen in der Datenbank. Beide sind
   umgehbar und stehen als das da, was sie sind; die Schranke, die hält, ist
   der Tagesdeckel in Dollar. Siehe E26.
+- **Eigene Dateien in der Demo**: höchstens 3 je Besuch, 2 MiB, 10 Seiten,
+  automatische Löschung nach 24 Stunden über die vollständige Löschkaskade.
+  Der Hinweis darauf steht **vor** dem Formular. Die Trennung läuft über den
+  Hash des Besuchercookies; die Dokumentliste stellt der Server zusammen.
+  Siehe E34.
 - Sicherheits-Header in `next.config.ts`
 - Geheimnisse nur in Umgebungsvariablen, `.env*` in `.gitignore`
 

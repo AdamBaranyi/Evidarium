@@ -26,6 +26,8 @@ export const FEHLER_TEXT: Record<string, string> = {
   zu_viele_zeichen: 'Dieses Dokument enthält mehr Text, als zurzeit verarbeitet wird.',
   leer: 'In dieser Datei wurde kein Text gefunden.',
   typ_nicht_unterstuetzt: 'Dieses Format wird nicht unterstützt.',
+  demo_zu_viele_seiten:
+    'In der Demo sind höchstens 10 Seiten je Datei möglich. Melde dich an, um grössere Dokumente zu laden.',
   dokument_weg: 'Das Dokument wurde während der Verarbeitung gelöscht.',
   version_weg: 'Diese Verarbeitung ist nicht mehr gültig.',
   unerwartet: 'Beim Verarbeiten ist ein unerwarteter Fehler aufgetreten.',

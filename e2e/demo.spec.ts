@@ -23,10 +23,27 @@ test('zeigt Korpus und Frageformular', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Frage stellen' })).toBeVisible();
 });
 
-test('bietet keinen Upload und keine Dokumentauswahl', async ({ page }) => {
-  await expect(page.locator('input[type="file"]')).toHaveCount(0);
+test('erlaubt eigene Dateien, aber keine Dokumentauswahl', async ({ page }) => {
+  /*
+   * Hochladen ja — seit dem 18.09.2026, eng begrenzt und mit automatischer
+   * Löschung. Die Dokumentauswahl bleibt beim Server: Wer IDs schicken darf,
+   * probiert fremde.
+   */
+  await expect(page.locator('input[type="file"]')).toHaveCount(1);
   await expect(page.locator('input[type="checkbox"]')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /auswählen/i })).toHaveCount(0);
+  // Genau die Knöpfe der Dokumentauswahl, nicht das Dateifeld: Dessen
+  // Beschriftung enthält ebenfalls «auswählen».
+  await expect(page.getByRole('button', { name: /(Alle|Keines) auswählen/ })).toHaveCount(0);
+});
+
+test('sagt vor dem Hochladen, dass geloescht wird', async ({ page }) => {
+  // Der Hinweis muss **vor** dem Formular stehen, nicht danach.
+  const hinweis = page.getByText(/automatisch gelöscht/i);
+  await expect(hinweis).toBeVisible();
+
+  const hinweisOben = (await hinweis.boundingBox())?.y ?? 0;
+  const feldOben = (await page.locator('input[type="file"]').boundingBox())?.y ?? 0;
+  expect(hinweisOben).toBeLessThan(feldOben);
 });
 
 test('keine Schrift unter 16 px', async ({ page }) => {

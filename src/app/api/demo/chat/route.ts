@@ -6,6 +6,7 @@ import { hashOrigin } from '@/lib/auth/session';
 import { ndjsonAntwort } from '@/lib/antwort/strom';
 import { fragenVonHerkunftHeute } from '@/lib/budget/budget';
 import { demoKorpus } from '@/lib/demo/korpus';
+import { eigeneDokumente } from '@/lib/demo/besucher-dokumente';
 import { besucherKennung, cookieKopf, neueBesucherkennung, DEMO_COOKIE } from '@/lib/demo/besucher';
 import { env } from '@/lib/config/env';
 
@@ -15,7 +16,8 @@ import { env } from '@/lib/config/env';
  * Drei Unterschiede zum angemeldeten Chat, alle drei absichtlich:
  *
  * 1. **Die Dokumentauswahl kommt nicht vom Client.** Sie ist fest der
- *    vorbereitete Korpus. Wer IDs schicken darf, probiert fremde.
+ *    vorbereitete Korpus plus die Dateien **dieses** Besuchs. Wer IDs
+ *    schicken darf, probiert fremde.
  * 2. **Keine Nachfragen mit Verlauf.** Jede Frage steht für sich; ein
  *    mitgeschickter Verlauf wäre freier Text, den jemand bezahlt.
  * 3. **Zwei Zähler**: Fragen je Besuch und Fragen je Herkunft und Tag. Beide
@@ -66,10 +68,20 @@ export async function POST(request: Request): Promise<Response> {
     ? {}
     : { 'Set-Cookie': cookieKopf(besucher, process.env.NODE_ENV === 'production') };
 
+  /*
+   * Der vorbereitete Korpus **und** die eigenen Dateien dieses Besuchs.
+   * Zusammengestellt auf dem Server; der Browser schickt keine IDs.
+   */
+  const eigene = await eigeneDokumente(korpus.userId, besucherKennung(besucher));
+  const documentIds = [
+    ...korpus.dokumente.map((d) => d.id),
+    ...eigene.filter((d) => d.status === 'ready').map((d) => d.id),
+  ];
+
   return ndjsonAntwort(
     {
       userId: korpus.userId,
-      documentIds: korpus.dokumente.map((d) => d.id),
+      documentIds,
       frage: eingabe.data.frage,
       verlauf: [],
       sessionId: besucherKennung(besucher),

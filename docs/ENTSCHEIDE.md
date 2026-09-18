@@ -596,3 +596,41 @@ Geändert:
 - `.panel` als gemeinsames Material: dieselbe Kante, dasselbe Licht, derselbe
   Schatten in der ganzen Anwendung. Wer von der Startseite hineingeht, sieht
   dasselbe Material weiter.
+
+## E34 — Eigene Dateien in der Demo, mit Ablaufdatum
+
+_18.09.2026._ Besucher dürfen bis zu drei eigene Dateien mitbringen, je
+höchstens 2 MiB und 10 Seiten. **Nach 24 Stunden werden sie gelöscht**, und
+das steht über dem Formular, nicht darunter.
+
+Der Gewinn ist gross: Wer das Portfolio anschaut, lädt sein eigenes PDF hoch
+und sieht, dass es funktioniert. Das überzeugt mehr als jede Fallstudie.
+
+**Das Risiko ist nicht die volle Datenbank, sondern fremde Personendaten auf
+fremdem Server.** Jemand lädt seinen Arbeitsvertrag hoch, und der Betreiber
+verarbeitet plötzlich fremde Daten. Dagegen helfen drei Dinge, und alle drei
+sind gebaut: enge Grenzen, automatische Löschung, und ein Hinweis **vor** dem
+Hochladen — «Lade nichts Vertrauliches hoch». Ein Hinweis, den man erst
+danach liest, ist keiner; ein E2E-Test prüft darum die Reihenfolge auf der
+Seite.
+
+**Die Trennung läuft über den Hash des Besuchercookies**, nicht über ein
+eigenes Konto je Besuch. Die Dateien gehören dem Demo-Konto und tragen
+`besucher_hash`; jede Abfrage filtert darauf, und der Endpunkt für Fragen
+stellt die Dokumentliste selbst zusammen — aus dem Korpus plus den Dateien
+dieses Besuchs. Der Browser schickt nie IDs.
+
+**Leerer Text statt `NULL`** für alles, was keinem Besuch gehört. In einem
+eindeutigen Index gelten zwei `NULL` als verschieden; die Dublettenerkennung
+angemeldeter Konten wäre damit wirkungslos gewesen. `NULLS NOT DISTINCT`
+kennt die eingesetzte Drizzle-Fassung nicht.
+
+**Gezählt wird je Besuch, nicht je Konto** — sonst sperrte der vorbereitete
+Korpus die Demo für alle. Und zwei Besucher dürfen dieselbe Datei laden: Ein
+abgelehnter Upload würde sonst verraten, dass jemand anderes sie schon hat.
+
+**Das Aufräumen liegt in der Warteschlange**, nicht in einem `setInterval`.
+Ein Zeitgeber im Prozess stirbt mit ihm, und niemand merkt es; ein Plan in der
+Datenbank überlebt einen Neustart und holt Versäumtes nach. Der Lauf
+protokolliert auch die Null — wer im Log nichts sieht, weiss sonst nicht, ob
+nichts fällig war oder nichts lief.

@@ -149,7 +149,7 @@ export function Chat({
         <Schrittanzeige schritte={schritte} laeuft={laeuft} />
 
         <form action={fragen} className="flex max-w-[var(--mass-blatt)] flex-col gap-3 panel p-4">
-          <label className="flex flex-col gap-2">
+          <label className="flex min-w-0 flex-col gap-2">
             <span>{auswaehlbar ? 'Frage an die ausgewählten Dokumente' : 'Deine Frage'}</span>
             <textarea
               ref={feld}
@@ -157,7 +157,12 @@ export function Chat({
               rows={3}
               required
               maxLength={2000}
-              className="border border-kante bg-flaeche-tief p-3 text-base"
+              /*
+               * `w-full`, sonst bestimmt die Voreinstellung `cols` die Breite:
+               * Das Feld schrumpft dann nicht unter rund 350 px und schiebt
+               * bei 320 px die ganze Seite in die Breite.
+               */
+              className="w-full border border-kante bg-flaeche-tief p-3 text-base"
             />
           </label>
 
@@ -171,7 +176,7 @@ export function Chat({
         </form>
       </div>
 
-      <aside className="flex flex-col gap-4 lg:order-2">
+      <aside className="flex min-w-0 flex-col gap-4 lg:order-2">
         {auswaehlbar ? (
           <DokumentWahl dokumente={dokumente} gewaehlt={gewaehlt} setzen={setGewaehlt} />
         ) : (

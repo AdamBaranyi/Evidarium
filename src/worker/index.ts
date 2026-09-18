@@ -2,11 +2,13 @@ import type { Job } from 'pg-boss';
 import { env } from '@/lib/config/env';
 import { dokumentEinlesen } from '@/lib/documents/einlesen';
 import {
+  QUEUE_DEMO_AUFRAEUMEN,
   QUEUE_DOKUMENT_EINLESEN,
   queue,
   queueStoppen,
   type EinlesenAuftrag,
 } from '@/lib/jobs/queue';
+import { abgelaufeneLoeschen } from '@/lib/demo/besucher-dokumente';
 import { einbetten, modellBereit } from './embeddings';
 import { internenEndpunktStarten } from './http';
 
@@ -59,6 +61,23 @@ async function main(): Promise<void> {
       throw new Error(`Einlesen fehlgeschlagen: ${ergebnis.code}`);
     },
   );
+
+  /*
+   * Abgelaufene Demo-Uploads wegräumen, alle 15 Minuten.
+   *
+   * Die Zusage lautet «nach 24 Stunden gelöscht». Eine Zusage, die an einem
+   * Zeitgeber im Web-Prozess hinge, wäre beim nächsten Neustart weg — der
+   * Plan liegt darum in der Datenbank, und ein Neustart holt Versäumtes nach.
+   *
+   * Der Lauf protokolliert auch die Null: Wer im Log nichts sieht, weiss
+   * sonst nicht, ob nichts fällig war oder nichts lief.
+   */
+  await boss.work(QUEUE_DEMO_AUFRAEUMEN, async () => {
+    const weg = await abgelaufeneLoeschen();
+    console.log(`[worker] Demo aufgeräumt: ${weg} abgelaufene Dateien gelöscht`);
+  });
+
+  await boss.schedule(QUEUE_DEMO_AUFRAEUMEN, '*/15 * * * *');
 }
 
 /*

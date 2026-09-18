@@ -116,6 +116,7 @@ für angemeldete Personen), drei Testbreiten, Fallstudie, Deployment auf vps1.
 | Löschkaskade für Dokumente, mit Oberfläche               | fertig |
 | Fallstudie `docs/FALLSTUDIE.md`                          | fertig |
 | Produktionsabbild, Compose, Deploy-Skript, Caddy         | fertig |
+| Eigene Dateien in der Demo, mit 24-Stunden-Loeschung     | fertig |
 | Deployment auf vps1 ausgefuehrt                          | offen  |
 
 **Nachweis vom 17.09.2026, Live-Modus:** 12 von 12 Fällen bestanden, 48,6 s,

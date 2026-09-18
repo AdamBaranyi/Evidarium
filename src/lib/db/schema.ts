@@ -91,13 +91,37 @@ export const documents = pgTable(
     contentHash: text('content_hash').notNull(),
     storagePath: text('storage_path').notNull(),
     activeVersionId: uuid('active_version_id'),
+    /*
+     * Wem in der öffentlichen Demo eine Datei gehört: der Hash des
+     * Besuchercookies, nie der Wert selbst. Solche Dateien gehören dem
+     * Demo-Konto, sind aber diesem Besuch zugeordnet.
+     *
+     * **Leerer Text statt `NULL`** für alles andere, und das ist kein
+     * Schönheitsfehler: In einem eindeutigen Index gelten zwei `NULL` als
+     * verschieden. Die Dublettenerkennung angemeldeter Konten wäre damit
+     * wirkungslos — dieselbe Datei liesse sich beliebig oft hochladen.
+     * `NULLS NOT DISTINCT` kennt die eingesetzte Drizzle-Fassung nicht.
+     */
+    besucherHash: text('besucher_hash').notNull().default(''),
+    /** Zeitpunkt der automatischen Löschung. Nur bei Demo-Uploads gesetzt. */
+    ablaufAm: timestamp('ablauf_am', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
   (table) => [
     check('documents_kind_gueltig', sql`${table.kind} IN ('pdf', 'text', 'markdown')`),
-    uniqueIndex('documents_hash_je_nutzer_idx').on(table.userId, table.contentHash),
+    /*
+     * Eindeutig je Konto **und Besuch**: Zwei Besucher dürfen dieselbe Datei
+     * hochladen, ohne voneinander zu erfahren. Ein abgelehnter Upload würde
+     * sonst die Existenz fremder Dokumente verraten.
+     */
+    uniqueIndex('documents_hash_je_nutzer_idx').on(
+      table.userId,
+      table.contentHash,
+      table.besucherHash,
+    ),
     index('documents_user_idx').on(table.userId, table.createdAt),
+    index('documents_besucher_idx').on(table.besucherHash, table.ablaufAm),
   ],
 );
 
