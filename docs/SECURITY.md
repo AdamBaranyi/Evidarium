@@ -80,35 +80,24 @@ Ausnahme weg.
 - Sicherheits-Header in `next.config.ts`
 - Geheimnisse nur in Umgebungsvariablen, `.env*` in `.gitignore`
 
-### GHSA-vwc7-r8mq-g2x9 — adm-zip ≤ 0.6.0 · **befristet bis 18.09.2026**
-
-_Bewertet 17.09.2026. Schweregrad moderat. Update vorhanden, aber noch gesperrt._
-
-**Woher:** `@huggingface/transformers → onnxruntime-node → adm-zip`.
-
-**Was der Befund besagt:** Beim Entpacken folgt adm-zip symbolischen Links im
-Zielpfad; ein präpariertes Archiv kann damit Dateien ausserhalb des
-Zielverzeichnisses überschreiben.
-
-**Warum jetzt nicht behoben:** Behoben in 0.6.1 — veröffentlicht sechs Tage vor
-dieser Bewertung. Die Wartezeit von sieben Tagen aus `bunfig.toml` verweigert
-die Installation, und das ist der Sinn der Wartezeit: Eine frische Fassung
-könnte selbst das Problem sein.
-
-```
-error: Version "adm-zip@0.6.1" was published within minimum release age
-```
-
-**Warum vertretbar:** onnxruntime-node entpackt damit beim Installieren seine
-eigenen vorgebauten Binärdateien aus einer bekannten Quelle. Evidarium entpackt
-zu keinem Zeitpunkt ein Archiv, das ein Nutzer hochgeladen hat.
-
-**Was zu tun ist:** Ab dem **18.09.2026** ist 0.6.1 installierbar. Dann
-`overrides` in `package.json` auf `0.6.1` heben und **diese Ausnahme samt
-`--ignore GHSA-vwc7-r8mq-g2x9` wieder entfernen.** Die Ausnahme ist befristet,
-nicht dauerhaft.
-
 ## Behobene Befunde
+
+### GHSA-vwc7-r8mq-g2x9 — adm-zip ≤ 0.6.0 · **behoben 18.09.2026**
+
+Über `@huggingface/transformers → onnxruntime-node → adm-zip`. Beim Entpacken
+folgte adm-zip symbolischen Links im Zielpfad.
+
+Die Behebung lag ab dem 17.09.2026 vor, war aber sechs Tage alt und scheiterte
+an der Wartezeit aus `bunfig.toml` — genau so gewollt. Die Ausnahme war darum
+**befristet und mit Datum** eingetragen, im Workflow und hier.
+
+Am 18.09.2026, ab 12:24 Uhr, war 0.6.1 installierbar: `overrides` gehoben, die
+Ausnahme samt `--ignore` entfernt, `bun audit --audit-level=moderate` ohne
+Befund, und nachgeprüft, dass das Embedding-Modell weiterhin lädt.
+
+**Lehre:** «Ab dem 18.09.2026» war zu ungenau. Die Wartezeit rechnet in
+Sekunden ab Veröffentlichung, nicht in Kalendertagen; der erste Versuch am
+Morgen scheiterte noch. Ein befristeter Eintrag gehört mit Uhrzeit versehen.
 
 Nicht ausgenommen, sondern behoben — über eng gefasste `overrides` in
 `package.json`:
