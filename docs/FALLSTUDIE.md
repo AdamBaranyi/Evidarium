@@ -138,6 +138,14 @@ Injektionsfall — denn der gefährliche Weg ist nicht die Frage «führe die
 Anweisung aus», sondern die harmlose Frage, deren Suche den vergifteten
 Abschnitt findet.
 
+**Und einer, der gar kein Programmierfehler war.** Beim Nachprüfen der eigenen
+Sätze für diese Fallstudie fiel auf: Das README nannte die Löschkaskade seit
+Tag 1 «gebaut und getestet». Gebaut war nur die Spalte `deleted_at`. Der Satz
+stand seit dem ersten Tag in einem öffentlichen Repository. Seither steht die
+Kaskade wirklich, mit vier Tests — und die Lehre ist die unbequemere: Eine
+Behauptung in der Dokumentation ist kein Nachweis, auch wenn man sie selbst
+geschrieben hat.
+
 ## Der Prüfer wird selbst geprüft
 
 «12 von 12 bestanden» sagt für sich genommen nur, dass mein eigener Prüfcode
@@ -178,10 +186,51 @@ in der Datenbank.
 Eine erreichte Grenze ist **kein Fehler**. Wer dagegenläuft, hat nichts falsch
 gemacht und bekommt einen freundlichen Satz, keinen roten Kasten.
 
-In der Demo kann niemand hochladen. Das ist die wirksamste Massnahme gegen
-Missbrauch und kostet nichts an Aussagekraft: Vorgeführt wird das Antworten
-mit Belegen, nicht das Hochladen. Die Dokumentauswahl setzt ausserdem der
-Server, nicht der Browser — wer IDs schicken darf, probiert fremde.
+Die Dokumentauswahl setzt in der Demo der Server, nicht der Browser — wer IDs
+schicken darf, probiert fremde.
+
+Eigene Dateien darf man mitbringen, aber eng begrenzt: drei je Besuch, je
+2 MiB und 10 Seiten, **gelöscht nach 24 Stunden**. Der Hinweis darauf steht
+über dem Formular, nicht darunter, und sagt deutlich, dass nichts
+Vertrauliches hochgeladen gehört. Denn das eigentliche Risiko ist nicht die
+volle Datenbank — das fängt man mit Zahlen ab —, sondern fremde Personendaten
+auf fremdem Server. Ein Hinweis, den man erst nach dem Hochladen liest, ist
+keiner; ein Browsertest prüft darum die Reihenfolge auf der Seite.
+
+## Die Gestaltung kommt aus dem Material
+
+Die Anwendung ist eine matte Arbeitsfläche. Alles, was aus einem Dokument
+stammt, liegt darauf als **Blatt**: warmes Papier, eigene Kante, leicht
+abgehoben — in beiden Farbschemata das einzige Helle auf dem Bildschirm.
+
+Damit braucht der Beleg **keine Akzentfarbe.** Er ist nicht eingefärbt,
+sondern aus anderem Material. Dazu zwei Schriften, deren Unterschied die
+Aussage ist: eine Grotesk spricht die Anwendung, eine Serife das Dokument.
+Wer ein Zitat sieht, sieht sofort, dass es von woanders kommt.
+
+**Farbe hat genau eine Aufgabe: das Urteil.** Belegt, teilweise belegt, keine
+Grundlage, Widerspruch — vier Zustände, vier Farben, sonst keine. Knöpfe
+tragen Tinte, der Fokusring bleibt farblos, und neben jeder Farbe steht das
+Urteil als Wort: Wer Farben nicht unterscheidet, verliert nichts.
+
+Der sichtbarste Nutzen davon steht in der Seitenspalte. Nach einer Antwort
+färbt sich je Dokument ein Punkt in der Farbe des Urteils, wenn es die
+Antwort getragen hat. Das beantwortet auf einen Blick, was man sonst durch
+alle Belege hindurch nachzählen müsste: **Worauf steht diese Antwort?** Bei
+einem Widerspruch leuchten zwei Punkte, bei «keine Grundlage» keiner — und
+das ist selbst eine Auskunft.
+
+Auf der Startseite läuft eine Frage wirklich durch, mit den gemessenen
+Zeiten. Ein Standbild hätte das Wesentliche verschwiegen: dass zwischen Frage
+und Antwort Arbeit liegt, und wo sie liegt. Der Hintergrund ist dabei kein
+Muster, sondern das Archiv — angedeutete Blätter, eines je Dokument, die
+hervortreten, wenn ihr Dokument zur laufenden Antwort beiträgt.
+
+Drei Fassungen sind vorher gefallen, alle drei, weil sie Voreinstellungen
+waren statt Entscheidungen: warmes Minimal mit grünem Akzent, dann fast
+schwarz mit leuchtendem Zinnober, dann der Broadsheet-Griff mit Haarlinien
+und gesperrten Versalien. Was am Ende trägt, ist nicht ein Effekt, sondern
+**Dichte**: eine echte Oberfläche mit ihren kleinen, wahren Einzelheiten.
 
 ## Bewusst nicht gebaut
 
@@ -234,9 +283,14 @@ Rate-Limit in der Datenbank. Drei Schwachstellen der Stufe «hoch» wurden
 behoben statt ausgenommen; eine vierte war befristet ausgenommen, mit Datum
 und Begründung, weil ihr Fix an der eigenen Wartezeit scheiterte.
 
-**Zahlen:** 81 automatische Tests, 24 Browserprüfungen auf 320, 768 und 1440
-Pixeln, 27 nummerierte und begründete Entscheidungen. Keine Datei über 400
+**Zahlen:** 103 automatische Tests, 39 Browserprüfungen auf 320, 768 und 1440
+Pixeln, 35 nummerierte und begründete Entscheidungen. Keine Datei über 400
 Zeilen, keine Schrift unter 16 Pixeln — beides wird in der CI erzwungen.
+
+Die Abnahmeliste steht im Repository mit dem, **wodurch** jeder Punkt
+nachprüfbar ist — und mit dem, was nur einmal von Hand vorgeführt wurde. Das
+ist ein Unterschied, den ich erst beim Durchgehen gemacht habe: Von Hand
+vorgeführt heisst, es galt an einem Tag, auf einem Rechner.
 
 ## Was ich mitnehme
 
