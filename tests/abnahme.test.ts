@@ -123,7 +123,7 @@ describe('Budgetdeckel', () => {
 });
 
 describe('Kein stiller Rückfall auf die Demo', () => {
-  it('meldet einen Providerfehler als Fehler', async () => {
+  it('meldet einen Providerfehler als Fehler', () => {
     /*
      * Die gefährlichste denkbare Abkürzung: Bei einem Anbieterausfall
      * einfach den Demo-Adapter antworten lassen. Die Antwort sähe echt aus,
