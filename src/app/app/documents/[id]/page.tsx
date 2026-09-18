@@ -3,7 +3,8 @@ import { cookies } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 import { readSession, SESSION_COOKIE } from '@/lib/auth/session';
 import { abschnitteHolen, dokumentHolen } from '@/lib/documents/abfragen';
-import { fehlerText, groesseText, statusText } from '@/lib/documents/zustaende';
+import { artText, fehlerText, groesseText, statusText } from '@/lib/documents/zustaende';
+import { ohneDateinamensvorsatz } from '@/lib/documents/anzeigetext';
 import { LoeschenForm } from './loeschen-form';
 
 export const dynamic = 'force-dynamic';
@@ -23,26 +24,25 @@ export default async function DokumentDetail({ params }: { params: Promise<{ id:
   const fehler = fehlerText(dokument.errorCode);
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8">
-      <Link href="/app/documents" className="text-beleg underline underline-offset-4">
+    <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-10">
+      <Link href="/app/documents" className="underline underline-offset-4">
         Zurück zu den Dokumenten
       </Link>
 
       <header className="flex flex-col gap-2">
-        <h1 className="text-2xl leading-tight">{dokument.filename}</h1>
-        <p className="text-ink-soft">
-          {dokument.kind.toUpperCase()} · {groesseText(dokument.sizeBytes)} ·{' '}
-          {statusText(dokument.status)}
-          {dokument.pageCount !== null && ` · ${dokument.pageCount} Seiten`}
-          {dokument.charCount !== null && ` · ${dokument.charCount} Zeichen`}
+        <h1 className="text-xl leading-[var(--line-title)]">{dokument.filename}</h1>
+        <p className="text-tinte-leise">
+          {artText(dokument.kind)}, {groesseText(dokument.sizeBytes)}. {statusText(dokument.status)}
+          {dokument.pageCount !== null && `, ${dokument.pageCount} Seiten`}
+          {dokument.charCount !== null && `, ${dokument.charCount} Zeichen`}.
         </p>
-        <p className="text-ink-soft">
-          Parser {dokument.parserVersion} · Zerlegung {dokument.chunkerVersion}
+        <p className="text-tinte-leise">
+          Gelesen mit Parser {dokument.parserVersion}, zerlegt mit {dokument.chunkerVersion}.
         </p>
       </header>
 
       {fehler !== null && (
-        <p role="alert" className="border border-edge bg-surface p-4">
+        <p role="alert" className="border border-kante bg-flaeche-hoch p-4">
           {fehler}
         </p>
       )}
@@ -51,11 +51,14 @@ export default async function DokumentDetail({ params }: { params: Promise<{ id:
 
       {dokument.status === 'ready' && (
         <section className="flex flex-col gap-4">
-          <h2 className="text-xl leading-tight">Gelesener Text</h2>
+          <h2 className="text-lg leading-tight">Gelesener Text</h2>
           {abschnitte.map((abschnitt) => (
-            <article key={abschnitt.ordinal} className="border border-edge bg-surface p-4">
-              <p className="text-ink-soft">{herkunft(abschnitt)}</p>
-              <p className="mt-2 whitespace-pre-wrap">{abschnitt.text}</p>
+            /* Dokumentinhalt gehört auf ein Blatt, auch hier. */
+            <article key={abschnitt.ordinal} className="blatt max-w-[var(--mass-blatt)] px-5 py-4">
+              <p className="folio border-b border-blatt-kante pb-2">{herkunft(abschnitt)}</p>
+              <p className="mt-3 whitespace-pre-wrap">
+                {ohneDateinamensvorsatz(abschnitt.text, dokument.filename)}
+              </p>
             </article>
           ))}
         </section>

@@ -449,3 +449,48 @@ Dabei noch eine Falle: **psql ersetzt seine Variablen nicht innerhalb von
 `$$`-Blöcken.** Die erste Fassung lief auf «syntax error at or near ":"», das
 Init brach ab, und die Erweiterung `vector` aus der nächsten Datei wurde nie
 angelegt — sichtbar wurde das erst drei Schritte später beim Migrieren.
+
+## E30 — Gestaltung: das Blatt
+
+_18.09.2026._ Die Anwendung ist eine matte Arbeitsfläche. Alles, was aus
+einem Dokument stammt, erscheint darauf als **Blatt**: warmes Papier, eigene
+Kante, leichtes Abheben — das einzige helle Element auf dem Bildschirm, in
+beiden Farbschemata.
+
+Damit braucht der Beleg **keine Akzentfarbe.** Er ist nicht eingefärbt,
+sondern aus anderem Material. Das Auge geht dorthin, weil dort das Licht ist.
+Es gibt in dieser Gestaltung keine Akzentfarbe, auch nicht für Knöpfe, Links
+oder Zustände; der Fokusring trägt Tinte und hängt nicht daran, dass jemand
+Farben unterscheiden kann.
+
+**Zwei Schriften, und der Unterschied ist die Aussage:** Archivo spricht die
+Anwendung, Source Serif 4 das Dokument. Wer ein Zitat sieht, sieht sofort,
+dass es von woanders kommt. Beide selbst gehostet, beide unter der SIL Open
+Font License, Lizenztexte in `public/schriften/`.
+
+**Zwei verworfene Fassungen, beide aus benannten Voreinstellungen:**
+
+- Die erste Fassung war «kritische Ausgabe»: fast schwarzer Grund, ein
+  leuchtendes Rubrum (`#ef6b4b`), Haarlinien, gesperrte Versalien als Sigel,
+  Metazeilen mit Mittelpunkten. Der `frontend-design`-Skill führt genau das
+  als Schablone: «fast schwarz mit einem leuchtenden Akzent», der
+  Broadsheet-Griff, «ALL-CAPS-Etiketten», «A · B · C». Verworfen, bevor Code
+  entstand.
+- Die Fassung davor war warmes Minimal mit einem grünen Akzent — laut
+  `avoid-ai-design` die Richtung, die der KI-Voreinstellung am nächsten liegt
+  und nur mit sehr genauer Ausführung trägt. Adam sagte dazu am 18.09.2026:
+  «eine sehr schlanke und einfache Design, ich brauche dafür mehr».
+
+Abgegrenzt gegen Tallyroom: Dort ist Kobalt Datenfarbe auf Schweizer
+Raster. Zwei Portfolio-Anwendungen im selben Gewand sähen nach Vorlage aus,
+darum hier Materialkontrast statt Akzentfarbe und eine andere Schriftfamilie.
+
+**Bewegung**, drei Stellen, alle als Antwort auf eine Handlung:
+Belegblätter treten mit 200 ms und 50 ms Versatz ein, das Quellen-Panel
+ebenso, der Hover am Blatt ist auf echte Zeiger beschränkt. Kurven und Dauern
+stammen aus der Tabelle des `animate`-Skills, nicht aus dem Gefühl. Die
+Schrittanzeige bewegt sich **nicht**: Ihre Zeilen wechseln im Sekundentakt,
+eine Einblendung darauf wäre Zappeln.
+
+Nicht gebaut: kein wortweises Tickern, kein Scroll-Effekt, kein
+Hintergrundbild, keine Hover-Bewegung auf Karten.

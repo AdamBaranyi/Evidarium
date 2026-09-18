@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { readSession, SESSION_COOKIE } from '@/lib/auth/session';
 import { dokumenteListen } from '@/lib/documents/abfragen';
-import { fehlerText, groesseText, statusText } from '@/lib/documents/zustaende';
+import { artText, fehlerText, groesseText, statusText } from '@/lib/documents/zustaende';
 import { UploadForm } from './upload-form';
 
 export const metadata: Metadata = { title: 'Dokumente – Evidarium' };
@@ -20,13 +20,13 @@ export default async function DokumentePage() {
   const dokumente = await dokumenteListen(sitzung.userId);
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8">
-      <h1 className="text-2xl leading-tight">Dokumente</h1>
+    <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-10">
+      <h1 className="text-xl leading-[var(--line-title)]">Dokumente</h1>
 
       <UploadForm />
 
       {dokumente.length === 0 ? (
-        <p className="text-ink-soft">
+        <p className="text-tinte-leise">
           Noch keine Dokumente. Lade ein PDF, eine Textdatei oder Markdown hoch.
         </p>
       ) : (
@@ -34,19 +34,19 @@ export default async function DokumentePage() {
           {dokumente.map((dokument) => {
             const fehler = fehlerText(dokument.errorCode);
             return (
-              <li key={dokument.id} className="border border-edge bg-surface p-4">
+              <li key={dokument.id} className="border border-kante bg-flaeche-hoch p-4">
                 <Link
                   href={`/app/documents/${dokument.id}`}
-                  className="text-beleg underline underline-offset-4"
+                  className="underline underline-offset-4"
                 >
                   {dokument.filename}
                 </Link>
 
-                <p className="text-ink-soft">
-                  {dokument.kind.toUpperCase()} · {groesseText(dokument.sizeBytes)} ·{' '}
+                <p className="text-tinte-leise">
+                  {artText(dokument.kind)}, {groesseText(dokument.sizeBytes)}.{' '}
                   {statusText(dokument.status)}
-                  {dokument.pageCount !== null && ` · ${dokument.pageCount} Seiten`}
-                  {dokument.chunkCount !== null && ` · ${dokument.chunkCount} Abschnitte`}
+                  {dokument.pageCount !== null && `, ${dokument.pageCount} Seiten`}
+                  {dokument.chunkCount !== null && `, ${dokument.chunkCount} Abschnitte`}.
                 </p>
 
                 {fehler !== null && (

@@ -1,54 +1,123 @@
 /*
- * Grundwerte, bewusst zurückhaltend. Hier steht nur, was später ohnehin nicht
- * mehr verhandelbar ist.
+ * Gestaltung: **das Blatt.**
  *
- * **Die ausgearbeitete visuelle Identität kommt nach Tag 5** (Entscheid
- * 17.09.2026): eigene Farbe, eigene Schrift, eigenes Raster, in einem eigenen
- * Durchgang. Der Wert von `--beleg` ist bis dahin ein Platzhalter.
+ * Die Anwendung ist eine Arbeitsfläche — matt, ruhig, ohne Schmuck. Alles,
+ * was aus einem Dokument stammt, erscheint darauf als **Blatt**: hell, warm,
+ * mit eigener Kante und leichtem Abheben. Das Blatt ist das einzige helle
+ * Element auf dem Bildschirm, in beiden Farbschemata.
  *
- * Eine Entscheidung ist schon getroffen: Farbe ist für den Beleg reserviert.
- * Das Produkt verspricht Nachprüfbarkeit — also ist die Fundstelle das
- * einzige Element, das farblich hervorsticht. Knöpfe tragen Tinte, nicht Farbe.
+ * Damit braucht der Beleg **keine Akzentfarbe**. Er ist nicht eingefärbt,
+ * sondern aus anderem Material: ein Stück des Dokuments, auf dem Grund des
+ * Dokuments. Das Auge geht von selbst dorthin, weil dort das Licht ist.
+ *
+ * Zwei Gründe, warum es nicht die naheliegende Fassung geworden ist:
+ *
+ * - **Fast-Schwarz mit einem leuchtenden Akzent** (Zinnober, Giftgrün) ist
+ *   eine der Voreinstellungen, die der `frontend-design`-Skill namentlich
+ *   aufführt. Die erste Fassung dieser Datei hatte genau das: `#ef6b4b` auf
+ *   `#101211`. Verworfen.
+ * - **Haarlinien, Null-Radius und dichte Spalten** — der Broadsheet-Griff —
+ *   stehen dort ebenso. Blätter sind darum feste Körper mit Kante und
+ *   Schatten, keine Linienraster.
+ *
+ * Auch nicht verwendet, weil dieselbe Liste sie als Schablone führt:
+ * gesperrte Versalien als Etikett, Metazeilen mit Mittelpunkten («A · B · C»),
+ * eine Monoschrift für kleine Datenbeschriftungen, Pfeile an Knopftexten.
  */
 :root {
-  /* Schriftgrössen: Untergrenze 16 px, ohne Ausnahme und auf jeder Breite. */
+  /* ---------------------------------------------------------- Schrift -- */
+  /*
+   * Zwei Familien, und der Unterschied ist die Aussage: Archivo spricht die
+   * Anwendung, Source Serif das Dokument. Wer ein Zitat sieht, sieht sofort,
+   * dass es von woanders kommt.
+   */
+  --schrift-flaeche: 'Archivo', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --schrift-blatt: 'Source Serif 4', ui-serif, Georgia, 'Times New Roman', serif;
+
+  /*
+   * Untergrenze 16 px, ohne Ausnahme und auf jeder Breite. Die Serife
+   * beginnt bei 18 px: Sie wirkt bei gleicher Angabe kleiner, und der
+   * Dokumenttext wird am längsten gelesen.
+   */
   --text-body: 16px;
+  --text-blatt: 18px;
   --text-lead: 20px;
-  --text-title: 24px;
-  --text-display: 32px;
+  --text-title: 26px;
+  /* Wächst mit der Breite: auf 320 px ruhig, auf 1440 px eine Ansage. */
+  --text-display: clamp(32px, 4.4vw, 58px);
 
-  --line-body: 1.6;
-  --line-title: 1.2;
+  --line-body: 1.5;
+  --line-blatt: 1.62;
+  --line-title: 1.12;
 
-  /* Warmer Grund, kein Blaustich. */
-  --ground: #f4f3ef;
-  --surface: #ffffff;
-  --ink: #16181a;
-  --ink-soft: #4a4f55;
-  --edge: #d9d6cf;
+  /* ------------------------------------------------------------ Raster -- */
+  --schritt: 8px;
+  /* Zeilenlänge unter 80 Zeichen; die Serife verträgt etwas mehr. */
+  --mass: 36rem;
+  --mass-blatt: 40rem;
 
-  /* Nur für Belege, Fokusring und aktiven Zustand. Nie für Knöpfe. */
-  --beleg: #0a6b5d;
-  /* Hinterlegung des Zitats im Quellen-Panel. */
-  --beleg-weich: #d6e9e5;
-
-  --action-bg: #16181a;
-  --action-ink: #f4f3ef;
-
-  --step: 8px;
-  --radius: 4px;
+  /* --------------------------------------------------------- Bewegung -- */
+  /*
+   * Werte aus der Tabelle des `animate`-Skills, nicht geschätzt.
+   * Unter 300 ms, weil alles hier Oberfläche ist und nichts erklärt werden
+   * muss.
+   */
+  --dauer-kurz: 120ms;
+  --dauer-mittel: 200ms;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
-@media (prefers-color-scheme: dark) {
+/*
+ * Dunkel ist die Vorgabe: Die Bildschirmfotos fürs Portfolio entstehen
+ * dunkel. Der Grund ist ein warmer Graphit, kein getöntes Fast-Schwarz —
+ * eine Arbeitsfläche, auf der ein Blatt liegen kann.
+ */
+:root {
+  --flaeche: #23211e;
+  --flaeche-tief: #1b1916;
+  --flaeche-hoch: #2b2823;
+  --tinte: #ece8e1;
+  --tinte-leise: #aaa49a;
+  --kante: #3a362f;
+  --kante-stark: #565147;
+
+  /* Das Blatt. In beiden Schemata dasselbe Papier. */
+  --blatt: #f7f2e6;
+  --blatt-tief: #eee7d6;
+  --blatt-tinte: #23211e;
+  --blatt-leise: #5f594c;
+  --blatt-kante: #d9cfb8;
+  /* Die Markierung ist kein Leuchtstift, sondern dunkleres Papier. */
+  --blatt-markierung: #e3d7b4;
+
+  --aktion-grund: #ece8e1;
+  --aktion-tinte: #23211e;
+}
+
+@media (prefers-color-scheme: light) {
   :root {
-    --ground: #121311;
-    --surface: #1b1d1a;
-    --ink: #eceae4;
-    --ink-soft: #a7aba6;
-    --edge: #33362f;
-    --beleg: #4fd1bb;
-    --beleg-weich: #15453d;
-    --action-bg: #eceae4;
-    --action-ink: #121311;
+    /*
+     * Auch hell bleibt die Fläche dunkler als das Blatt: ein Schreibtisch,
+     * auf dem Papier liegt. Nicht die übliche weisse Seite mit grauen
+     * Karten — dort wäre das Blatt nicht mehr das Hellste.
+     */
+    --flaeche: #d7d2c7;
+    --flaeche-tief: #cbc5b8;
+    --flaeche-hoch: #e0dbd1;
+    --tinte: #23211e;
+    --tinte-leise: #57524a;
+    --kante: #b8b2a4;
+    --kante-stark: #8d8779;
+
+    --blatt: #fdfbf5;
+    --blatt-tief: #f5f0e3;
+    --blatt-tinte: #23211e;
+    --blatt-leise: #5f594c;
+    --blatt-kante: #ded6c4;
+    --blatt-markierung: #f0e4bd;
+
+    --aktion-grund: #23211e;
+    --aktion-tinte: #f5f3ee;
   }
 }

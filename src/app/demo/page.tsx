@@ -12,9 +12,8 @@ export const dynamic = 'force-dynamic';
  * Die öffentliche Demo: fragen ja, hochladen nein.
  *
  * Der Korpus ist derselbe, gegen den die Evaluation läuft. Wer mag, kann die
- * zwölf Prüffälle nachstellen — einschliesslich der beiden Widersprüche und
- * der beiden untergeschobenen Anweisungen — und das Ergebnis im Protokoll
- * nachlesen.
+ * Prüffälle nachstellen — einschliesslich der beiden Widersprüche und der
+ * untergeschobenen Anweisung — und das Ergebnis im Protokoll nachlesen.
  */
 export default async function DemoPage() {
   if (!env.DEMO_AKTIV) notFound();
@@ -23,33 +22,44 @@ export default async function DemoPage() {
   if (!korpus) notFound();
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
-      <h1 className="text-2xl leading-tight">Evidarium ausprobieren</h1>
+    <div className="flex min-h-dvh flex-col">
+      <header className="border-b border-kante bg-flaeche-tief">
+        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-baseline gap-x-7 gap-y-2 px-6 py-4">
+          <Link href="/" className="font-blatt text-lg">
+            Evidarium
+          </Link>
+          <p className="text-tinte-leise">Demo</p>
+          <Link href="/login" className="ms-auto underline underline-offset-4">
+            Anmelden
+          </Link>
+        </div>
+      </header>
 
-      <p className="text-lg text-ink-soft">
-        Jede Aussage trägt ein wörtliches Zitat. Ein Klick darauf öffnet die Stelle im Dokument.
-      </p>
+      <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10">
+        <div className="flex flex-col gap-3">
+          <h1 className="max-w-[20ch] text-xl leading-[var(--line-title)]">
+            Frag diese Dokumente etwas.
+          </h1>
+          <p className="max-w-[var(--mass)] text-tinte-leise">
+            Jede Aussage trägt ein wörtliches Zitat, ein Klick öffnet die Stelle im Dokument. Zwei
+            der Dokumente widersprechen sich absichtlich, und in einem steckt eine untergeschobene
+            Anweisung — beides darfst du ausprobieren.
+          </p>
+        </div>
 
-      <section className="flex flex-col gap-2 border border-edge bg-surface p-4">
-        <p>
-          Die Dokumente stammen von einer erfundenen Firma. Zwei von ihnen widersprechen sich
-          absichtlich, und in einem steckt eine untergeschobene Anweisung. Beides darfst du gerne
-          ausprobieren.
-        </p>
-        <p className="text-ink-soft">
-          Fragen ja, Hochladen nein: Eigene Dokumente kann nur laden, wer angemeldet ist. Der
-          Betrieb dieser Demo kostet Geld, darum gilt ein Kontingent von {env.FRAGEN_JE_SITZUNG}{' '}
-          Fragen je Besuch.
-        </p>
-      </section>
-
-      <Chat dokumente={korpus.dokumente} endpunkt="/api/demo/chat" auswaehlbar={false} />
-
-      <p className="text-ink-soft">
-        <Link href="/" className="text-beleg underline underline-offset-4">
-          Zurück zur Startseite
-        </Link>
-      </p>
-    </main>
+        <Chat
+          dokumente={korpus.dokumente}
+          endpunkt="/api/demo/chat"
+          auswaehlbar={false}
+          seitenhinweis={
+            <p className="border border-kante p-4 text-tinte-leise">
+              Fragen ja, Hochladen nein: Eigene Dokumente kann laden, wer angemeldet ist. Der
+              Betrieb kostet Geld, darum gilt ein Kontingent von {env.FRAGEN_JE_SITZUNG} Fragen je
+              Besuch.
+            </p>
+          }
+        />
+      </main>
+    </div>
   );
 }

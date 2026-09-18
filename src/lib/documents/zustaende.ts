@@ -46,3 +46,18 @@ export function groesseText(bytes: number): string {
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KiB`;
   return `${(bytes / 1024 / 1024).toFixed(1)} MiB`;
 }
+
+/**
+ * Die Dateiart in Worten.
+ *
+ * Nicht `kind.toUpperCase()`: «MARKDOWN» in Versalien ist eine Schablone, und
+ * «TEXT» sagt weniger als «Textdatei».
+ */
+export function artText(kind: string): string {
+  const texte: Record<string, string> = {
+    pdf: 'PDF',
+    text: 'Textdatei',
+    markdown: 'Markdown',
+  };
+  return texte[kind] ?? kind;
+}

@@ -29,9 +29,16 @@ export type ChatEigenschaften = {
    * weder IDs noch Gesprächsverlauf.
    */
   auswaehlbar?: boolean;
+  /** Zusätzlicher Hinweis für die Seitenspalte, etwa das Kontingent. */
+  seitenhinweis?: React.ReactNode;
 };
 
-export function Chat({ dokumente, endpunkt = '/api/chat', auswaehlbar = true }: ChatEigenschaften) {
+export function Chat({
+  dokumente,
+  endpunkt = '/api/chat',
+  auswaehlbar = true,
+  seitenhinweis,
+}: ChatEigenschaften) {
   const [gewaehlt, setGewaehlt] = useState<string[]>(() => dokumente.map((d) => d.id));
   const [eintraege, setEintraege] = useState<Eintrag[]>([]);
   const [schritte, setSchritte] = useState<Schritt[]>([]);
@@ -98,10 +105,10 @@ export function Chat({ dokumente, endpunkt = '/api/chat', auswaehlbar = true }: 
 
   if (dokumente.length === 0) {
     return (
-      <p className="border border-edge bg-surface p-4">
-        Noch kein verarbeitetes Dokument.{' '}
-        <Link href="/app/documents" className="text-beleg underline underline-offset-4">
-          Zuerst eines hochladen
+      <p className="max-w-[var(--mass)] border border-kante bg-flaeche-hoch p-4">
+        Hier ist noch nichts zu durchsuchen.{' '}
+        <Link href="/app/documents" className="underline underline-offset-4">
+          Lade zuerst ein Dokument hoch
         </Link>
         .
       </p>
@@ -109,67 +116,82 @@ export function Chat({ dokumente, endpunkt = '/api/chat', auswaehlbar = true }: 
   }
 
   return (
-    <>
-      {auswaehlbar ? (
-        <DokumentWahl dokumente={dokumente} gewaehlt={gewaehlt} setzen={setGewaehlt} />
-      ) : (
-        <section className="border border-edge bg-surface p-4">
-          <h2 className="text-lg leading-tight">Durchsuchte Dokumente</h2>
-          <ul className="mt-2 flex flex-col gap-1 text-ink-soft">
-            {dokumente.map((dokument) => (
-              <li key={dokument.id}>{dokument.filename}</li>
-            ))}
-          </ul>
-        </section>
-      )}
+    /*
+     * Zwei Spuren, sobald Platz ist: die Unterhaltung trägt die Seite, der
+     * Zusammenhang steht daneben. Untereinander schöbe die Dokumentliste die
+     * Frage nach unten — und die Frage ist, wofür man hier ist.
+     */
+    <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_17rem]">
+      <div className="flex min-w-0 flex-col gap-8 lg:order-1">
+        <ol className="flex flex-col gap-10">
+          {eintraege.map((eintrag) => (
+            <li key={eintrag.id}>
+              {eintrag.art === 'frage' && (
+                /* Die Frage steht als Frage da, in der Schrift der Oberfläche
+                 und ohne Sprechblase — es ist ein Arbeitsplatz, kein Chat. */
+                <p className="max-w-[var(--mass)] text-xl leading-tight">{eintrag.text}</p>
+              )}
+              {eintrag.art === 'antwort' && (
+                <AntwortKarte antwort={eintrag.antwort} oeffnen={setPanel} />
+              )}
+              {eintrag.art === 'hinweis' && (
+                <p
+                  role={eintrag.ton === 'fehler' ? 'alert' : undefined}
+                  className="max-w-[var(--mass)] border border-kante bg-flaeche-hoch p-4"
+                >
+                  {eintrag.nachricht}
+                </p>
+              )}
+            </li>
+          ))}
+        </ol>
 
-      <ol className="flex flex-col gap-4">
-        {eintraege.map((eintrag) => (
-          <li key={eintrag.id}>
-            {eintrag.art === 'frage' && (
-              <p className="border-l-2 border-edge py-1 pl-3 text-lg">{eintrag.text}</p>
-            )}
-            {eintrag.art === 'antwort' && (
-              <AntwortKarte antwort={eintrag.antwort} oeffnen={setPanel} />
-            )}
-            {eintrag.art === 'hinweis' && (
-              <p
-                role={eintrag.ton === 'fehler' ? 'alert' : undefined}
-                className="border border-edge bg-surface p-4"
-              >
-                {eintrag.nachricht}
-              </p>
-            )}
-          </li>
-        ))}
-      </ol>
+        <Schrittanzeige schritte={schritte} laeuft={laeuft} />
 
-      <Schrittanzeige schritte={schritte} laeuft={laeuft} />
-
-      <form action={fragen} className="flex flex-col gap-3 border border-edge bg-surface p-4">
-        <label className="flex flex-col gap-2">
-          <span>{auswaehlbar ? 'Frage an die ausgewählten Dokumente' : 'Deine Frage'}</span>
-          <textarea
-            ref={feld}
-            name="frage"
-            rows={3}
-            required
-            maxLength={2000}
-            className="border border-edge bg-[var(--ground)] p-3"
-          />
-        </label>
-
-        <button
-          type="submit"
-          disabled={laeuft || (auswaehlbar && gewaehlt.length === 0)}
-          className="min-h-11 self-start bg-[var(--action-bg)] px-4 py-2 text-[var(--action-ink)] disabled:opacity-60"
+        <form
+          action={fragen}
+          className="flex max-w-[var(--mass-blatt)] flex-col gap-3 border border-kante bg-flaeche-hoch p-4"
         >
-          {laeuft ? 'Wird beantwortet …' : 'Fragen'}
-        </button>
-      </form>
+          <label className="flex flex-col gap-2">
+            <span>{auswaehlbar ? 'Frage an die ausgewählten Dokumente' : 'Deine Frage'}</span>
+            <textarea
+              ref={feld}
+              name="frage"
+              rows={3}
+              required
+              maxLength={2000}
+              className="border border-kante bg-flaeche-tief p-3 text-base"
+            />
+          </label>
+
+          <button
+            type="submit"
+            disabled={laeuft || (auswaehlbar && gewaehlt.length === 0)}
+            className="min-h-11 self-start bg-aktion-grund px-5 py-2 text-aktion-tinte transition-opacity duration-[var(--dauer-kurz)] disabled:opacity-55"
+          >
+            {laeuft ? 'Wird beantwortet …' : 'Frage stellen'}
+          </button>
+        </form>
+      </div>
+
+      <aside className="flex flex-col gap-4 lg:order-2">
+        {auswaehlbar ? (
+          <DokumentWahl dokumente={dokumente} gewaehlt={gewaehlt} setzen={setGewaehlt} />
+        ) : (
+          <section className="border border-kante bg-flaeche-hoch p-4">
+            <h2 className="text-tinte-leise">Durchsucht wird in</h2>
+            <ul className="mt-1 flex flex-col gap-1">
+              {dokumente.map((dokument) => (
+                <li key={dokument.id}>{dokument.filename}</li>
+              ))}
+            </ul>
+          </section>
+        )}
+        {seitenhinweis}
+      </aside>
 
       <QuellenPanel inhalt={panel} schliessen={() => setPanel(null)} />
-    </>
+    </div>
   );
 }
 

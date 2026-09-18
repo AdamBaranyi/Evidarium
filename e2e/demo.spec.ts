@@ -18,9 +18,9 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('zeigt Korpus und Frageformular', async ({ page }) => {
-  await expect(page.getByRole('heading', { name: 'Evidarium ausprobieren' })).toBeVisible();
-  await expect(page.getByText('Durchsuchte Dokumente')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Fragen' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Frag diese Dokumente etwas.' })).toBeVisible();
+  await expect(page.getByText('Durchsucht wird in')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Frage stellen' })).toBeVisible();
 });
 
 test('bietet keinen Upload und keine Dokumentauswahl', async ({ page }) => {

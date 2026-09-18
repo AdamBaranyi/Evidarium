@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { zitatTeile } from '@/lib/antwort/hervorheben';
+import { ohneDateinamensvorsatz } from '@/lib/documents/anzeigetext';
 
 /*
  * Die Markierung im Quellen-Panel muss dieselbe Toleranz haben wie die
@@ -49,5 +50,24 @@ describe('Zitat im Abschnitt finden', () => {
 
   it('gibt bei leerem Zitat nichts zurueck', () => {
     expect(zitatTeile('Irgendein Text', '   ')).toBeNull();
+  });
+});
+
+describe('Dateinamensvorsatz', () => {
+  it('entfernt den vorangestellten Dateinamen fürs Anzeigen', () => {
+    const text = 'Teamhandbuch.pdf\n\nBeim Onboarding hilft Mara Keller.';
+    expect(ohneDateinamensvorsatz(text, 'Teamhandbuch.pdf')).toBe(
+      'Beim Onboarding hilft Mara Keller.',
+    );
+  });
+
+  it('lässt einen Abschnitt ohne Vorsatz unberührt', () => {
+    const text = 'Beim Onboarding hilft Mara Keller.';
+    expect(ohneDateinamensvorsatz(text, 'Teamhandbuch.pdf')).toBe(text);
+  });
+
+  it('entfernt nur den eigenen Dateinamen, nicht einen gleichlautenden Satzanfang', () => {
+    const text = 'Teamhandbuch.pdf ist die Grundlage.';
+    expect(ohneDateinamensvorsatz(text, 'Teamhandbuch.pdf')).toBe(text);
   });
 });

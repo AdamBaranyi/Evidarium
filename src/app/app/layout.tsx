@@ -2,17 +2,24 @@ import Link from 'next/link';
 import { abmelden } from './actions';
 
 /*
- * Eine Navigationsleiste für den angemeldeten Bereich. Sie besteht aus Links
- * und einem Knopf — kein ausklappbares Menü, weil drei Ziele keines brauchen.
+ * Kopfzeile des angemeldeten Bereichs: Wortmarke, drei Ziele, Abmelden.
+ *
+ * Die Wortmarke steht in der Dokumentschrift — als einzige Stelle ausserhalb
+ * eines Blatts. Der Name meint den Ort, an dem Belege liegen; ihn im
+ * Material der Belege zu setzen, ist keine Zierde, sondern die Aussage.
  */
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="border-b border-edge bg-surface">
+      <header className="border-b border-kante bg-flaeche-tief">
         <nav
           aria-label="Hauptnavigation"
-          className="mx-auto flex max-w-3xl flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3"
+          className="mx-auto flex w-full max-w-6xl flex-wrap items-baseline gap-x-7 gap-y-2 px-6 py-4"
         >
+          <Link href="/app/chat" className="font-blatt text-lg">
+            Evidarium
+          </Link>
+
           <Link href="/app/chat" className="underline underline-offset-4">
             Fragen
           </Link>

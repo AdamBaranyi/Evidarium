@@ -22,7 +22,7 @@ export function LoeschenForm({ documentId, dateiname }: { documentId: string; da
       <button
         type="button"
         onClick={() => setSicher(true)}
-        className="min-h-11 self-start border border-edge px-4 py-2"
+        className="min-h-11 self-start border border-kante px-4 py-2"
       >
         Dokument löschen
       </button>
@@ -30,7 +30,7 @@ export function LoeschenForm({ documentId, dateiname }: { documentId: string; da
   }
 
   return (
-    <form action={absenden} className="flex flex-col gap-3 border border-edge bg-surface p-4">
+    <form action={absenden} className="flex flex-col gap-3 border border-kante bg-flaeche-hoch p-4">
       <input type="hidden" name="documentId" value={documentId} />
 
       <p>
@@ -39,7 +39,7 @@ export function LoeschenForm({ documentId, dateiname }: { documentId: string; da
       </p>
 
       {antwort?.fehler !== undefined && (
-        <p role="alert" className="text-ink">
+        <p role="alert" className="text-tinte">
           {antwort.fehler}
         </p>
       )}
@@ -48,7 +48,7 @@ export function LoeschenForm({ documentId, dateiname }: { documentId: string; da
         <button
           type="submit"
           disabled={laeuft}
-          className="min-h-11 bg-[var(--action-bg)] px-4 py-2 text-[var(--action-ink)] disabled:opacity-60"
+          className="min-h-11 bg-aktion-grund px-5 py-2 text-aktion-tinte disabled:opacity-60"
         >
           {laeuft ? 'Wird gelöscht …' : 'Endgültig löschen'}
         </button>

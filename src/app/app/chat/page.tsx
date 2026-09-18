@@ -22,21 +22,24 @@ export default async function ChatPage() {
     .map((dokument) => ({ id: dokument.id, filename: dokument.filename }));
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
-      <h1 className="text-2xl leading-tight">Fragen</h1>
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10">
+      <h1 className="text-xl leading-[var(--line-title)]">Fragen</h1>
 
-      <p className="text-ink-soft">
+      <p className="max-w-[var(--mass)] text-tinte-leise">
         Jede Aussage trägt ein wörtliches Zitat. Ein Klick darauf öffnet die Stelle im Dokument.
       </p>
 
-      {env.AI_MODE === 'demo' && (
-        <p className="border border-edge bg-surface p-4">
-          Demo-Modus: Es wird kein Modell aufgerufen. Die Antworten stammen aus einem festen
-          Adapter, durchlaufen aber dieselbe Belegprüfung.
-        </p>
-      )}
-
-      <Chat dokumente={dokumente} />
+      <Chat
+        dokumente={dokumente}
+        seitenhinweis={
+          env.AI_MODE === 'demo' ? (
+            <p className="border border-kante p-4 text-tinte-leise">
+              Demo-Modus: Es wird kein Modell aufgerufen. Die Antworten stammen aus einem festen
+              Adapter, durchlaufen aber dieselbe Belegprüfung.
+            </p>
+          ) : undefined
+        }
+      />
     </main>
   );
 }

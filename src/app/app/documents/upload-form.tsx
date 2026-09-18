@@ -35,7 +35,7 @@ export function UploadForm() {
   }
 
   return (
-    <form action={senden} className="flex flex-col gap-3 border border-edge bg-surface p-4">
+    <form action={senden} className="flex flex-col gap-3 border border-kante bg-flaeche-hoch p-4">
       <label className="flex flex-col gap-2">
         <span>Dokument hinzufügen</span>
         <input
@@ -48,13 +48,13 @@ export function UploadForm() {
         />
       </label>
 
-      <p className="text-ink-soft">
+      <p className="text-tinte-leise">
         PDF mit Textschicht, TXT oder Markdown. Höchstens {GRENZEN.maxBytes / 1024 / 1024} MiB und{' '}
         {GRENZEN.maxSeiten} Seiten.
       </p>
 
       {fehler !== null && (
-        <p role="alert" className="text-ink">
+        <p role="alert" className="text-tinte">
           {fehler}
         </p>
       )}
@@ -62,7 +62,7 @@ export function UploadForm() {
       <button
         type="submit"
         disabled={laeuft}
-        className="min-h-11 self-start bg-[var(--action-bg)] px-4 py-2 text-[var(--action-ink)] disabled:opacity-60"
+        className="min-h-11 self-start bg-aktion-grund px-5 py-2 text-aktion-tinte disabled:opacity-60"
       >
         {laeuft ? 'Wird übertragen …' : 'Hochladen'}
       </button>

@@ -4,15 +4,18 @@ import Link from 'next/link';
 import { useEffect, useRef } from 'react';
 import type { Fundstelle } from '@/lib/antwort/fragen';
 import { zitatTeile } from '@/lib/antwort/hervorheben';
-import { herkunft } from './typen';
+import { ohneDateinamensvorsatz } from '@/lib/documents/anzeigetext';
 
 /*
- * Das Quellen-Panel ist die Einlösung des Versprechens: ein Klick auf den
- * Beleg, und der **ganze** Abschnitt steht da, mit dem Zitat an seiner Stelle.
+ * Das Blatt in voller Grösse.
  *
- * Absichtlich der ganze Abschnitt, nicht nur das Zitat: Ein aus dem
+ * Hier wird das Versprechen eingelöst: der **ganze** Abschnitt, mit dem Zitat
+ * an seiner Stelle. Absichtlich der ganze Abschnitt — ein aus dem
  * Zusammenhang gerissener Satz kann richtig zitiert und trotzdem irreführend
  * sein. Wer den Umgebungstext sieht, merkt das.
+ *
+ * Der Umgebungstext steht leiser als das Zitat, nicht versteckt: Er ist
+ * Zusammenhang, nicht Beleg.
  */
 
 export type PanelInhalt = { stelle: Fundstelle; zitat: string };
@@ -35,54 +38,58 @@ export function QuellenPanel({
     if (!inhalt && element.open) element.close();
   }, [inhalt]);
 
-  const teile = inhalt ? zitatTeile(inhalt.stelle.text, inhalt.zitat) : null;
+  const abschnitt = inhalt
+    ? ohneDateinamensvorsatz(inhalt.stelle.text, inhalt.stelle.filename)
+    : '';
+  const teile = inhalt ? zitatTeile(abschnitt, inhalt.zitat) : null;
 
   return (
     <dialog
       ref={dialog}
       onClose={schliessen}
       aria-label="Fundstelle im Dokument"
-      className="m-auto max-h-[min(80dvh,40rem)] w-[min(44rem,100vw-2rem)] border border-edge bg-surface p-0 text-ink backdrop:bg-[rgb(0_0_0/0.45)]"
+      className="quellen-blatt blatt m-auto max-h-[min(84dvh,46rem)] w-[min(46rem,100vw-2rem)] p-0"
     >
       {inhalt && (
-        <div className="flex max-h-[min(80dvh,40rem)] flex-col">
-          <header className="flex flex-wrap items-baseline justify-between gap-3 border-b border-edge p-4">
-            <div>
-              <h2 className="text-lg leading-tight">{inhalt.stelle.filename}</h2>
-              <p className="text-ink-soft">{herkunft(inhalt.stelle) ?? 'Abschnitt'}</p>
-            </div>
-            <form method="dialog">
-              <button type="submit" className="min-h-11 px-3 underline underline-offset-4">
-                Schliessen
-              </button>
-            </form>
+        <div className="flex max-h-[min(84dvh,46rem)] flex-col">
+          <header className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b border-blatt-kante px-5 py-4">
+            <h2 className="text-lead leading-tight">{inhalt.stelle.filename}</h2>
+            {inhalt.stelle.page !== null && <p className="folio">Seite {inhalt.stelle.page}</p>}
           </header>
 
-          <div className="overflow-y-auto p-4">
+          <div className="overflow-y-auto px-5 py-5">
             {teile === null ? (
               <>
-                <p className="text-ink-soft">
+                <p className="text-blatt-leise">
                   Das Zitat liess sich im Abschnitt nicht eindeutig markieren. Der Abschnitt steht
                   unverändert darunter.
                 </p>
-                <p className="mt-3 whitespace-pre-wrap">{inhalt.stelle.text}</p>
+                <p className="mt-4 whitespace-pre-wrap">{abschnitt}</p>
               </>
             ) : (
-              <p className="whitespace-pre-wrap">
+              <p className="whitespace-pre-wrap text-blatt-leise">
                 {teile.vor}
-                <mark className="bg-[var(--beleg-weich)] text-ink">{teile.treffer}</mark>
+                <mark className="bg-blatt-markierung text-blatt-tinte">{teile.treffer}</mark>
                 {teile.nach}
               </p>
             )}
           </div>
 
-          <footer className="border-t border-edge p-4">
+          <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-blatt-kante px-5 py-4">
             <Link
               href={`/app/documents/${inhalt.stelle.documentId}`}
-              className="text-beleg underline underline-offset-4"
+              className="font-flaeche text-base underline underline-offset-4"
             >
               Ganzes Dokument öffnen
             </Link>
+            <form method="dialog">
+              <button
+                type="submit"
+                className="min-h-11 font-flaeche text-base underline underline-offset-4"
+              >
+                Schliessen
+              </button>
+            </form>
           </footer>
         </div>
       )}

@@ -15,7 +15,7 @@ export function LoginForm() {
           name="email"
           required
           autoComplete="username"
-          className="rounded border border-edge bg-surface px-3 py-2 text-base"
+          className="border border-kante bg-flaeche-tief px-3 py-2 text-base"
         />
       </label>
 
@@ -26,12 +26,12 @@ export function LoginForm() {
           name="password"
           required
           autoComplete="current-password"
-          className="rounded border border-edge bg-surface px-3 py-2 text-base"
+          className="border border-kante bg-flaeche-tief px-3 py-2 text-base"
         />
       </label>
 
       {ergebnis?.fehler !== undefined && (
-        <p role="alert" className="text-ink">
+        <p role="alert" className="text-tinte">
           {ergebnis.fehler}
         </p>
       )}
@@ -39,7 +39,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={laeuft}
-        className="min-h-11 rounded bg-[var(--action-bg)] px-4 py-2 text-[var(--action-ink)] disabled:opacity-60"
+        className="min-h-11 bg-aktion-grund px-5 py-2 text-aktion-tinte disabled:opacity-60"
       >
         {laeuft ? 'Wird geprüft …' : 'Anmelden'}
       </button>

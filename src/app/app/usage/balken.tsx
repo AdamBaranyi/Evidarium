@@ -22,7 +22,7 @@ export function Balken({
     <div className="flex flex-col gap-1">
       <p className="flex flex-wrap justify-between gap-3">
         <span>{name}</span>
-        <span className="text-ink-soft">{text}</span>
+        <span className="text-tinte-leise">{text}</span>
       </p>
       <div
         role="meter"
@@ -31,10 +31,10 @@ export function Balken({
         aria-valuemin={0}
         aria-valuemax={grenze}
         aria-valuetext={text}
-        className="h-2 w-full border border-edge"
+        className="h-2 w-full border border-kante"
       >
         {/* Nur die Füllung trägt Farbe; der Rahmen bleibt neutral. */}
-        <div className="h-full bg-beleg" style={{ width: `${anteil}%` }} />
+        <div className="h-full bg-tinte" style={{ width: `${anteil}%` }} />
       </div>
     </div>
   );

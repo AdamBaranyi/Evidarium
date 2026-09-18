@@ -26,16 +26,17 @@ export function DokumentWahl({
   }
 
   return (
-    <fieldset className="flex flex-col gap-2 border border-edge bg-surface p-4">
-      <legend className="px-1">Durchsuchte Dokumente</legend>
-
-      <button
-        type="button"
-        onClick={() => setzen(alle ? [] : dokumente.map((d) => d.id))}
-        className="min-h-11 self-start underline underline-offset-4"
-      >
-        {alle ? 'Keines auswählen' : 'Alle auswählen'}
-      </button>
+    <fieldset className="flex flex-col gap-1 border border-kante bg-flaeche-hoch p-4">
+      <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+        <legend className="text-tinte-leise">Durchsucht wird in</legend>
+        <button
+          type="button"
+          onClick={() => setzen(alle ? [] : dokumente.map((d) => d.id))}
+          className="min-h-11 underline underline-offset-4"
+        >
+          {alle ? 'Keines auswählen' : 'Alle auswählen'}
+        </button>
+      </div>
 
       {dokumente.map((dokument) => (
         <label key={dokument.id} className="flex min-h-11 items-center gap-3">
@@ -43,15 +44,15 @@ export function DokumentWahl({
             type="checkbox"
             checked={gewaehlt.includes(dokument.id)}
             onChange={(e) => umschalten(dokument.id, e.target.checked)}
-            className="size-5"
+            className="size-5 accent-[var(--tinte)]"
           />
           <span>{dokument.filename}</span>
         </label>
       ))}
 
       {gewaehlt.length === 0 && (
-        <p className="text-ink-soft">
-          Mindestens ein Dokument auswählen, sonst gibt es nichts zu durchsuchen.
+        <p className="mt-2 text-tinte-leise">
+          Ohne Auswahl gibt es nichts zu durchsuchen. Wähle mindestens ein Dokument.
         </p>
       )}
     </fieldset>

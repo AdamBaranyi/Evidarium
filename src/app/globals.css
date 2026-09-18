@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import '../styles/tokens.css';
+@import '../styles/schriften.css';
 
 /*
  * Tailwind-Stufen unter 16 px abschalten, statt sich auf Disziplin zu
@@ -13,13 +14,28 @@
   --text-lg: var(--text-lead);
   --text-xl: var(--text-title);
   --text-2xl: var(--text-display);
+  --text-blatt: var(--text-blatt);
 
-  --color-ground: var(--ground);
-  --color-surface: var(--surface);
-  --color-ink: var(--ink);
-  --color-ink-soft: var(--ink-soft);
-  --color-edge: var(--edge);
-  --color-beleg: var(--beleg);
+  --font-flaeche: var(--schrift-flaeche);
+  --font-blatt: var(--schrift-blatt);
+
+  --color-flaeche: var(--flaeche);
+  --color-flaeche-tief: var(--flaeche-tief);
+  --color-flaeche-hoch: var(--flaeche-hoch);
+  --color-tinte: var(--tinte);
+  --color-tinte-leise: var(--tinte-leise);
+  --color-kante: var(--kante);
+  --color-kante-stark: var(--kante-stark);
+
+  --color-blatt: var(--blatt);
+  --color-blatt-tief: var(--blatt-tief);
+  --color-blatt-tinte: var(--blatt-tinte);
+  --color-blatt-leise: var(--blatt-leise);
+  --color-blatt-kante: var(--blatt-kante);
+  --color-blatt-markierung: var(--blatt-markierung);
+
+  --color-aktion-grund: var(--aktion-grund);
+  --color-aktion-tinte: var(--aktion-tinte);
 }
 
 html {
@@ -29,34 +45,175 @@ html {
 
 body {
   margin: 0;
-  background: var(--ground);
-  color: var(--ink);
-  font-family:
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    sans-serif;
+  background: var(--flaeche);
+  color: var(--tinte);
+  font-family: var(--schrift-flaeche);
   line-height: var(--line-body);
+  /* Archivo hat echte Kapitälchen-Alternativen nicht nötig; Ziffern gleich
+     breit, damit Zahlen in Listen nicht springen. */
+  font-variant-numeric: tabular-nums;
 }
 
+/*
+ * Der Fokusring trägt **keine Farbe**, weil in dieser Gestaltung nichts
+ * Farbe trägt. Tinte mit Abstand ist auf beiden Gründen gut sichtbar und
+ * hängt nicht daran, dass jemand Farben unterscheiden kann.
+ */
 :focus-visible {
-  outline: 2px solid var(--beleg);
-  outline-offset: 2px;
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
 }
 
-/* Lange Dateinamen dürfen die Bedienung bei 320 px nicht verschieben. */
-:where(h1, h2, h3, p, li, td, th) {
+/*
+ * Lange Dateinamen dürfen die Bedienung bei 320 px nicht verschieben.
+ *
+ * `overflow-wrap` ja, **Silbentrennung nein**: Trennung nützt im Blocksatz;
+ * bei linksbündigem Text erzeugt sie nur Striche. Auf 320 px standen vier
+ * Trennungen in fünf Zeilen.
+ */
+:where(p, li, td, th) {
   overflow-wrap: break-word;
-  hyphens: auto;
+}
+
+/*
+ * Überschriften werden **nicht** getrennt. Automatische Trennung zerlegt eine
+ * Zeile wie «mit Quellen» in «Quel-len» — im Fliesstext vertretbar, in einer
+ * Überschrift ein Fehler, den man als Erstes sieht.
+ */
+:where(h1, h2, h3) {
+  overflow-wrap: break-word;
+  hyphens: manual;
+  text-wrap: balance;
+}
+
+/*
+ * **Das Blatt.** Der einzige Ort im Entwurf mit Papierfarbe, Rundung und
+ * Schatten. Alles andere ist flach und kantig — darum fällt das Blatt auf,
+ * ohne dass es leuchten muss.
+ */
+.blatt {
+  background: var(--blatt);
+  color: var(--blatt-tinte);
+  border: 1px solid var(--blatt-kante);
+  border-radius: 2px;
+  box-shadow:
+    0 1px 0 rgb(0 0 0 / 0.14),
+    0 6px 18px -10px rgb(0 0 0 / 0.5);
+  font-family: var(--schrift-blatt);
+  font-size: var(--text-blatt);
+  line-height: var(--line-blatt);
+}
+
+/* Die Seitenzahl sitzt wie eine Kolumnenziffer in der Ecke des Blatts. */
+.folio {
+  font-family: var(--schrift-blatt);
+  font-size: var(--text-body);
+  color: var(--blatt-leise);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/*
+ * Ein Blatt kommt herein, wenn eine Antwort erscheint: 200 ms, starke
+ * Ease-out-Kurve, nur Deckkraft und Verschiebung. Kein Effekt auf
+ * Bewegung, die der Mensch nicht ausgelöst hat.
+ */
+@keyframes blatt-ein {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.blatt-ein {
+  animation: blatt-ein var(--dauer-mittel) var(--ease-out) both;
+}
+
+/*
+ * Ein anklickbares Blatt hebt sich unter dem Zeiger etwas stärker ab.
+ *
+ * Nur mit echtem Zeiger: Auf einem Touchgerät löst die Berührung einen
+ * Schein-Hover aus, und das Blatt bliebe nach dem Tippen angehoben stehen.
+ */
+@media (hover: hover) and (pointer: fine) {
+  .blatt-knopf:hover {
+    box-shadow:
+      0 2px 0 rgb(0 0 0 / 0.16),
+      0 12px 28px -12px rgb(0 0 0 / 0.55);
+  }
+}
+
+.blatt-knopf {
+  transition: box-shadow var(--dauer-kurz) var(--ease-out);
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* Weniger und sanfter, nicht null: Die Deckkraft bleibt, der Weg fällt weg. */
+  .blatt-ein {
+    animation: none;
+  }
+
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/*
+ * Das Quellen-Panel kommt herein, wenn jemand einen Beleg öffnet.
+ *
+ * Zweck: räumlicher Zusammenhang — das Blatt, das eben klein dastand, wird
+ * gross. 200 ms, starke Ease-out-Kurve, nur Deckkraft und Verschiebung.
+ * Ein modaler Dialog hängt an keinem Auslöser, darum bleibt er mittig
+ * (`transform-origin` gilt hier nicht).
+ */
+.quellen-blatt {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--dauer-mittel) var(--ease-out),
+    transform var(--dauer-mittel) var(--ease-out),
+    overlay var(--dauer-mittel) allow-discrete,
+    display var(--dauer-mittel) allow-discrete;
+}
+
+.quellen-blatt:not([open]) {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+@starting-style {
+  .quellen-blatt[open] {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.quellen-blatt::backdrop {
+  background: rgb(10 9 8 / 0.55);
+  opacity: 1;
+  transition:
+    opacity var(--dauer-mittel) var(--ease-out),
+    overlay var(--dauer-mittel) allow-discrete,
+    display var(--dauer-mittel) allow-discrete;
+}
+
+.quellen-blatt:not([open])::backdrop {
+  opacity: 0;
+}
+
+@starting-style {
+  .quellen-blatt[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Die Deckkraft bleibt, der Weg fällt weg. */
+  .quellen-blatt,
+  .quellen-blatt:not([open]) {
+    transform: none;
   }
 }
