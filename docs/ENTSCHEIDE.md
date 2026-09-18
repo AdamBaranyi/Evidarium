@@ -320,3 +320,52 @@ Meldung «Fundstelle fehlt: Teamhandbuch.pdf, Seite 3».
 Der Hash statt des Dateinamens: Über den Namen würde ein geänderter Korpus
 stillschweigend gegen die alte Fassung geprüft — die Datei heisst ja weiterhin
 gleich. Genau das wäre beim Nachschärfen des Injektionsfalls passiert.
+
+## E26 — Öffentliche Demo: fragen ja, hochladen nein
+
+_18.09.2026._ `/demo` beantwortet Fragen ohne Anmeldung. Hochladen bleibt
+angemeldeten Personen vorbehalten.
+
+Das ist die wirksamste Massnahme gegen Missbrauch und kostet nichts an
+Aussagekraft: Vorgeführt wird das Antworten mit Belegen, nicht das Hochladen.
+
+**Die Dokumentauswahl kommt nicht vom Client.** Der Endpunkt setzt sie selbst
+auf den vorbereiteten Korpus. Wer IDs schicken darf, probiert fremde — die
+Suchabfragen filtern zwar ohnehin auf den Nutzer, aber eine Schranke, die man
+gar nicht erst anbietet, kann auch nicht versagen. Ebenso kein
+Gesprächsverlauf: Er wäre freier Text, den jemand anders bezahlt.
+
+Drei Zähler übereinander, und sie sind **verschieden viel wert**:
+
+| Zähler                      | Umgehbar durch     | Zweck        |
+| --------------------------- | ------------------ | ------------ |
+| Fragen je Besuch (Cookie)   | Cookies löschen    | Fairness     |
+| Fragen je Herkunft und Tag  | Anschluss wechseln | Fairness     |
+| Tages- und Monatsdeckel USD | nichts             | **Schranke** |
+
+Die ersten beiden stehen ausdrücklich als das da, was sie sind. Eine schwer
+umgehbare Besuchererkennung wäre Fingerprinting — teuer, aufdringlich und für
+den Zweck unnötig. Was hält, ist der Deckel in Dollar.
+
+Gespeichert wird je ein **Hash**: der des Besuchercookies und der der
+Herkunft. Weder die IP noch der Cookie-Wert selbst landen in der Datenbank.
+
+Die Konfiguration steht auf `DEMO_AKTIV=false`, damit eine nachgebaute
+Installation nicht versehentlich einen fremden Schlüssel an eine offene Seite
+hängt. In Produktion verlangt `DEMO_AKTIV=true` zusätzlich `TRUST_PROXY=true`:
+Hinter einem Reverse Proxy hätten sonst alle Besucher dieselbe Herkunft, und
+der Zähler je Herkunft zählte alle als einen.
+
+## E27 — Die Demo zeigt denselben Korpus, gegen den die Evaluation läuft
+
+_18.09.2026._ Kein geschönter Vorführkorpus.
+
+Die Evaluation weist nach, dass diese sechs Dokumente die zwölf Fälle korrekt
+beantworten — darunter beide Widersprüche und beide untergeschobenen
+Anweisungen. Wer die Demo ausprobiert, kann genau diese Fälle nachstellen und
+das Ergebnis in `docs/EVALUATION.md` nachlesen. Ein eigener, freundlicherer
+Korpus für die Vorführung hätte den umgekehrten Wert: Er würde zeigen, dass
+das Produkt dort funktioniert, wo es niemand prüft.
+
+Die Seite sagt darum ausdrücklich, dass zwei Dokumente sich widersprechen und
+eines eine untergeschobene Anweisung enthält, und lädt zum Ausprobieren ein.

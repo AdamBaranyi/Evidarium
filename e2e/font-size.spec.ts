@@ -8,6 +8,9 @@ import { expect, test } from '@playwright/test';
 const MIN_PX = 16;
 const SEITEN = ['/', '/login'];
 
+// `/demo` wird getrennt geprüft: Die Seite gibt es nur, wenn die Demo
+// eingeschaltet **und** befüllt ist.
+
 for (const pfad of SEITEN) {
   test(`keine Schrift unter ${MIN_PX} px auf ${pfad}`, async ({ page }) => {
     await page.goto(pfad);

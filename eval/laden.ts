@@ -25,14 +25,16 @@ import { einlesenBeauftragen } from '@/lib/jobs/queue';
 const KORPUS = join(import.meta.dirname, 'korpus');
 const EVAL_KONTO = 'evaluation@nordstern.test';
 
+export { EVAL_KONTO };
+
 /** Wartezeit, bis der Worker ein Dokument fertig hat. */
 const GEDULD_MS = 120_000;
 const TAKT_MS = 500;
 
 export type GeladenesDokument = { datei: string; documentId: string };
 
-async function evalNutzer(): Promise<string> {
-  const [vorhanden] = await db.select().from(users).where(eq(users.email, EVAL_KONTO)).limit(1);
+async function korpusNutzer(konto: string): Promise<string> {
+  const [vorhanden] = await db.select().from(users).where(eq(users.email, konto)).limit(1);
   if (vorhanden) return vorhanden.id;
 
   /*
@@ -42,10 +44,10 @@ async function evalNutzer(): Promise<string> {
    */
   const [neu] = await db
     .insert(users)
-    .values({ email: EVAL_KONTO, passwordHash: 'kein-anmeldbares-konto' })
+    .values({ email: konto, passwordHash: 'kein-anmeldbares-konto' })
     .returning({ id: users.id });
 
-  if (!neu) throw new Error('Evaluationskonto konnte nicht angelegt werden');
+  if (!neu) throw new Error(`Konto ${konto} konnte nicht angelegt werden`);
   return neu.id;
 }
 
@@ -86,8 +88,15 @@ async function aufFertigWarten(documentId: string, datei: string): Promise<void>
   }
 }
 
-export async function korpusLaden(): Promise<{ userId: string; dokumente: GeladenesDokument[] }> {
-  const userId = await evalNutzer();
+/**
+ * Lädt den Korpus für ein Konto. Dasselbe Verfahren dient der Evaluation
+ * und der öffentlichen Demo — ein zweiter Ladeweg wäre eine zweite
+ * Fehlerquelle.
+ */
+export async function korpusLaden(
+  konto: string = EVAL_KONTO,
+): Promise<{ userId: string; dokumente: GeladenesDokument[] }> {
+  const userId = await korpusNutzer(konto);
   const dateien = (await readdir(KORPUS)).filter((name) => !name.startsWith('.')).sort();
   const geladen: GeladenesDokument[] = [];
 

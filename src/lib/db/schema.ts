@@ -215,6 +215,12 @@ export const usageEvents = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     sessionId: text('session_id'),
+    /*
+     * Hash der Herkunft, nur für die öffentliche Demo. Die IP selbst wird
+     * nie gespeichert — der Hash genügt, um Fragen derselben Quelle zu
+     * zählen, und lässt sich nicht zurückrechnen.
+     */
+    originHash: text('origin_hash'),
     operation: text('operation').notNull(),
     status: text('status').notNull().default('reserviert'),
     modell: text('modell').notNull(),
@@ -234,5 +240,6 @@ export const usageEvents = pgTable(
     index('usage_events_zeitraum_idx').on(table.createdAt),
     index('usage_events_nutzer_idx').on(table.userId, table.createdAt),
     index('usage_events_sitzung_idx').on(table.sessionId),
+    index('usage_events_herkunft_idx').on(table.originHash, table.createdAt),
   ],
 );

@@ -69,13 +69,22 @@ function monatsbeginn(): Date {
  * gemeinsam. Der Lock gilt nur für die Dauer der Transaktion, nicht für den
  * Modellaufruf selbst.
  */
+export type Reservierungsauftrag = {
+  userId: string;
+  /** Kennung fürs Sitzungskontingent. Nie das Sitzungsgeheimnis selbst. */
+  sessionId: string | null;
+  modell: string;
+  maxEingabeTokens: number;
+  maxAusgabeTokens: number;
+  /** Nur bei der öffentlichen Demo gesetzt. Hash, nie die IP. */
+  originHash?: string | null;
+};
+
 export async function reservieren(
-  userId: string,
-  sessionId: string | null,
-  modell: string,
-  maxEingabeTokens: number,
-  maxAusgabeTokens: number,
+  auftrag: Reservierungsauftrag,
 ): Promise<Reservierung | BudgetAblehnung> {
+  const { userId, sessionId, modell, maxEingabeTokens, maxAusgabeTokens } = auftrag;
+  const originHash = auftrag.originHash ?? null;
   // Ohne bekannten Preis bleibt der Live-Modus gesperrt. Lieber keine
   // Antwort als eine, deren Kosten niemand kennt.
   if (!modellHatPreis(modell)) {
@@ -127,6 +136,7 @@ export async function reservieren(
       .values({
         userId,
         sessionId,
+        originHash,
         operation: 'antwort',
         status: 'reserviert',
         modell,
@@ -230,6 +240,27 @@ export async function nutzungsprotokoll(userId: string, grenze = 20): Promise<Nu
     ...rest,
     kostenUsd: ausMikro(kostenMikroUsd),
   }));
+}
+
+/**
+ * Wie viele Fragen heute von dieser Herkunft kamen.
+ *
+ * Gezählt wird der Hash, nie die Adresse. Diese Grenze ist die Bequemlichkeit
+ * — die Schranke, die wirklich hält, ist der Tagesdeckel in Dollar: Wer die
+ * Herkunft wechselt, umgeht diese Zahl, nicht aber den Deckel.
+ */
+export async function fragenVonHerkunftHeute(originHash: string): Promise<number> {
+  const [zeile] = await db
+    .select({ anzahl: count() })
+    .from(usageEvents)
+    .where(
+      and(
+        eq(usageEvents.originHash, originHash),
+        eq(usageEvents.operation, 'antwort'),
+        gte(usageEvents.createdAt, tagesbeginn()),
+      ),
+    );
+  return zeile?.anzahl ?? 0;
 }
 
 /** Wie viele Fragen diese Anmeldung schon gestellt hat. */

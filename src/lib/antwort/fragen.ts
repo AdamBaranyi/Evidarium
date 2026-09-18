@@ -70,6 +70,8 @@ export type FrageAuftrag = {
   verlauf?: { rolle: 'nutzer' | 'assistent'; text: string }[];
   /** Kennung für das Sitzungskontingent. Nie das Sitzungsgeheimnis selbst. */
   sessionId?: string | null;
+  /** Hash der Herkunft, nur bei der öffentlichen Demo. Nie die IP. */
+  originHash?: string | null;
   melden?: (phase: Phase) => void;
 };
 
@@ -127,13 +129,14 @@ export async function frageBeantworten(auftrag: FrageAuftrag): Promise<FrageErge
    */
   let reservierung: Reservierung | null = null;
   if (!provider.istDemo) {
-    const ergebnisBudget = await reservieren(
+    const ergebnisBudget = await reservieren({
       userId,
       sessionId,
-      env.AI_CHAT_MODEL,
-      MAX_EINGABE_TOKENS,
-      MAX_AUSGABE_TOKENS,
-    );
+      originHash: auftrag.originHash ?? null,
+      modell: env.AI_CHAT_MODEL,
+      maxEingabeTokens: MAX_EINGABE_TOKENS,
+      maxAusgabeTokens: MAX_AUSGABE_TOKENS,
+    });
     if ('grund' in ergebnisBudget) {
       return {
         art: 'budget',

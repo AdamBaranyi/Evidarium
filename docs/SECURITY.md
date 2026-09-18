@@ -66,6 +66,12 @@ Ausnahme weg.
 - `/api/chat` prüft die Herkunft wie der Upload und antwortet erst nach der
   Sitzungsprüfung; die Dokumentauswahl aus dem Browser ist ein Wunsch, keine
   Berechtigung — die Abfragen filtern zusätzlich auf den Nutzer
+- **Öffentliche Demo** (`DEMO_AKTIV`, standardmässig aus): Die
+  Dokumentauswahl setzt der Server, nicht der Client; kein Upload, kein
+  Gesprächsverlauf. Zwei Zähler je Besuch und je Herkunft, beide über einen
+  Hash — weder IP noch Cookie-Wert landen in der Datenbank. Beide sind
+  umgehbar und stehen als das da, was sie sind; die Schranke, die hält, ist
+  der Tagesdeckel in Dollar. Siehe E26.
 - Sicherheits-Header in `next.config.ts`
 - Geheimnisse nur in Umgebungsvariablen, `.env*` in `.gitignore`
 
@@ -119,18 +125,18 @@ API-Schlüssel hinter einer öffentlich erreichbaren Demo.
 **Faustregel:** Echt bauen, was den Betreiber schützt — Schlüssel, Server,
 Kosten. Dokumentieren statt bauen, was nur hypothetische Nutzer schützt.
 
-| Massnahme                                                                      | Wo                | Stand   |
-| ------------------------------------------------------------------------------ | ----------------- | ------- |
-| Eigener Schlüssel nur für diese Anwendung, nie ein privater Mehrzweckschlüssel | Anthropic Console | Tag 4   |
-| Harte Ausgabengrenze für diesen Schlüssel, ausserhalb des eigenen Codes        | Anthropic Console | Tag 4   |
-| Monatsdeckel in der Anwendung                                                  | Server            | Tag 4   |
-| Tagesdeckel für die ganze Anwendung                                            | Server            | Tag 4   |
-| Fragen je Sitzung begrenzt (Startwert 10)                                      | Server            | Tag 4   |
-| Token-Obergrenze je Antwort (1200)                                             | Server            | Tag 4   |
-| Ausgaben je Aufruf in `usage_events` protokolliert                             | Datenbank         | Tag 4   |
-| Upload nur für angemeldete Nutzer, Demo fragt an vorbereitetem Korpus          | Server            | Tag 5   |
-| Injektionsabwehr                                                               | Server            | Tag 4/5 |
-| Quellen-ID und Zitat serverseitig geprüft, Metadaten nie aus der Modellausgabe | Server            | Tag 4   |
+| Massnahme                                                                      | Wo                | Stand     |
+| ------------------------------------------------------------------------------ | ----------------- | --------- |
+| Eigener Schlüssel nur für diese Anwendung, nie ein privater Mehrzweckschlüssel | Anthropic Console | Tag 4     |
+| Harte Ausgabengrenze für diesen Schlüssel, ausserhalb des eigenen Codes        | Anthropic Console | Tag 4     |
+| Monatsdeckel in der Anwendung                                                  | Server            | Tag 4     |
+| Tagesdeckel für die ganze Anwendung                                            | Server            | Tag 4     |
+| Fragen je Sitzung begrenzt (Startwert 10)                                      | Server            | Tag 4     |
+| Token-Obergrenze je Antwort (1200)                                             | Server            | Tag 4     |
+| Ausgaben je Aufruf in `usage_events` protokolliert                             | Datenbank         | Tag 4     |
+| Upload nur für angemeldete Nutzer, Demo fragt an vorbereitetem Korpus          | Server            | **steht** |
+| Injektionsabwehr                                                               | Server            | Tag 4/5   |
+| Quellen-ID und Zitat serverseitig geprüft, Metadaten nie aus der Modellausgabe | Server            | Tag 4     |
 
 Der Schlüssel verlässt den Server nie: nicht im Bundle, nicht in einer
 API-Antwort, nicht in einer Fehlermeldung. Eine erreichte Grenze erzeugt eine
@@ -141,4 +147,3 @@ nichts falsch gemacht.
 
 - Content Security Policy ohne `unsafe-inline` bei Skripten (kommt mit der
   ausgearbeiteten Oberfläche)
-- Prompt-Injection-Testfälle (Tag 5)

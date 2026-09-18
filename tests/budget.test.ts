@@ -48,7 +48,13 @@ describe('Preistabelle', () => {
 
 describe('Budgetgrenzen', () => {
   it('sperrt ein Modell ohne hinterlegten Preis', async () => {
-    const ergebnis = await reservieren(nutzer, null, 'claude-gibt-es-nicht', 1000, 100);
+    const ergebnis = await reservieren({
+      userId: nutzer,
+      sessionId: null,
+      modell: 'claude-gibt-es-nicht',
+      maxEingabeTokens: 1000,
+      maxAusgabeTokens: 100,
+    });
     expect('grund' in ergebnis && ergebnis.grund).toBe('kein_preis');
   });
 
@@ -56,11 +62,23 @@ describe('Budgetgrenzen', () => {
     const sitzung = `sitzung-${Date.now()}`;
 
     for (let i = 0; i < env.FRAGEN_JE_SITZUNG; i += 1) {
-      const e = await reservieren(nutzer, sitzung, MODELL, 100, 10);
+      const e = await reservieren({
+        userId: nutzer,
+        sessionId: sitzung,
+        modell: MODELL,
+        maxEingabeTokens: 100,
+        maxAusgabeTokens: 10,
+      });
       expect('id' in e, `Frage ${i + 1} sollte durchgehen`).toBe(true);
     }
 
-    const zuviel = await reservieren(nutzer, sitzung, MODELL, 100, 10);
+    const zuviel = await reservieren({
+      userId: nutzer,
+      sessionId: sitzung,
+      modell: MODELL,
+      maxEingabeTokens: 100,
+      maxAusgabeTokens: 10,
+    });
     expect('grund' in zuviel && zuviel.grund).toBe('sitzung');
   });
 
@@ -68,19 +86,55 @@ describe('Budgetgrenzen', () => {
     const a = `a-${Date.now()}`;
     const b = `b-${Date.now()}`;
     for (let i = 0; i < env.FRAGEN_JE_SITZUNG; i += 1) {
-      await reservieren(nutzer, a, MODELL, 100, 10);
+      await reservieren({
+        userId: nutzer,
+        sessionId: a,
+        modell: MODELL,
+        maxEingabeTokens: 100,
+        maxAusgabeTokens: 10,
+      });
     }
-    expect('grund' in (await reservieren(nutzer, a, MODELL, 100, 10))).toBe(true);
-    expect('id' in (await reservieren(nutzer, b, MODELL, 100, 10))).toBe(true);
+    expect(
+      'grund' in
+        (await reservieren({
+          userId: nutzer,
+          sessionId: a,
+          modell: MODELL,
+          maxEingabeTokens: 100,
+          maxAusgabeTokens: 10,
+        })),
+    ).toBe(true);
+    expect(
+      'id' in
+        (await reservieren({
+          userId: nutzer,
+          sessionId: b,
+          modell: MODELL,
+          maxEingabeTokens: 100,
+          maxAusgabeTokens: 10,
+        })),
+    ).toBe(true);
   });
 
   it('sperrt, wenn der Tagesdeckel erreicht ist', async () => {
     // Ein einzelner Aufruf, der den Tagesdeckel allein ausschöpft.
     const tokensFuerDeckel = Math.ceil(env.BUDGET_TAG_USD * 1_000_000);
-    const erste = await reservieren(nutzer, null, MODELL, tokensFuerDeckel, 0);
+    const erste = await reservieren({
+      userId: nutzer,
+      sessionId: null,
+      modell: MODELL,
+      maxEingabeTokens: tokensFuerDeckel,
+      maxAusgabeTokens: 0,
+    });
     expect('id' in erste).toBe(true);
 
-    const zweite = await reservieren(nutzer, null, MODELL, 1000, 100);
+    const zweite = await reservieren({
+      userId: nutzer,
+      sessionId: null,
+      modell: MODELL,
+      maxEingabeTokens: 1000,
+      maxAusgabeTokens: 100,
+    });
     expect('grund' in zweite && zweite.grund).toBe('tag');
   });
 
@@ -94,7 +148,15 @@ describe('Budgetgrenzen', () => {
     const tokens = Math.ceil(jeAufruf * 1_000_000);
 
     const ergebnisse = await Promise.all(
-      Array.from({ length: 12 }, () => reservieren(nutzer, null, MODELL, tokens, 0)),
+      Array.from({ length: 12 }, () =>
+        reservieren({
+          userId: nutzer,
+          sessionId: null,
+          modell: MODELL,
+          maxEingabeTokens: tokens,
+          maxAusgabeTokens: 0,
+        }),
+      ),
     );
 
     const durchgelassen = ergebnisse.filter((e) => 'id' in e).length;
@@ -107,7 +169,13 @@ describe('Budgetgrenzen', () => {
 
 describe('Abrechnung', () => {
   it('ersetzt die Reservierung durch die gemessenen Werte', async () => {
-    const e = await reservieren(nutzer, null, MODELL, 12_000, 1_200);
+    const e = await reservieren({
+      userId: nutzer,
+      sessionId: null,
+      modell: MODELL,
+      maxEingabeTokens: 12_000,
+      maxAusgabeTokens: 1_200,
+    });
     expect('id' in e).toBe(true);
     if (!('id' in e)) return;
 
@@ -125,7 +193,13 @@ describe('Abrechnung', () => {
      * Fehlende Messwerte sind keine Nullkosten: Der Anbieter kann die
      * Anfrage verarbeitet haben, auch wenn die Antwort nie ankam.
      */
-    const e = await reservieren(nutzer, null, MODELL, 12_000, 1_200);
+    const e = await reservieren({
+      userId: nutzer,
+      sessionId: null,
+      modell: MODELL,
+      maxEingabeTokens: 12_000,
+      maxAusgabeTokens: 1_200,
+    });
     if (!('id' in e)) throw new Error('Reservierung fehlt');
 
     const reserviert = (await nutzungsstand()).tagUsd;

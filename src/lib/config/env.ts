@@ -36,6 +36,22 @@ const Schema = z.object({
   BUDGET_MONAT_USD: z.coerce.number().positive().default(10),
   BUDGET_TAG_USD: z.coerce.number().positive().default(2),
   FRAGEN_JE_SITZUNG: z.coerce.number().int().positive().default(10),
+  /*
+   * Die öffentliche Demo. Standardmässig **aus**: Eine Installation, die
+   * jemand nachbaut, soll nicht versehentlich einen fremden Schlüssel an
+   * einer offenen Seite hängen haben.
+   */
+  DEMO_AKTIV: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((wert) => wert === 'true'),
+  DEMO_KONTO: z.email().default('demo@nordstern.test'),
+  /*
+   * Fragen je Herkunft und Tag. Die eigentliche Schranke bleibt der
+   * Tagesdeckel in Dollar — diese Zahl verhindert nur, dass eine einzelne
+   * Quelle ihn allein aufbraucht.
+   */
+  DEMO_FRAGEN_JE_HERKUNFT_TAG: z.coerce.number().int().positive().default(30),
   TRUST_PROXY: z
     .enum(['true', 'false'])
     .default('false')
@@ -48,10 +64,24 @@ const Geprueft = Schema.refine(
     path: ['ANTHROPIC_API_KEY'],
     error: 'AI_MODE=live braucht ANTHROPIC_API_KEY. Ohne Schlüssel bleibt AI_MODE=demo.',
   },
-).refine((werte) => werte.BUDGET_TAG_USD <= werte.BUDGET_MONAT_USD, {
-  path: ['BUDGET_TAG_USD'],
-  error: 'Der Tagesdeckel darf nicht über dem Monatsdeckel liegen.',
-});
+)
+  .refine((werte) => werte.BUDGET_TAG_USD <= werte.BUDGET_MONAT_USD, {
+    path: ['BUDGET_TAG_USD'],
+    error: 'Der Tagesdeckel darf nicht über dem Monatsdeckel liegen.',
+  })
+  /*
+   * Eine offene Demo ohne Herkunftserkennung hinter einem Reverse Proxy
+   * hätte für alle Besucher denselben Zähler: Das Limit je Herkunft griffe
+   * nie, und ein einzelner Besucher könnte den Tagesdeckel allein leeren.
+   */
+  .refine(
+    (werte) => !werte.DEMO_AKTIV || werte.TRUST_PROXY || process.env.NODE_ENV !== 'production',
+    {
+      path: ['DEMO_AKTIV'],
+      error:
+        'DEMO_AKTIV=true braucht in Produktion TRUST_PROXY=true — sonst zählt das Limit je Herkunft alle Besucher als einen.',
+    },
+  );
 
 export type Env = z.infer<typeof Schema>;
 

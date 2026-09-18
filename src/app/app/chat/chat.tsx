@@ -19,7 +19,19 @@ import type { Dokument, Eintrag, Schritt, StromZeile } from './typen';
 /** Wie viele frühere Wechsel als Gesprächskontext mitgehen. */
 const VERLAUF_TIEFE = 6;
 
-export function Chat({ dokumente }: { dokumente: Dokument[] }) {
+export type ChatEigenschaften = {
+  dokumente: Dokument[];
+  /** Endpunkt, der den NDJSON-Strom liefert. */
+  endpunkt?: string;
+  /**
+   * Darf die fragende Person die Dokumente auswählen? In der öffentlichen
+   * Demo nicht: Dort setzt der Server die Auswahl, und der Browser schickt
+   * weder IDs noch Gesprächsverlauf.
+   */
+  auswaehlbar?: boolean;
+};
+
+export function Chat({ dokumente, endpunkt = '/api/chat', auswaehlbar = true }: ChatEigenschaften) {
   const [gewaehlt, setGewaehlt] = useState<string[]>(() => dokumente.map((d) => d.id));
   const [eintraege, setEintraege] = useState<Eintrag[]>([]);
   const [schritte, setSchritte] = useState<Schritt[]>([]);
@@ -32,7 +44,8 @@ export function Chat({ dokumente }: { dokumente: Dokument[] }) {
     // aussen anders belegt, soll hier nicht als «[object Object]» landen.
     const eingabe = formular.get('frage');
     const frage = typeof eingabe === 'string' ? eingabe.trim() : '';
-    if (frage === '' || gewaehlt.length === 0 || laeuft) return;
+    if (frage === '' || laeuft) return;
+    if (auswaehlbar && gewaehlt.length === 0) return;
 
     const eigene: Eintrag = { id: crypto.randomUUID(), art: 'frage', text: frage };
     const bisher = [...eintraege, eigene];
@@ -42,14 +55,14 @@ export function Chat({ dokumente }: { dokumente: Dokument[] }) {
     if (feld.current) feld.current.value = '';
 
     try {
-      const antwort = await fetch('/api/chat', {
+      const antwort = await fetch(endpunkt, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          frage,
-          documentIds: gewaehlt,
-          verlauf: alsVerlauf(eintraege),
-        }),
+        body: JSON.stringify(
+          auswaehlbar
+            ? { frage, documentIds: gewaehlt, verlauf: alsVerlauf(eintraege) }
+            : { frage },
+        ),
       });
 
       if (!antwort.ok || !antwort.body) {
@@ -97,7 +110,18 @@ export function Chat({ dokumente }: { dokumente: Dokument[] }) {
 
   return (
     <>
-      <DokumentWahl dokumente={dokumente} gewaehlt={gewaehlt} setzen={setGewaehlt} />
+      {auswaehlbar ? (
+        <DokumentWahl dokumente={dokumente} gewaehlt={gewaehlt} setzen={setGewaehlt} />
+      ) : (
+        <section className="border border-edge bg-surface p-4">
+          <h2 className="text-lg leading-tight">Durchsuchte Dokumente</h2>
+          <ul className="mt-2 flex flex-col gap-1 text-ink-soft">
+            {dokumente.map((dokument) => (
+              <li key={dokument.id}>{dokument.filename}</li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <ol className="flex flex-col gap-4">
         {eintraege.map((eintrag) => (
@@ -124,7 +148,7 @@ export function Chat({ dokumente }: { dokumente: Dokument[] }) {
 
       <form action={fragen} className="flex flex-col gap-3 border border-edge bg-surface p-4">
         <label className="flex flex-col gap-2">
-          <span>Frage an die ausgewählten Dokumente</span>
+          <span>{auswaehlbar ? 'Frage an die ausgewählten Dokumente' : 'Deine Frage'}</span>
           <textarea
             ref={feld}
             name="frage"
@@ -137,7 +161,7 @@ export function Chat({ dokumente }: { dokumente: Dokument[] }) {
 
         <button
           type="submit"
-          disabled={laeuft || gewaehlt.length === 0}
+          disabled={laeuft || (auswaehlbar && gewaehlt.length === 0)}
           className="min-h-11 self-start bg-[var(--action-bg)] px-4 py-2 text-[var(--action-ink)] disabled:opacity-60"
         >
           {laeuft ? 'Wird beantwortet …' : 'Fragen'}
@@ -176,6 +200,13 @@ async function stromLesen(
       je(JSON.parse(zeile) as StromZeile);
     }
   }
+
+  /*
+   * Was ohne abschliessenden Zeilenumbruch endet, wäre sonst verloren. Das
+   * ist kein Randfall: Eine Antwort, die als schlichtes JSON kommt — etwa
+   * eine erreichte Budgetgrenze — hat gar keinen Umbruch.
+   */
+  if (rest.trim() !== '') je(JSON.parse(rest) as StromZeile);
 }
 
 function schrittAnfuegen(alt: Schritt[], phase: Schritt['phase'], jetzt: number): Schritt[] {

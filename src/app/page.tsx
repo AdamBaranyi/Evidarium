@@ -1,6 +1,12 @@
 import Link from 'next/link';
+import { demoBereit } from '@/lib/demo/korpus';
 
-export default function StartPage() {
+// Ob die Demo bereitsteht, entscheidet sich am Korpus in der Datenbank.
+export const dynamic = 'force-dynamic';
+
+export default async function StartPage() {
+  const demo = await demoBereit();
+
   return (
     <main className="mx-auto flex min-h-dvh max-w-2xl flex-col justify-center gap-6 px-4 py-12">
       <h1 className="text-2xl leading-tight">Evidarium</h1>
@@ -11,9 +17,17 @@ export default function StartPage() {
         Das Produkt verspricht Nachprüfbarkeit, nicht Unfehlbarkeit: Jede Aussage trägt eine
         Fundstelle, die sich im Originaldokument öffnen lässt.
       </p>
-      <Link href="/login" className="text-beleg underline underline-offset-4">
-        Anmelden
-      </Link>
+
+      <p className="flex flex-wrap gap-x-6 gap-y-2">
+        {demo && (
+          <Link href="/demo" className="text-beleg underline underline-offset-4">
+            Ohne Anmeldung ausprobieren
+          </Link>
+        )}
+        <Link href="/login" className="text-beleg underline underline-offset-4">
+          Anmelden
+        </Link>
+      </p>
     </main>
   );
 }

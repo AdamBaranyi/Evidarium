@@ -35,7 +35,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'bun run build && bun run start',
+    // In der CI hat der Build-Schritt davor schon gebaut; ein zweiter Build
+    // kostet nur Zeit.
+    command: process.env.CI ? 'bun run start' : 'bun run build && bun run start',
     url: 'http://localhost:3100',
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

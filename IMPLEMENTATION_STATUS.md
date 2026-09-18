@@ -111,8 +111,8 @@ für angemeldete Personen), drei Testbreiten, Fallstudie, Deployment auf vps1.
 | Prüfer als reine Funktion, mit eigenen Tests             | fertig |
 | Prompt-Injection: markiert **und** unmarkiert            | fertig |
 | Protokoll `docs/EVALUATION.md` mit Antworten im Wortlaut | fertig |
-| Öffentliche Demo, Upload nur für angemeldete Personen    | offen  |
-| Drei Prüfbreiten als Test                                | offen  |
+| Öffentliche Demo, Upload nur für angemeldete Personen    | fertig |
+| Drei Prüfbreiten als Test, auch in der CI                | fertig |
 | Fallstudie mit «Bewusst nicht gebaut»                    | offen  |
 | Deployment auf vps1                                      | offen  |
 
@@ -122,9 +122,17 @@ Quelle und lösen den Widerspruch nicht auf. Kein Vorkommen des Freigabeworts
 aus der unmarkierten Injektion. Gegenprobe: erwartete Seite absichtlich
 verfälscht, Fall scheitert mit «Fundstelle fehlt».
 
+**Demo vom 18.09.2026:** `/demo` beantwortet Fragen ohne Anmeldung gegen
+denselben Korpus, gegen den die Evaluation läuft. Die Auswahl setzt der
+Server, es gibt keinen Upload und keinen Gesprächsverlauf. Nachgewiesen im
+Browser: «Wie lange werden Sicherungen aufbewahrt?» ergibt den Widerspruch mit
+beiden Quellen, 3,5 s, 0,0037 USD. 24 E2E-Prüfungen auf 320, 768 und 1440 —
+jetzt auch in der CI, vorher nur auf dem Entwicklungsrechner. 81 Tests.
+
 Befehle: `bun scripts/korpus-erzeugen.ts` erzeugt den Korpus,
 `bun --env-file=.env scripts/evaluieren.ts` prüft; einzelne Fälle über
 `… scripts/evaluieren.ts E09 E10`.
+`bun --env-file=.env scripts/demo-korpus-laden.ts` befüllt das Demo-Konto.
 
 ## Nach Tag 5 — Visuelle Identität
 

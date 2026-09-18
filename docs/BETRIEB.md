@@ -34,6 +34,21 @@ lokalen Befehl auf der Maschine, auf der die Anwendung läuft:
 ````bash
 bun run konto:anlegen adam@example.test
 
+## Oeffentliche Demo
+
+```bash
+bun --env-file=.env scripts/demo-korpus-laden.ts   # Demo-Konto befuellen
+```
+
+Danach `DEMO_AKTIV=true` setzen und die Anwendung neu starten. In Produktion
+verlangt die Konfigurationspruefung zusaetzlich `TRUST_PROXY=true` — ohne sie
+haetten hinter einem Reverse Proxy alle Besucher dieselbe Herkunft, und das
+Limit je Herkunft zaehlte alle als einen.
+
+Die Demo laeuft auf demselben Schluessel und demselben Tagesdeckel wie der
+angemeldete Betrieb. Wer den Deckel erreicht, sperrt beide — das ist gewollt:
+ein Deckel, zwei Wege, keine getrennte Buchhaltung.
+
 ## Evaluation
 
 ```bash
