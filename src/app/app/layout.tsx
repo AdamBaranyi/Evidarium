@@ -16,7 +16,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           aria-label="Hauptnavigation"
           className="mx-auto flex w-full max-w-6xl flex-wrap items-baseline gap-x-7 gap-y-2 px-6 py-4"
         >
-          <Link href="/app/chat" className="font-blatt text-lg">
+          <Link href="/app/chat" className="wortmarke">
             Evidarium
           </Link>
 

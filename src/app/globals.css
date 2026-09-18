@@ -37,6 +37,11 @@
 
   --color-aktion-grund: var(--aktion-grund);
   --color-aktion-tinte: var(--aktion-tinte);
+
+  --color-urteil-belegt: var(--urteil-belegt);
+  --color-urteil-teilweise: var(--urteil-teilweise);
+  --color-urteil-keine: var(--urteil-keine);
+  --color-urteil-widerspruch: var(--urteil-widerspruch);
 }
 
 html {
@@ -106,6 +111,35 @@ body {
 }
 
 /* Die Seitenzahl sitzt wie eine Kolumnenziffer in der Ecke des Blatts. */
+/*
+ * Die Wortmarke ist der Name des Produkts und darf so gross sein. Sie steht
+ * in der Dokumentschrift — als einzige Stelle ausserhalb eines Blatts, weil
+ * der Name den Ort meint, an dem Belege liegen.
+ */
+.wortmarke {
+  font-family: var(--schrift-blatt);
+  font-size: clamp(24px, 2.6vw, 34px);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+/*
+ * Der Grund ist nicht schwarz, sondern eine Fläche mit Licht: eine weiche
+ * Quelle oben links, wie über einem Schreibtisch. Kein Farbverlauf als
+ * Schmuck — es gibt nur die eine Lichtfarbe, und sie macht den Raum, in dem
+ * das Blatt liegen kann.
+ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(70% 55% at 18% 0%, rgb(255 250 238 / 0.07), transparent 65%),
+    radial-gradient(50% 45% at 92% 8%, rgb(255 246 230 / 0.04), transparent 70%);
+}
+
 .folio {
   font-family: var(--schrift-blatt);
   font-size: var(--text-body);

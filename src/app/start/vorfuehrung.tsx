@@ -2,65 +2,33 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useWenigerBewegung } from '@/lib/ui/bewegung';
+import { SCHRITTE, SZENEN, TAKT } from './szenen';
 
 /*
- * Die Vorführung auf der Startseite: ein Fenster, in dem eine Frage
- * tatsächlich durchläuft — einbetten, suchen, antworten, Belege prüfen —,
- * bis die Antwort mit ihrem Blatt dasteht.
+ * Die Vorführung auf der Startseite: ein Fenster, in dem Fragen tatsächlich
+ * durchlaufen — einbetten, suchen, antworten, Belege prüfen —, bis die
+ * Antwort mit ihren Blättern dasteht.
+ *
+ * Zwei Fälle im Wechsel, und der zweite ist der Punkt: Widersprechen sich
+ * zwei Dokumente, zeigt Evidarium beide und löst nichts auf.
  *
  * **Warum das hier laufen darf, obwohl sonst nichts von allein läuft:** Es ist
  * erklärende Bewegung auf einer Startseite, der einzige Ort, an dem der
- * `animate`-Skill das vorsieht. Sie zeigt den Ablauf, den man sonst
- * beschreiben müsste, und sie zeigt ihn mit den Zeiten, die er wirklich
- * braucht — der Modellaufruf dauert Sekunden, und das steht so da.
- *
- * Drei Regeln, die die Vorführung einhält:
- * - Sie läuft **nicht**, wenn sie niemand sieht (IntersectionObserver).
- * - Sie läuft **nicht** bei `prefers-reduced-motion`; dann steht sofort das
- *   Endbild da, vollständig und lesbar.
- * - Sie behauptet nichts: Die Sätze stammen aus dem Korpus, gegen den die
- *   Evaluation läuft.
+ * `animate`-Skill sie vorsieht. Sie läuft nicht, wenn sie niemand sieht, und
+ * nicht bei `prefers-reduced-motion` — dann steht sofort das fertige Bild da.
  */
-
-type Schritt = { text: string; dauer: string };
-
-const SCHRITTE: Schritt[] = [
-  { text: 'Frage wird eingebettet', dauer: '0.0 s' },
-  { text: 'Dokumente werden durchsucht', dauer: '0.0 s' },
-  { text: 'Modell formuliert die Antwort', dauer: '2.4 s' },
-  { text: 'Belege werden geprüft', dauer: '0.0 s' },
-];
-
-const FRAGE = 'Wer hilft beim Onboarding?';
-const AUSSAGE = 'Beim Onboarding hilft Mara Keller.';
-const VOR = 'Die ersten beiden Wochen sind als Einarbeitung geplant. ';
-const ZITAT = 'Beim Onboarding hilft Mara Keller.';
-const NACH = ' Zugaenge werden vor dem ersten Arbeitstag vorbereitet.';
-
-/** Die Marken der Vorführung in Millisekunden, vom Start der Schleife an. */
-const TAKT = {
-  frage: 300,
-  schritt: [900, 1300, 1700, 4300] as const,
-  fertig: [1300, 1700, 4300, 4700] as const,
-  aussage: 5000,
-  blatt: 5250,
-  markierung: 5900,
-  /*
-   * Das fertige Bild steht lange: Es ist das, was man sieht, wenn man auf die
-   * Seite kommt, und das, was auf einem Bildschirmfoto landet. Erst danach
-   * blendet der Durchlauf aus und beginnt von vorn — ohne das Ausblenden
-   * stünde das Fenster einen Moment leer da, und das sähe kaputt aus.
-   */
-  verblassen: 13600,
-  ende: 14200,
-};
-
 export function Vorfuehrung() {
-  const [zeit, setZeit] = useState(0);
+  /*
+   * **Eine** Uhr, und die Szene wird daraus berechnet.
+   *
+   * Die erste Fassung schaltete die Szene im Updater von `setZeit` weiter —
+   * ein Zustandswechsel im Updater eines anderen Zustands. Updater müssen
+   * rein sein; der Wechsel kam nie an. Derselbe Fehler wie am 17.09.2026 bei
+   * den Schrittzeiten, nur an anderer Stelle.
+   */
+  const [uhr, setUhr] = useState(0);
   const [sichtbar, setSichtbar] = useState(false);
   const bereich = useRef<HTMLDivElement>(null);
-
-  // Ohne Bewegungswunsch steht sofort das Endbild da.
   const ruhig = useWenigerBewegung();
 
   useEffect(() => {
@@ -75,55 +43,83 @@ export function Vorfuehrung() {
 
   useEffect(() => {
     if (ruhig || !sichtbar) return;
-    // Ein Takt von 100 ms genügt: Die Marken liegen weit auseinander, und
-    // ein feinerer Takt kostet nur Arbeit, die niemand sieht.
-    const uhr = setInterval(() => setZeit((t) => (t > TAKT.ende ? 0 : t + 100)), 100);
-    return () => clearInterval(uhr);
+    const takt = setInterval(() => setUhr((wert) => wert + 100), 100);
+    return () => clearInterval(takt);
   }, [ruhig, sichtbar]);
 
-  const t = ruhig ? TAKT.markierung : zeit;
+  const runde = TAKT.ende + 100;
+  const szene = Math.floor(uhr / runde) % SZENEN.length;
+  const fall = SZENEN[szene] ?? SZENEN[0];
+  if (!fall) return null;
+
+  const t = ruhig ? TAKT.markierung : uhr % runde;
   const da = (marke: number) => t >= marke;
   const geht = !ruhig && t >= TAKT.verblassen;
 
   return (
     <div ref={bereich} className={`vorfuehrung ${geht ? 'geht' : ''}`}>
+      <div aria-hidden className="archiv">
+        <span />
+        <span />
+        <span />
+        <span />
+      </div>
+
       <div className="vorfuehrung-fenster">
         <div className="vorfuehrung-leiste">
           <span className="font-blatt">Evidarium</span>
-          <span className="text-tinte-leise">Teamhandbuch.pdf</span>
+          <span className="text-tinte-leise">
+            {fall.blaetter.length === 1
+              ? '1 Quelle geprüft'
+              : `${fall.blaetter.length} Quellen geprüft`}
+          </span>
         </div>
 
         <div className="vorfuehrung-inhalt">
-          <p className={`vorfuehrung-frage ${da(TAKT.frage) ? 'ist-da' : ''}`}>{FRAGE}</p>
+          <p className={`vorfuehrung-frage ${da(TAKT.frage) ? 'ist-da' : ''}`}>{fall.frage}</p>
 
           <ol className="vorfuehrung-schritte">
             {SCHRITTE.map((schritt, i) => {
               const beginn = TAKT.schritt[i] ?? 0;
               const fertig = TAKT.fertig[i] ?? 0;
+              const dauer = i === 2 ? fall.modellDauer : '0.0 s';
               return (
-                <li key={schritt.text} className={da(beginn) ? 'ist-da' : ''}>
-                  <span className={da(fertig) ? 'text-tinte-leise' : ''}>{schritt.text}</span>
-                  <span className="text-tinte-leise">{da(fertig) ? schritt.dauer : '…'}</span>
+                <li key={schritt} className={da(beginn) ? 'ist-da' : ''}>
+                  <span className={da(fertig) ? 'text-tinte-leise' : ''}>{schritt}</span>
+                  <span className="text-tinte-leise">{da(fertig) ? dauer : '…'}</span>
                 </li>
               );
             })}
           </ol>
 
-          <p className={`vorfuehrung-aussage ${da(TAKT.aussage) ? 'ist-da' : ''}`}>{AUSSAGE}</p>
+          <div className={`vorfuehrung-urteil ${da(TAKT.urteil) ? 'ist-da' : ''}`}>
+            <span aria-hidden className="vorfuehrung-balken" style={{ background: fall.farbe }} />
+            <div>
+              <p className="text-tinte-leise">{fall.urteil}</p>
+              <p className="vorfuehrung-aussage-text">{fall.aussage}</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Das Blatt legt sich über das Fenster — so wie der Beleg über die Antwort. */}
-      <div className={`vorfuehrung-blatt blatt ${da(TAKT.blatt) ? 'ist-da' : ''}`}>
-        <span className="flex items-baseline justify-between gap-4 border-b border-blatt-kante pb-2">
-          <span className="text-blatt-leise">Teamhandbuch.pdf</span>
-          <span className="folio shrink-0">2</span>
-        </span>
-        <p className="mt-3 text-blatt-leise">
-          {VOR}
-          <mark className={da(TAKT.markierung) ? 'ist-da' : ''}>{ZITAT}</mark>
-          {NACH}
-        </p>
+      {/* Die Blätter legen sich über das Fenster — so wie der Beleg über die Antwort. */}
+      <div className="vorfuehrung-blaetter">
+        {fall.blaetter.map((blatt, i) => (
+          <div
+            key={blatt.datei}
+            className={`vorfuehrung-blatt blatt ${da(TAKT.blatt + i * 250) ? 'ist-da' : ''}`}
+          >
+            <span className="flex items-baseline justify-between gap-4 border-b border-blatt-kante pb-2">
+              <span className="text-blatt-leise">{blatt.datei}</span>
+              <span className="folio shrink-0">{blatt.seite}</span>
+            </span>
+            <p className="mt-3 text-blatt-leise">
+              {blatt.vor}
+              <mark className={da(TAKT.markierung + i * 250) ? 'ist-da' : ''}>{blatt.zitat}</mark>
+              {blatt.nach}
+            </p>
+          </div>
+        ))}
       </div>
     </div>
   );

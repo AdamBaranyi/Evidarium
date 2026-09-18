@@ -54,3 +54,16 @@ export function herkunft(stelle: {
   if (stelle.lineEnd === stelle.lineStart) return `Zeile ${stelle.lineStart}`;
   return `Zeilen ${stelle.lineStart}–${stelle.lineEnd}`;
 }
+
+/**
+ * Die Farbe des Urteils.
+ *
+ * Sie steht **neben** dem Wort, nie an seiner Stelle: Wer Farben nicht
+ * unterscheidet, liest dasselbe. Siehe `--urteil-*` in tokens.css.
+ */
+export const KATEGORIEFARBE: Record<Antwort['kategorie'], string> = {
+  belegt: 'bg-urteil-belegt',
+  teilweise_belegt: 'bg-urteil-teilweise',
+  keine_grundlage: 'bg-urteil-keine',
+  widerspruch: 'bg-urteil-widerspruch',
+};

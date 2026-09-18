@@ -2,7 +2,7 @@
 
 import { kostenSchaetzen } from '@/lib/budget/preise';
 import type { PanelInhalt } from './quellen-panel';
-import { KATEGORIEERKLAERUNG, KATEGORIETEXT, type Antwort } from './typen';
+import { KATEGORIEERKLAERUNG, KATEGORIEFARBE, KATEGORIETEXT, type Antwort } from './typen';
 
 /*
  * Eine geprüfte Antwort.
@@ -34,12 +34,19 @@ export function AntwortKarte({
 
   return (
     <article className="flex flex-col gap-5">
-      <header className="flex flex-col gap-1">
-        <h3 className="text-lg leading-tight">{KATEGORIETEXT[antwort.kategorie]}</h3>
-        <p className="max-w-[var(--mass)] text-tinte-leise">
-          {KATEGORIEERKLAERUNG[antwort.kategorie]}
-          {antwort.demo && ' Diese Antwort stammt aus dem Demo-Adapter, es lief kein Modell.'}
-        </p>
+      <header className="flex gap-3">
+        {/* Der Farbbalken ist die Zugabe, das Wort daneben die Aussage. */}
+        <span
+          aria-hidden
+          className={`mt-1 w-[3px] shrink-0 ${KATEGORIEFARBE[antwort.kategorie]}`}
+        />
+        <div className="flex flex-col gap-1">
+          <h3 className="text-lg leading-tight">{KATEGORIETEXT[antwort.kategorie]}</h3>
+          <p className="max-w-[var(--mass)] text-tinte-leise">
+            {KATEGORIEERKLAERUNG[antwort.kategorie]}
+            {antwort.demo && ' Diese Antwort stammt aus dem Demo-Adapter, es lief kein Modell.'}
+          </p>
+        </div>
       </header>
 
       {antwort.aussagen.map((aussage, i) => (

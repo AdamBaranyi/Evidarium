@@ -93,6 +93,26 @@
 
   --aktion-grund: #ece8e1;
   --aktion-tinte: #23211e;
+
+  /*
+   * **Farbe für das Urteil.**
+   *
+   * Bis zum 18.09.2026 hatte dieser Entwurf gar keine Farbe: Der Beleg war
+   * allein durch sein Material kenntlich. Adams Befund an der fertigen Seite:
+   * zu arm. Er hat recht — und es gibt eine Stelle, an der Farbe nicht
+   * Schmuck ist, sondern Inhalt: die vier Urteile.
+   *
+   * Ob eine Antwort belegt, halb belegt, unbelegt oder widersprüchlich ist,
+   * ist das Einzige, was diese Anwendung wirklich beurteilt. Vier Zustände,
+   * vier Farben, sonst keine. Knöpfe tragen weiterhin Tinte, Links sind
+   * unterstrichen, der Fokusring bleibt farblos — wer Farben nicht
+   * unterscheiden kann, verliert nichts: Neben jeder Farbe steht das Urteil
+   * als Wort.
+   */
+  --urteil-belegt: #79c295;
+  --urteil-teilweise: #e3b45c;
+  --urteil-keine: #9aa0a6;
+  --urteil-widerspruch: #e8625f;
 }
 
 @media (prefers-color-scheme: light) {
@@ -119,5 +139,11 @@
 
     --aktion-grund: #23211e;
     --aktion-tinte: #f5f3ee;
+
+    /* Hell dunkler gesetzt: auf hellem Grund braucht Farbe mehr Tiefe. */
+    --urteil-belegt: #1d7a4c;
+    --urteil-teilweise: #9a6a10;
+    --urteil-keine: #5d6268;
+    --urteil-widerspruch: #b8352f;
   }
 }

@@ -17,7 +17,7 @@ export default function LoginPage() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-5xl flex-col justify-center gap-10 px-6 py-12 md:grid md:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] md:items-center md:gap-14">
       <div className="flex flex-col gap-6">
-        <p className="font-blatt text-lg">Evidarium</p>
+        <p className="wortmarke">Evidarium</p>
         <h1 className="text-xl leading-[var(--line-title)]">Anmelden</h1>
         <LoginForm />
         <p className="text-tinte-leise">

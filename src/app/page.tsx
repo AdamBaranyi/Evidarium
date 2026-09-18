@@ -22,7 +22,7 @@ export default async function StartPage() {
     <div className="flex min-h-dvh flex-col overflow-x-clip">
       <header className="border-b border-kante bg-flaeche-tief">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-baseline gap-x-7 gap-y-2 px-6 py-4">
-          <p className="font-blatt text-lg">Evidarium</p>
+          <p className="wortmarke">Evidarium</p>
           <Link href="/login" className="ms-auto underline underline-offset-4">
             Anmelden
           </Link>

@@ -25,7 +25,7 @@ export default async function DemoPage() {
     <div className="flex min-h-dvh flex-col">
       <header className="border-b border-kante bg-flaeche-tief">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-baseline gap-x-7 gap-y-2 px-6 py-4">
-          <Link href="/" className="font-blatt text-lg">
+          <Link href="/" className="wortmarke">
             Evidarium
           </Link>
           <p className="text-tinte-leise">Demo</p>

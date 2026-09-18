@@ -528,3 +528,41 @@ Deko-Textur und schwebender Suchleiste, und landet damit im Cluster, den
 `frontend-design` beschreibt. Übernommen wurde das Prinzip, nicht die
 Ausführung: Fenster, Überlagerung, Licht als Tiefe statt Farbverlauf als
 Schmuck.
+
+## E32 — Farbe fürs Urteil, Hintergrund aus dem Archiv
+
+_18.09.2026._ Revision von E30. Dort hatte der Entwurf **gar keine** Farbe:
+Der Beleg war allein durch sein Material kenntlich. Adams Befund an der
+fertigen Seite: «zu poor», kein Hintergrund, Wortmarke zu klein. Zutreffend.
+
+Geändert wurde nicht die Richtung, sondern die Dichte — und die Fülle kommt
+aus dem Produkt, nicht aus Dekor:
+
+**Farbe hat genau eine Aufgabe: das Urteil.** Belegt, teilweise belegt, keine
+Grundlage, Widerspruch — vier Zustände, vier Farben, sonst keine. Das ist das
+Einzige, was diese Anwendung wirklich beurteilt; Statusfarben, die etwas
+bedeuten, sind kein Schmuck. Knöpfe tragen weiterhin Tinte, Links sind
+unterstrichen, der Fokusring bleibt farblos. **Neben jeder Farbe steht das
+Urteil als Wort** — wer Farben nicht unterscheidet, verliert nichts.
+
+**Der Hintergrund ist das Archiv:** angedeutete Blätter hinter dem Fenster,
+gekippt, unscharf. Der Grund ist damit aus dem Material des Produkts gebaut
+und nicht aus einer Textur, die auf jeder Seite ginge. Dazu eine weiche
+Lichtquelle oben links, wie über einem Schreibtisch.
+
+**Die Vorführung zeigt zwei Fälle im Wechsel**, und der zweite ist der Punkt:
+Zwei Richtlinien widersprechen sich, Evidarium zeigt beide Blätter mit je
+eigener Quelle und löst nichts auf. Mehr Inhalt statt mehr Schmuck — und
+nebenbei die zweite Farbe.
+
+**Nicht übernommen** wurde die Vorlage, die Adam als Beispiel schickte
+(Dribbble, «AI Voice Assistant SaaS»): Pastellverlauf, Glasflächen,
+Pflanzenfoto. Das ist der Trend-Standard, den seine eigene Recherche in
+`wissen-design` als Falle führt. Übernommen wurde stattdessen das Prinzip
+starker Produktseiten: das Produkt selbst zeigen, mit Tiefe und Überlagerung.
+
+**Fehler dabei, gefunden beim Hinsehen:** Die Szene wechselte nicht. Der
+Wechsel stand im Updater von `setZeit` — ein Zustandswechsel im Updater eines
+anderen Zustands, also unrein, und er kam nie an. Jetzt läuft **eine** Uhr,
+und die Szene wird daraus berechnet. Derselbe Fehlertyp wie bei den
+Schrittzeiten am 17.09.2026.

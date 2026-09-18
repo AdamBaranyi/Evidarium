@@ -28,14 +28,82 @@
  * vorn. Nur Deckkraft, kein Weg: Es ist kein Auftritt, sondern ein Abgang.
  */
 .vorfuehrung .vorfuehrung-inhalt,
-.vorfuehrung .vorfuehrung-blatt {
-  transition-property: opacity, transform;
+.vorfuehrung .vorfuehrung-blaetter {
+  transition-property: opacity;
 }
 
 .vorfuehrung.geht .vorfuehrung-inhalt,
-.vorfuehrung.geht .vorfuehrung-blatt {
+.vorfuehrung.geht .vorfuehrung-blaetter {
   opacity: 0;
   transition: opacity var(--dauer-mittel) var(--ease-out);
+}
+
+/*
+ * **Das Archiv hinter dem Fenster.**
+ *
+ * Drei angedeutete Blätter, gekippt, unscharf, kaum sichtbar — der Stapel, aus
+ * dem die Antwort kommt. Der Hintergrund ist damit aus dem Material des
+ * Produkts gebaut und nicht aus einer Textur, die auf jeder Seite ginge.
+ *
+ * Nur ab Tablettbreite: Darunter fehlt der Platz, und angeschnittene Blätter
+ * am Rand sähen nach Fehler aus.
+ */
+.archiv {
+  display: none;
+}
+
+@media (min-width: 48rem) {
+  .archiv {
+    display: block;
+    position: absolute;
+    inset: -22% -16% -26% -16%;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .archiv span {
+    position: absolute;
+    display: block;
+    background: var(--blatt);
+    border-radius: 3px;
+    filter: blur(3px);
+  }
+
+  .archiv span:nth-child(1) {
+    width: 30%;
+    height: 62%;
+    top: 4%;
+    left: -2%;
+    opacity: 0.11;
+    transform: rotate(-9deg);
+  }
+
+  .archiv span:nth-child(2) {
+    width: 26%;
+    height: 54%;
+    top: 22%;
+    right: 0%;
+    opacity: 0.08;
+    transform: rotate(7deg);
+  }
+
+  .archiv span:nth-child(3) {
+    width: 34%;
+    height: 46%;
+    bottom: 2%;
+    left: 16%;
+    opacity: 0.06;
+    transform: rotate(-3deg);
+  }
+
+  .archiv span:nth-child(4) {
+    width: 20%;
+    height: 40%;
+    bottom: 12%;
+    right: 18%;
+    opacity: 0.05;
+    transform: rotate(12deg);
+  }
 }
 
 .vorfuehrung-fenster {
@@ -77,7 +145,7 @@
  * neu zu starten.
  */
 .vorfuehrung-frage,
-.vorfuehrung-aussage,
+.vorfuehrung-urteil,
 .vorfuehrung-schritte > li,
 .vorfuehrung-blatt {
   opacity: 0;
@@ -88,7 +156,7 @@
 }
 
 .vorfuehrung-frage.ist-da,
-.vorfuehrung-aussage.ist-da,
+.vorfuehrung-urteil.ist-da,
 .vorfuehrung-schritte > li.ist-da,
 .vorfuehrung-blatt.ist-da {
   opacity: 1;
@@ -116,10 +184,22 @@
   gap: 1.5rem;
 }
 
-.vorfuehrung-aussage {
+/* Urteil und Aussage gehören zusammen: Farbbalken, Wort, Satz. */
+.vorfuehrung-urteil {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.vorfuehrung-balken {
+  width: 3px;
+  flex: none;
+  background: var(--urteil-belegt);
+}
+
+.vorfuehrung-aussage-text {
   font-size: var(--text-lead);
   /* Schmal genug, dass das aufliegende Blatt den Satz nicht schneidet. */
-  max-width: 24ch;
+  max-width: 22ch;
 }
 
 /*
@@ -127,21 +207,36 @@
  * Tablettbreite: Darunter fehlt der Platz, und ein überlappendes Blatt
  * verdeckte den Ablauf, den es belegen soll.
  */
-.vorfuehrung-blatt {
+.vorfuehrung-blaetter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   margin-top: 1rem;
+}
+
+.vorfuehrung-blatt {
   padding: 1.1rem 1.25rem;
 }
 
 @media (min-width: 48rem) {
-  .vorfuehrung-blatt {
+  .vorfuehrung-blaetter {
     position: absolute;
     right: -1.5rem;
     bottom: -3.5rem;
     width: 22rem;
     margin-top: 0;
+  }
+
+  .vorfuehrung-blatt {
     box-shadow:
       0 2px 0 rgb(0 0 0 / 0.2),
       0 26px 50px -24px rgb(0 0 0 / 0.75);
+  }
+
+  /* Ein zweites Blatt liegt versetzt darunter — zwei Quellen, ein Stapel. */
+  .vorfuehrung-blatt:nth-child(2) {
+    margin-right: -1.25rem;
+    margin-left: 1.25rem;
   }
 }
 
