@@ -55,9 +55,10 @@ BUDGET_TAG_USD=2
 FRAGEN_JE_SITZUNG=10
 
 # Pflicht für Impressum, Datenschutz und security.txt. Nie ins Repository.
-# Ohne diese drei Werte startet das Deployment nicht.
-BETREIBER_NAME=
-BETREIBER_ADRESSE=
+# Ohne diese drei Werte startet das Deployment nicht. In Anführungszeichen,
+# weil Name und Adresse Leerzeichen enthalten.
+BETREIBER_NAME=""
+BETREIBER_ADRESSE=""
 BETREIBER_EMAIL=
 
 # Öffentliche Demo. Erst einschalten, wenn der Korpus geladen ist:
@@ -77,7 +78,7 @@ fi
 # online. Lieber hier abbrechen als eine Seite mit leeren Rechtsangaben
 # ausliefern.
 for NAME in BETREIBER_NAME BETREIBER_ADRESSE BETREIBER_EMAIL; do
-  if ! grep -Eq "^${NAME}=.+" "$UMGEBUNG"; then
+  if ! grep -Eq "^${NAME}=\"?[^\"]+" "$UMGEBUNG"; then
     echo "Abbruch: ${NAME} ist in $UMGEBUNG nicht gesetzt." >&2
     exit 1
   fi

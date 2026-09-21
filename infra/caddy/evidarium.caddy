@@ -24,10 +24,14 @@ evidarium.adambaranyi.xyz {
 		-Server
 	}
 
+	# Protokolle nach Zeit löschen, nicht nur nach Grösse: Die
+	# Datenschutzerklärung nennt 14 Tage, und bei wenig Verkehr hielte eine
+	# reine Grössenregel sie monatelang.
 	log {
 		output file /var/log/caddy/evidarium.log {
 			roll_size 10MiB
 			roll_keep 5
+			roll_keep_for 336h
 		}
 	}
 }

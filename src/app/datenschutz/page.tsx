@@ -43,11 +43,16 @@ export default function DatenschutzPage() {
         <li>Kein Verkauf und keine Weitergabe zu anderen Zwecken.</li>
       </ul>
 
-      <h2>Serverprotokolle</h2>
+      <h2>Hosting und Serverprotokolle</h2>
       <p>
-        Der Webserver protokolliert Zeitpunkt, IP-Adresse, aufgerufene Adresse und Browserkennung,
-        um Fehler und Missbrauch zu erkennen. Die Protokolle rotieren und werden nach wenigen Wochen
-        überschrieben. Der Server steht in der Schweiz.
+        Evidarium läuft auf einem eigenen Server bei FSIT (fsit.ch) in der Schweiz. FSIT stellt die
+        Maschine bereit und bearbeitet die Daten in meinem Auftrag.
+      </p>
+      <p>
+        Bei jedem Aufruf speichert der Server technische Daten: IP-Adresse, Datum und Uhrzeit,
+        aufgerufene Adresse, Statuscode, übertragene Datenmenge und Browserkennung. Das ist nötig,
+        um die Seite auszuliefern, Fehler zu finden und Angriffe abzuwehren. Die Daten werden nicht
+        mit anderen zusammengeführt und nach 14 Tagen gelöscht.
       </p>
 
       <h2>Öffentliche Demo</h2>
@@ -88,10 +93,18 @@ export default function DatenschutzPage() {
         </>
       )}
 
+      <h2>Kontakt per E-Mail</h2>
+      <p>
+        Die Kontaktadresse leitet an mein Postfach bei Apple iCloud weiter. Apple bearbeitet Daten
+        in Irland und den USA, für die USA gestützt auf Standarddatenschutzklauseln. Ich bewahre
+        Nachrichten so lange auf, wie es für die Anfrage nötig ist.
+      </p>
+
       <h2>Deine Rechte</h2>
       <p>
-        Du kannst Auskunft über deine Daten verlangen, ihre Berichtigung oder Löschung. Eine E-Mail
-        an die oben genannte Adresse genügt.
+        Du kannst Auskunft über deine Personendaten verlangen, unrichtige Daten berichtigen und
+        Daten löschen lassen, soweit keine Pflicht zur Aufbewahrung besteht. Schreib dafür an die
+        oben genannte Adresse.
       </p>
     </Textseite>
   );
