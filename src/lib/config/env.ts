@@ -76,6 +76,16 @@ const Schema = z.object({
    * Quelle ihn allein aufbraucht.
    */
   DEMO_FRAGEN_JE_HERKUNFT_TAG: z.coerce.number().int().positive().default(30),
+  /*
+   * Angaben für Impressum, Datenschutzerklärung und `security.txt`.
+   *
+   * **Nie im Repository** — sie werden auf dem Server gesetzt. Hier optional,
+   * damit Entwicklung und CI ohne sie laufen; `infra/deploy.sh` startet die
+   * Produktion nicht, solange sie fehlen.
+   */
+  BETREIBER_NAME: leerIstFehlend(z.string().min(1).optional()),
+  BETREIBER_ADRESSE: leerIstFehlend(z.string().min(1).optional()),
+  BETREIBER_EMAIL: leerIstFehlend(z.email().optional()),
   TRUST_PROXY: z
     .enum(['true', 'false'])
     .default('false')

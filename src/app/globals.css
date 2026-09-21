@@ -27,6 +27,7 @@
   --color-tinte-leise: var(--tinte-leise);
   --color-kante: var(--kante);
   --color-kante-stark: var(--kante-stark);
+  --color-rand-bedienung: var(--rand-bedienung);
 
   --color-blatt: var(--blatt);
   --color-blatt-tief: var(--blatt-tief);
@@ -61,13 +62,71 @@ body {
 }
 
 /*
- * Der Fokusring trägt **keine Farbe**, weil in dieser Gestaltung nichts
- * Farbe trägt. Tinte mit Abstand ist auf beiden Gründen gut sichtbar und
- * hängt nicht daran, dass jemand Farben unterscheiden kann.
+ * Der Fokusring trägt die Tinte der Fläche — ausdrücklich **nicht**
+ * `currentColor`.
+ *
+ * Die erste Fassung nahm `currentColor`. Beim hellen Hauptknopf ist die
+ * Schriftfarbe aber genau die Farbe des Seitengrunds, und der Ring lag mit
+ * Abstand ausserhalb des Knopfs auf eben diesem Grund: unsichtbar. Gemessen
+ * am 21.09.2026, Befund B4 im Prüfbericht. Die Tinte der Fläche steht immer
+ * gegen den Grund, auf dem der Ring tatsächlich liegt.
  */
 :focus-visible {
-  outline: 2px solid currentColor;
+  outline: 2px solid var(--tinte);
   outline-offset: 3px;
+}
+
+/* Zwischenüberschriften und Listen auf Textseiten. */
+.textseite h2 {
+  font-size: var(--text-lead);
+  line-height: var(--line-title);
+  margin-top: 1.25rem;
+}
+
+.textseite ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+/*
+ * Die Sprungmarke liegt ausserhalb des Bildes, bis sie den Fokus bekommt —
+ * dann steht sie oben links, gross genug zum Treffen. Nicht `display: none`:
+ * Das würde sie auch für die Tastatur entfernen.
+ */
+.sprungmarke {
+  position: absolute;
+  left: 1rem;
+  top: -10rem;
+  z-index: 50;
+  padding: 0.75rem 1.1rem;
+  background: var(--aktion-grund);
+  color: var(--aktion-tinte);
+}
+
+.sprungmarke:focus {
+  top: 1rem;
+}
+
+/* Auf dem Blatt ist der Grund Papier — dort gilt die Tinte des Blatts. */
+.blatt :focus-visible {
+  outline-color: var(--blatt-tinte);
+}
+
+/*
+ * Eingabefelder mit Rand, der sich abhebt (WCAG 1.4.11). Über die Elemente
+ * selbst statt über Klassen an jeder Stelle: Ein neues Feld, das die Klasse
+ * vergisst, fiele sonst still durch.
+ */
+:where(input:not([type='checkbox'], [type='radio'], [type='hidden']), textarea, select) {
+  border: 1px solid var(--rand-bedienung);
+}
+
+/* Auswahlkästchen: der native Rahmen in derselben Farbe. */
+:where(input[type='checkbox']) {
+  accent-color: var(--tinte);
 }
 
 /*

@@ -89,3 +89,28 @@ describe('Fragen je Herkunft', () => {
     expect(await fragenVonHerkunftHeute(herkunft)).toBe(0);
   });
 });
+
+describe('Kurz speichern', () => {
+  it('entfernt den Herkunfts-Hash nach 24 Stunden und lässt das Protokoll stehen', async () => {
+    const { personendatenKuerzen } = await import('@/lib/betrieb/aufraeumen');
+    const herkunft = `herkunft-alt-${Date.now()}`;
+    const e = await reservieren({
+      userId: nutzer,
+      sessionId: null,
+      originHash: herkunft,
+      modell: MODELL,
+      maxEingabeTokens: 100,
+      maxAusgabeTokens: 10,
+    });
+    if (!('id' in e)) throw new Error('Reservierung fehlt');
+
+    // Zwei Tage in die Zukunft: der Eintrag ist dann älter als 24 Stunden.
+    await personendatenKuerzen(new Date(Date.now() + 2 * 24 * 60 * 60 * 1000));
+
+    const [zeile] = await db.select().from(usageEvents).where(eq(usageEvents.id, e.id));
+    expect(zeile).toBeDefined();
+    expect(zeile?.originHash).toBeNull();
+    // Kosten und Modell bleiben — die braucht die Abrechnung.
+    expect(zeile?.modell).toBe(MODELL);
+  });
+});

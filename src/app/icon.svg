@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Arbeitsfläche, darauf ein Blatt mit einer markierten Zeile: das Produkt in einem Zeichen. -->
+  <rect width="64" height="64" rx="12" fill="#23211e"/>
+  <rect x="17" y="11" width="30" height="42" rx="2" fill="#f7f2e6"/>
+  <rect x="22" y="19" width="20" height="3" rx="1" fill="#b9b19e"/>
+  <rect x="21" y="27" width="22" height="7" rx="1" fill="#e3c77a"/>
+  <rect x="22" y="39" width="17" height="3" rx="1" fill="#b9b19e"/>
+</svg>

@@ -1,9 +1,11 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { herkunftStimmt } from '@/lib/auth/request';
+import { clientHerkunft, herkunftStimmt } from '@/lib/auth/request';
+import { hashOrigin } from '@/lib/auth/session';
 import { dokumentAnlegen } from '@/lib/documents/anlegen';
 import { einlesenBeauftragen } from '@/lib/jobs/queue';
 import { demoKorpus } from '@/lib/demo/korpus';
+import { demoUploadsGesamt, uploadsVonHerkunftHeute } from '@/lib/demo/besucher-dokumente';
 import { ablaufZeitpunkt, DEMO_GRENZEN } from '@/lib/demo/grenzen';
 import { besucherKennung, cookieKopf, neueBesucherkennung, DEMO_COOKIE } from '@/lib/demo/besucher';
 import { env } from '@/lib/config/env';
@@ -45,6 +47,35 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ fehler: 'Die Demo ist gerade nicht bereit.' }, { status: 503 });
   }
 
+  /*
+   * Grösse **vor** dem Einlesen prüfen: `formData()` liest den ganzen Körper
+   * in den Speicher, bevor irgendetwas anderes greift. Ohne diese Prüfung
+   * nähme der Server eine Datei von einem Gigabyte an, um sie danach
+   * abzulehnen. Befund S6. Der Aufschlag deckt die Formularhülle.
+   */
+  const laenge = Number(request.headers.get('content-length') ?? '0');
+  if (!Number.isFinite(laenge) || laenge > DEMO_GRENZEN.maxBytes + 64 * 1024) {
+    return NextResponse.json({ fehler: MELDUNGEN.zu_gross }, { status: 413 });
+  }
+
+  /*
+   * Zwei Grenzen, die das Cookie nicht umgeht — eine erreichte Grenze ist
+   * kein Fehler, darum ein Satz statt eines roten Kastens.
+   */
+  if ((await demoUploadsGesamt()) >= DEMO_GRENZEN.gesamt) {
+    return NextResponse.json(
+      { fehler: 'Die Demo nimmt gerade keine weiteren Dateien an. In einigen Stunden wieder.' },
+      { status: 429 },
+    );
+  }
+  const herkunftHash = hashOrigin(await clientHerkunft());
+  if ((await uploadsVonHerkunftHeute(herkunftHash)) >= DEMO_GRENZEN.jeHerkunftTag) {
+    return NextResponse.json(
+      { fehler: 'Von hier kamen heute schon genug Dateien. Morgen geht es weiter.' },
+      { status: 429 },
+    );
+  }
+
   const vorhandenesCookie = (await cookies()).get(DEMO_COOKIE)?.value;
   const besucher = vorhandenesCookie ?? neueBesucherkennung();
 
@@ -68,6 +99,7 @@ export async function POST(request: Request): Promise<Response> {
 
   const ergebnis = await dokumentAnlegen(korpus.userId, dateiname, bytes, {
     besucherHash: besucherKennung(besucher),
+    herkunftHash,
     ablaufAm: ablaufZeitpunkt(),
     maxBytes: DEMO_GRENZEN.maxBytes,
     maxDateien: DEMO_GRENZEN.maxDateien,

@@ -73,6 +73,48 @@ WCAG 1.4.11 verlangt 3:1 für alles, woran man ein Bedienelement erkennt.
 
 Fliesstext besteht überall. Die Bedienelemente nicht.
 
+## Stand der Behebung
+
+_21.09.2026, am selben Tag._ Jeder Befund ist behoben **und durch einen Test
+festgehalten**, damit er beim nächsten Umbau nicht still zurückkommt.
+
+| Nr. | Behoben durch                                                                      | Festgehalten in                       |
+| --- | ---------------------------------------------------------------------------------- | ------------------------------------- |
+| B1  | README, Fallstudie und E3 berichtigt (E3 berichtigt, nicht gelöscht)               | —                                     |
+| B2  | Impressum, Datenschutz; Angaben nur auf dem Server, `deploy.sh` bricht ohne sie ab | `e2e/a11y.spec.ts`, `e2e/csp.spec.ts` |
+| B3  | Knopf «Anhalten» in der Fensterleiste, hält Vorführung und Archiv an               | `e2e/fokus.spec.ts`                   |
+| B4  | Fokusring in der Tinte der Fläche statt `currentColor`                             | `e2e/fokus.spec.ts`, hell und dunkel  |
+| B5  | Eigener Token `--rand-bedienung`, 3,25:1 bis 4,02:1                                | `tests/kontrast.test.ts`              |
+| B6  | CSP mit Nonce, ohne `unsafe-inline` bei Skripten                                   | `e2e/csp.spec.ts` samt Gegenprobe     |
+| B7  | Grenze je Herkunft (10 am Tag) und gesamt (300 Dateien)                            | Code; Tests der Zähler in `tests/`    |
+| B8  | Eigene 404-, Fehler- und Rückfallseite auf Deutsch                                 | `e2e/a11y.spec.ts`, `e2e/csp.spec.ts` |
+| S1  | Fertige Antwort wird über `role="status"` angesagt                                 | —                                     |
+| S2  | `h2` für Seitenspalte und Unterhaltung                                             | —                                     |
+| S3  | Sprungmarke und Fusszeile auf jeder Seite                                          | `e2e/fokus.spec.ts`                   |
+| S4  | Blattkante hell dunkler: 3,23:1                                                    | `tests/kontrast.test.ts`              |
+| S5  | Immer eine volle Argon2-Prüfung, auch ohne Konto                                   | `src/lib/auth/password.test.ts`       |
+| S6  | Grösse vor dem Lesen geprüft; `request_body` im Caddy-Auszug                       | —                                     |
+| S7  | IP-Hash nach 24 Stunden entfernt, Kostenprotokoll bleibt                           | `tests/demo.test.ts`                  |
+| S8  | Favicon, Vorschaubild mit den eigenen Schriften, Open-Graph-Angaben                | —                                     |
+| S9  | Barrierefreiheitserklärung, `security.txt` nach RFC 9116                           | `e2e/a11y.spec.ts`                    |
+| S10 | Eine Kopfzeile für alle Seiten                                                     | —                                     |
+| N1  | Anmeldeversuche und abgelaufene Sitzungen im geplanten Auftrag                     | —                                     |
+
+**Offen bleiben N2 bis N4** (nächtliche Sicherung, Gesundheitsendpunkt,
+Messung auf vps1) — sie gehören zum Betrieb und kommen mit dem Deployment.
+
+**Zwei Dinge, die ich beim Beheben gelernt habe:**
+
+- Die erste Gegenprobe zur CSP schlug fehl, und zwar zu Recht: Ein per
+  `createElement` angelegtes Skript lief. Nicht wegen einer Lücke, sondern
+  weil `page.evaluate` Sonderrechte hat und `'strict-dynamic'` Skripten
+  vertraut, die ein vertrautes Skript selbst anlegt. Geprüft wird jetzt der
+  echte Angriffsweg: eingeschleustes HTML mit Ereignis-Handler.
+- Das Vorschaubild sah beim ersten Mal fast richtig aus — in Times und
+  Helvetica. Eine Seite aus `setContent` darf keine `file://`-Schriften laden,
+  und der Browser fiel still zurück. Das Skript prüft jetzt, ob die Schriften
+  wirklich geladen sind, statt es anzunehmen.
+
 ## Was gut ist und bleibt
 
 - axe: null Verstösse auf allen öffentlichen Seiten, hell und dunkel

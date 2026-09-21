@@ -22,7 +22,7 @@ export default async function ChatPage() {
     .map((dokument) => ({ id: dokument.id, filename: dokument.filename }));
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10">
+    <main id="inhalt" className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10">
       <h1 className="text-xl leading-[var(--line-title)]">Fragen</h1>
 
       <p className="max-w-[var(--mass)] text-tinte-leise">

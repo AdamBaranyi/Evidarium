@@ -9,6 +9,7 @@ import {
   type EinlesenAuftrag,
 } from '@/lib/jobs/queue';
 import { abgelaufeneLoeschen } from '@/lib/demo/besucher-dokumente';
+import { personendatenKuerzen } from '@/lib/betrieb/aufraeumen';
 import { einbetten, modellBereit } from './embeddings';
 import { internenEndpunktStarten } from './http';
 
@@ -74,7 +75,11 @@ async function main(): Promise<void> {
    */
   await boss.work(QUEUE_DEMO_AUFRAEUMEN, async () => {
     const weg = await abgelaufeneLoeschen();
-    console.log(`[worker] Demo aufgeräumt: ${weg} abgelaufene Dateien gelöscht`);
+    const gekuerzt = await personendatenKuerzen();
+    console.log(
+      `[worker] aufgeräumt: ${weg} Demo-Dateien, ${gekuerzt.herkunft} Herkunfts-Hashes, ` +
+        `${gekuerzt.versuche} Anmeldeversuche, ${gekuerzt.sitzungen} Sitzungen`,
+    );
   });
 
   await boss.schedule(QUEUE_DEMO_AUFRAEUMEN, '*/15 * * * *');

@@ -24,7 +24,7 @@ export default async function DokumentDetail({ params }: { params: Promise<{ id:
   const fehler = fehlerText(dokument.errorCode);
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-10">
+    <main id="inhalt" className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-10">
       <Link href="/app/documents" className="underline underline-offset-4">
         Zurück zu den Dokumenten
       </Link>

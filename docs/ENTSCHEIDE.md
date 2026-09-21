@@ -16,10 +16,19 @@ Fast-Refresh-Rebuilds aus. Bun installiert also, `next` läuft auf Node.
 
 ## E3 — Embeddings lokal, Antworten über eine Schnittstelle
 
-_11.09.2026, bestätigt 17.09.2026._ Dokumente verlassen den Server nicht; das
-ist Datenschutzargument und Kostenargument zugleich, denn Einlesen kostet dann
-nichts. Antworten lokal auf CPU zu erzeugen wäre langsam und schlechter —
-dafür eine Schnittstelle mit eigenem Schlüssel und hartem Monatsdeckel.
+_11.09.2026, bestätigt 17.09.2026, **berichtigt 21.09.2026**._ Einlesen,
+Zerlegen, Einbetten und Suchen laufen auf dem eigenen Server; ganze Dateien
+verlassen ihn nie. Das ist Datenschutzargument und Kostenargument zugleich,
+denn Einlesen kostet dann nichts. Antworten lokal auf CPU zu erzeugen wäre
+langsam und schlechter — dafür eine Schnittstelle mit eigenem Schlüssel und
+hartem Monatsdeckel.
+
+**Berichtigung:** Bis zum 21.09.2026 stand hier «Dokumente verlassen den
+Server nicht». Das war falsch. Für eine Antwort gehen die gefundenen
+Abschnitte — höchstens acht je Frage (`KONTEXT_STELLEN`) — mit der Frage an
+Anthropic. Der Satz stand so auch im README und in der Fallstudie; gefunden
+beim Prüfbericht vor dem Start. Er ist nicht gelöscht, sondern berichtigt,
+weil diese Datei nie gekürzt wird.
 
 ## E4 — Das Embedding-Modell wird genau einmal geladen
 
@@ -652,3 +661,27 @@ das ist selbst eine Auskunft.
 
 Farbe bleibt dabei Zugabe: Neben jedem Punkt steht der Dateiname, und das
 Urteil steht in der Antwort als Wort.
+
+## E36 — Vor dem Start geprüft, nicht vorausgesetzt
+
+_21.09.2026._ Vor dem ersten Deployment eine vollständige Prüfung
+(`docs/PRUEFBERICHT.md`): Barrierefreiheit, Sicherheit, Datenschutz,
+Gestaltung, Betrieb. Anlass war Adams Vorgabe, nichts Halbfertiges online zu
+stellen.
+
+**axe ergab null Verstösse — und trotzdem gab es acht Befunde, die vor dem
+Start behoben sein mussten.** Ein Automat findet etwa ein Drittel dessen, was
+WCAG verlangt. Die Handprüfung fand: einen im Dunkeln unsichtbaren Fokusring,
+Eingabefelder mit 1,22:1 statt 3:1, eine endlose Animation ohne
+Pause-Steuerung, fehlende CSP, eine Upload-Grenze, die sich durch Löschen des
+Cookies umgehen liess — und, am schwersten, eine **falsche
+Datenschutzaussage** in README, Fallstudie und E3.
+
+Jeder Befund ist behoben **und durch einen Test festgehalten**. Die Regel
+dahinter: Ein Befund, der nur behoben ist, kommt beim nächsten Umbau still
+zurück; einer, der als Test dasteht, nicht.
+
+Die Rechtsseiten beschreiben, was der Code tut, und ziehen Fristen aus
+denselben Konstanten. Der Abschnitt über Anthropic erscheint nur im
+Live-Modus: Eine Erklärung, die eine Übermittlung beschreibt, die gar nicht
+stattfindet, wäre ebenso falsch wie eine, die sie verschweigt.

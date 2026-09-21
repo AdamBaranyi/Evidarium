@@ -54,6 +54,12 @@ BUDGET_MONAT_USD=10
 BUDGET_TAG_USD=2
 FRAGEN_JE_SITZUNG=10
 
+# Pflicht für Impressum, Datenschutz und security.txt. Nie ins Repository.
+# Ohne diese drei Werte startet das Deployment nicht.
+BETREIBER_NAME=
+BETREIBER_ADRESSE=
+BETREIBER_EMAIL=
+
 # Öffentliche Demo. Erst einschalten, wenn der Korpus geladen ist:
 #   docker compose ... exec worker bun scripts/demo-korpus-laden.ts
 DEMO_AKTIV=false
@@ -65,6 +71,17 @@ UMG
   echo "Angelegt. Schlüssel und APP_ORIGIN prüfen, dann noch einmal starten."
   exit 0
 fi
+
+# ------------------------------------------------------- Pflichtangaben ---
+# Eine öffentliche Seite ohne Impressum und Datenschutzkontakt geht nicht
+# online. Lieber hier abbrechen als eine Seite mit leeren Rechtsangaben
+# ausliefern.
+for NAME in BETREIBER_NAME BETREIBER_ADRESSE BETREIBER_EMAIL; do
+  if ! grep -Eq "^${NAME}=.+" "$UMGEBUNG"; then
+    echo "Abbruch: ${NAME} ist in $UMGEBUNG nicht gesetzt." >&2
+    exit 1
+  fi
+done
 
 # ------------------------------------------------------------------ Stand ---
 melde "Stand holen: $ZIEL"

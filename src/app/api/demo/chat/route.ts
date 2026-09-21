@@ -41,6 +41,16 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ fehler: 'Die Demo ist gerade nicht bereit.' }, { status: 503 });
   }
 
+  /*
+   * Eine Frage mit Verlauf bleibt weit unter 64 KiB. Ohne diese Grenze läse
+   * `request.json()` einen beliebig grossen Körper in den Speicher, bevor die
+   * Prüfung der Felder überhaupt greift. Befund S6.
+   */
+  const laenge = Number(request.headers.get('content-length') ?? '0');
+  if (!Number.isFinite(laenge) || laenge > 64 * 1024) {
+    return NextResponse.json({ fehler: 'Anfrage zu gross.' }, { status: 413 });
+  }
+
   const roh: unknown = await request.json().catch(() => null);
   const eingabe = Eingabe.safeParse(roh);
   if (!eingabe.success) {

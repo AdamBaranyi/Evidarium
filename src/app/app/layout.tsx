@@ -1,25 +1,16 @@
 import Link from 'next/link';
 import { abmelden } from './actions';
+import { Kopf } from '../_teile/kopf';
 
 /*
- * Kopfzeile des angemeldeten Bereichs: Wortmarke, drei Ziele, Abmelden.
- *
- * Die Wortmarke steht in der Dokumentschrift — als einzige Stelle ausserhalb
- * eines Blatts. Der Name meint den Ort, an dem Belege liegen; ihn im
- * Material der Belege zu setzen, ist keine Zierde, sondern die Aussage.
+ * Kopfzeile des angemeldeten Bereichs: dieselbe wie überall, dazu drei Ziele
+ * und Abmelden. Kein ausklappbares Menü — drei Ziele brauchen keines.
  */
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col">
-      <header className="border-b border-kante bg-flaeche-tief">
-        <nav
-          aria-label="Hauptnavigation"
-          className="mx-auto flex w-full max-w-6xl flex-wrap items-baseline gap-x-7 gap-y-2 px-6 py-4"
-        >
-          <Link href="/app/chat" className="wortmarke">
-            Evidarium
-          </Link>
-
+    <div className="flex flex-1 flex-col">
+      <Kopf ziel="/app/chat">
+        <nav aria-label="Hauptnavigation" className="flex flex-wrap items-baseline gap-x-7 gap-y-2">
           <Link href="/app/chat" className="underline underline-offset-4">
             Fragen
           </Link>
@@ -29,14 +20,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <Link href="/app/usage" className="underline underline-offset-4">
             Verbrauch
           </Link>
-
-          <form action={abmelden} className="ms-auto">
-            <button type="submit" className="min-h-11 underline underline-offset-4">
-              Abmelden
-            </button>
-          </form>
         </nav>
-      </header>
+
+        <form action={abmelden} className="ms-auto">
+          <button type="submit" className="min-h-11 underline underline-offset-4">
+            Abmelden
+          </button>
+        </form>
+      </Kopf>
 
       {children}
     </div>

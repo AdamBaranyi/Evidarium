@@ -44,7 +44,7 @@ export function UploadForm() {
           name="datei"
           required
           accept=".pdf,.txt,.md,.markdown"
-          className="text-base"
+          className="w-full min-w-0 text-base"
         />
       </label>
 

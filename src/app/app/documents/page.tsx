@@ -20,7 +20,7 @@ export default async function DokumentePage() {
   const dokumente = await dokumenteListen(sitzung.userId);
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-10">
+    <main id="inhalt" className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-10">
       <h1 className="text-xl leading-[var(--line-title)]">Dokumente</h1>
 
       <UploadForm />

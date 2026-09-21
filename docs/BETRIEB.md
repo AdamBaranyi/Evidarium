@@ -72,6 +72,13 @@ der Umgebung steht. Wer vorher `.env` eingelesen hat, faehrt still gegen die
 falsche Datenbank. `deploy.sh` entfernt die betroffenen Variablen darum
 selbst.
 
+## Jaehrlich
+
+- **`security.txt` erneuern** vor dem 21.09.2027: Datum in
+  `src/app/.well-known/security.txt/route.ts` heben. Ein abgelaufenes
+  `Expires` heisst fuer Sicherheitsforschende: Die Kontaktangabe ist nicht
+  mehr gepflegt.
+
 ## Oeffentliche Demo
 
 ```bash

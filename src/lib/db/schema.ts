@@ -105,6 +105,11 @@ export const documents = pgTable(
     besucherHash: text('besucher_hash').notNull().default(''),
     /** Zeitpunkt der automatischen Löschung. Nur bei Demo-Uploads gesetzt. */
     ablaufAm: timestamp('ablauf_am', { withTimezone: true }),
+    /*
+     * Hash der Herkunft, nur bei Demo-Uploads — für die Grenze je Herkunft
+     * und Tag. Verschwindet mit dem Dokument nach 24 Stunden.
+     */
+    herkunftHash: text('herkunft_hash'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
@@ -122,6 +127,7 @@ export const documents = pgTable(
     ),
     index('documents_user_idx').on(table.userId, table.createdAt),
     index('documents_besucher_idx').on(table.besucherHash, table.ablaufAm),
+    index('documents_herkunft_idx').on(table.herkunftHash, table.createdAt),
   ],
 );
 

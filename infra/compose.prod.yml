@@ -43,6 +43,9 @@ services:
       DEMO_AKTIV: ${DEMO_AKTIV:-false}
       DEMO_KONTO: ${DEMO_KONTO:-demo@nordstern.test}
       DEMO_FRAGEN_JE_HERKUNFT_TAG: ${DEMO_FRAGEN_JE_HERKUNFT_TAG:-30}
+      BETREIBER_NAME: ${BETREIBER_NAME:?BETREIBER_NAME fehlt}
+      BETREIBER_ADRESSE: ${BETREIBER_ADRESSE:?BETREIBER_ADRESSE fehlt}
+      BETREIBER_EMAIL: ${BETREIBER_EMAIL:?BETREIBER_EMAIL fehlt}
     volumes:
       - storage:/app/storage
     ports:

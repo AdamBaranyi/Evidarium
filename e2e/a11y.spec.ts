@@ -20,7 +20,11 @@ test.use({ contextOptions: { reducedMotion: 'reduce' } });
 async function pruefe(page: Page, pfad: string, thema: 'light' | 'dark') {
   await page.emulateMedia({ colorScheme: thema, reducedMotion: 'reduce' });
   const antwort = await page.goto(pfad);
-  test.skip(antwort?.status() === 404, `${pfad} ist nicht eingeschaltet`);
+  // Die 404-Seite soll 404 liefern; alle anderen dürfen es nicht.
+  test.skip(
+    antwort?.status() === 404 && pfad !== '/gibt-es-nicht',
+    `${pfad} ist nicht eingeschaltet`,
+  );
 
   await page.evaluate(() => document.fonts.ready);
   await page.waitForLoadState('networkidle');
@@ -42,7 +46,15 @@ async function pruefe(page: Page, pfad: string, thema: 'light' | 'dark') {
   ).toEqual([]);
 }
 
-for (const pfad of ['/', '/login', '/demo']) {
+for (const pfad of [
+  '/',
+  '/login',
+  '/demo',
+  '/impressum',
+  '/datenschutz',
+  '/barrierefreiheit',
+  '/gibt-es-nicht',
+]) {
   for (const thema of ['light', 'dark'] as const) {
     test(`axe ohne Befund auf ${pfad}, ${thema}`, async ({ page }) => {
       await pruefe(page, pfad, thema);

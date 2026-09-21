@@ -5,6 +5,12 @@ import { defineConfig, devices } from '@playwright/test';
  * 1440 (Schreibtisch). Browser-Emulation ist kein Beweis für ein bestimmtes
  * Gerät — geprüft wird das Layout, nicht das Telefon.
  */
+/*
+ * Port über `PW_PORT` wählbar: So läuft ein Produktionsbuild zum Prüfen neben
+ * einem Entwicklungsserver auf 3100, ohne ihn zu stören.
+ */
+const PORT = Number(process.env.PW_PORT ?? 3100);
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
@@ -15,7 +21,7 @@ export default defineConfig({
   workers: 1,
   reporter: process.env.CI ? 'github' : 'list',
   use: {
-    baseURL: 'http://localhost:3100',
+    baseURL: `http://localhost:${PORT}`,
     locale: 'de-CH',
     timezoneId: 'Europe/Zurich',
     trace: 'on-first-retry',
@@ -37,8 +43,10 @@ export default defineConfig({
   webServer: {
     // In der CI hat der Build-Schritt davor schon gebaut; ein zweiter Build
     // kostet nur Zeit.
-    command: process.env.CI ? 'bun run start' : 'bun run build && bun run start',
-    url: 'http://localhost:3100',
+    command: process.env.CI
+      ? `bunx next start --port ${PORT}`
+      : `bun run build && bunx next start --port ${PORT}`,
+    url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
   },

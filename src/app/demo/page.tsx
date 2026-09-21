@@ -7,6 +7,7 @@ import { demoKorpus } from '@/lib/demo/korpus';
 import { eigeneDokumente } from '@/lib/demo/besucher-dokumente';
 import { besucherKennung, DEMO_COOKIE } from '@/lib/demo/besucher';
 import { EigeneDateien } from './eigene-dateien';
+import { Kopf } from '../_teile/kopf';
 import { env } from '@/lib/config/env';
 
 export const metadata: Metadata = { title: 'Demo – Evidarium' };
@@ -34,20 +35,14 @@ export default async function DemoPage() {
   ];
 
   return (
-    <div className="flex min-h-dvh flex-col">
-      <header className="border-b border-kante bg-flaeche-tief">
-        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-baseline gap-x-7 gap-y-2 px-6 py-4">
-          <Link href="/" className="wortmarke">
-            Evidarium
-          </Link>
-          <p className="text-tinte-leise">Demo</p>
-          <Link href="/login" className="ms-auto underline underline-offset-4">
-            Anmelden
-          </Link>
-        </div>
-      </header>
+    <div className="flex flex-1 flex-col">
+      <Kopf unterzeile="Demo">
+        <Link href="/login" className="ms-auto underline underline-offset-4">
+          Anmelden
+        </Link>
+      </Kopf>
 
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10">
+      <main id="inhalt" className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10">
         <div className="flex flex-col gap-3">
           <h1 className="max-w-[20ch] text-xl leading-[var(--line-title)]">
             Frag diese Dokumente etwas.

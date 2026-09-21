@@ -15,7 +15,7 @@ export function LoginForm() {
           name="email"
           required
           autoComplete="username"
-          className="border border-kante bg-flaeche-tief px-3 py-2 text-base"
+          className="border border-rand-bedienung bg-flaeche-tief px-3 py-2 text-base"
         />
       </label>
 
@@ -26,7 +26,7 @@ export function LoginForm() {
           name="password"
           required
           autoComplete="current-password"
-          className="border border-kante bg-flaeche-tief px-3 py-2 text-base"
+          className="border border-rand-bedienung bg-flaeche-tief px-3 py-2 text-base"
         />
       </label>
 

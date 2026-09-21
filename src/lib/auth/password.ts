@@ -26,3 +26,29 @@ export async function verifyPassword(hashWert: string, klartext: string): Promis
     return false;
   }
 }
+
+/*
+ * Ein Schein-Hash mit denselben Parametern, einmal je Prozess erzeugt — nicht
+ * fest im Code, damit er garantiert zu den aktuellen Parametern passt.
+ */
+const scheinHash = hash(crypto.randomUUID(), PARAMETER);
+
+/**
+ * Prüft ein Passwort **immer gleich lang**, ob es das Konto gibt oder nicht.
+ *
+ * Ohne diese Funktion lief bei einer unbekannten Adresse gar kein Argon2:
+ * Die Antwort kam messbar schneller, und über die Laufzeit liess sich
+ * herausfinden, welche Adressen ein Konto haben — die gleichlautende
+ * Fehlermeldung half dann nichts. Befund S5 im Prüfbericht.
+ *
+ * Dasselbe gilt für Konten ohne gültigen Hash, etwa das Demo-Konto: Auch dort
+ * wird gegen den Schein-Hash gerechnet, statt sofort abzubrechen.
+ */
+export async function passwortPruefenGleichlang(
+  hashWert: string | null,
+  klartext: string,
+): Promise<boolean> {
+  const echt = hashWert !== null && hashWert.startsWith('$argon2');
+  const passt = await verifyPassword(echt ? hashWert : await scheinHash, klartext);
+  return echt && passt;
+}

@@ -6,6 +6,13 @@
 evidarium.adambaranyi.xyz {
 	encode zstd gzip
 
+	# Die Anwendung prüft die Grösse selbst; das hier ist die zweite Schranke,
+	# vor der Anwendung: Ein überlanger Körper erreicht Node gar nicht erst.
+	# 3 MiB = grösster Upload (2 MiB) mit reichlich Rand für die Formularhülle.
+	request_body {
+		max_size 3MB
+	}
+
 	# Der Antwortstrom darf nicht gepuffert werden: Die Schrittanzeige lebt
 	# davon, dass jede Zeile sofort ankommt.
 	reverse_proxy 127.0.0.1:3100 {

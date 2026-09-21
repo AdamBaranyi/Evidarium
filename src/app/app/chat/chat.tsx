@@ -8,6 +8,7 @@ import { DokumentWahl } from './dokument-wahl';
 import { Schrittanzeige } from './schrittanzeige';
 import {
   belegteDokumente,
+  KATEGORIETEXT,
   KATEGORIEWERT,
   type Dokument,
   type Eintrag,
@@ -51,6 +52,12 @@ export function Chat({
   const [schritte, setSchritte] = useState<Schritt[]>([]);
   const [laeuft, setLaeuft] = useState(false);
   const [panel, setPanel] = useState<PanelInhalt | null>(null);
+  /*
+   * Was Screenreadern angesagt wird, wenn das Ergebnis da ist. Die Schritte
+   * wurden schon angesagt, die fertige Antwort bisher nicht — wer nicht
+   * sieht, hörte «Belege werden geprüft» und danach nichts mehr. Befund S1.
+   */
+  const [ansage, setAnsage] = useState('');
   const feld = useRef<HTMLTextAreaElement>(null);
 
   async function fragen(formular: FormData) {
@@ -102,6 +109,7 @@ export function Chat({
         }
         setSchritte((alt) => schrittAbschliessen(alt, jetzt));
         setEintraege([...bisher, alsEintrag(zeile)]);
+        setAnsage(ansageFuer(zeile));
       });
     } catch {
       setEintraege([...bisher, hinweis('fehler', 'Die Verbindung wurde unterbrochen.')]);
@@ -162,6 +170,11 @@ export function Chat({
           </aside>
 
           <div className="flex min-w-0 flex-col gap-8 p-5">
+            {/* Die Antworten tragen h3; ohne diese h2 fehlte eine Stufe. Befund S2. */}
+            <h2 className="sr-only">Unterhaltung</h2>
+            <p role="status" className="sr-only">
+              {ansage}
+            </p>
             <ol className="flex flex-col gap-10">
               {eintraege.map((eintrag) => (
                 <li key={eintrag.id}>
@@ -201,7 +214,7 @@ export function Chat({
                    * Breite: Das Feld schrumpft dann nicht unter rund 350 px
                    * und schiebt bei 320 px die ganze Seite in die Breite.
                    */
-                  className="w-full border border-kante bg-flaeche-tief p-3 text-base"
+                  className="w-full border border-rand-bedienung bg-flaeche-tief p-3 text-base"
                 />
               </label>
 
@@ -267,6 +280,16 @@ function schrittAbschliessen(alt: Schritt[], jetzt: number): Schritt[] {
   return alt.map((schritt) =>
     schritt.dauerMs === null ? { ...schritt, dauerMs: jetzt - schritt.seit } : schritt,
   );
+}
+
+/** Ein Satz fürs Ohr: das Urteil und worauf es steht, nicht der ganze Text. */
+function ansageFuer(zeile: Exclude<StromZeile, { art: 'phase' }>): string {
+  if (zeile.art === 'antwort') {
+    const quellen = zeile.stellen.length;
+    return `Antwort da: ${KATEGORIETEXT[zeile.kategorie]}, ${quellen === 1 ? 'eine Quelle' : `${quellen} Quellen`}.`;
+  }
+  if (zeile.art === 'keine_treffer') return 'In den ausgewählten Dokumenten steht dazu nichts.';
+  return zeile.nachricht;
 }
 
 function hinweis(ton: 'budget' | 'fehler' | 'leer', nachricht: string): Eintrag {

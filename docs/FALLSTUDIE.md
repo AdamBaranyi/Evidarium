@@ -268,9 +268,12 @@ gemessenen Zeiten.
 Next.js mit App Router, TypeScript strict, PostgreSQL 18 mit pgvector,
 Drizzle, eigener Worker mit Jobqueue in der Datenbank.
 
-**Embeddings laufen lokal** auf dem eigenen Server — die Dokumente verlassen
-die Maschine nicht. Nur die Antwortgenerierung nutzt eine Schnittstelle nach
-aussen. Gesucht wird hybrid: semantisch über Vektoren **und** lexikalisch über
+**Embeddings laufen lokal** auf dem eigenen Server, die Suche ebenso; ganze
+Dateien verlassen ihn nie. Für eine Antwort gehen die gefundenen Abschnitte —
+höchstens acht je Frage — an die Schnittstelle von Anthropic. Eine frühere
+Fassung dieses Absatzes behauptete, die Dokumente verliessen die Maschine gar
+nicht; das war falsch und ist beim Prüfbericht vor dem Start aufgefallen.
+Gesucht wird hybrid: semantisch über Vektoren **und** lexikalisch über
 die Volltextsuche in zwei Sprachkonfigurationen, zusammengeführt über
 Reciprocal Rank Fusion. Beide Verfahren machen verschiedene Fehler — die
 semantische Suche findet Umschreibungen und scheitert an Eigennamen und

@@ -17,6 +17,19 @@ export const DEMO_GRENZEN = {
   maxSeiten: 10,
   /** Aufbewahrung in Stunden. */
   stunden: 24,
+  /*
+   * Die Grenze je Besuch hängt am Cookie, und ein Cookie ist schnell
+   * gelöscht. Darum zwei weitere Stufen, wie bei den Fragen:
+   *
+   * - **je Herkunft und Tag** hält, wer einfach die Cookies leert;
+   * - **gesamt** ist die Schranke, die auch wechselnde Adressen nicht
+   *   überwinden: mehr Demo-Dateien als das liegen nie auf dem Server.
+   *   300 × 2 MiB sind höchstens 600 MiB, und nach 24 Stunden ist alles weg.
+   *
+   * Befund B7 im Prüfbericht.
+   */
+  jeHerkunftTag: 10,
+  gesamt: 300,
 } as const;
 
 export function ablaufZeitpunkt(): Date {

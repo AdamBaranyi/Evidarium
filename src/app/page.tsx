@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { demoBereit } from '@/lib/demo/korpus';
 import { Vorfuehrung } from './start/vorfuehrung';
+import { Kopf } from './_teile/kopf';
 
 // Ob die Demo bereitsteht, entscheidet sich am Korpus in der Datenbank.
 export const dynamic = 'force-dynamic';
@@ -18,18 +19,14 @@ export default async function StartPage() {
   const demo = await demoBereit();
 
   return (
-    /* `overflow-x-clip`, weil das Blatt rechts über das Fenster hinausragt. */
-    <div className="flex min-h-dvh flex-col overflow-x-clip">
-      <header className="border-b border-kante bg-flaeche-tief">
-        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-baseline gap-x-7 gap-y-2 px-6 py-4">
-          <p className="wortmarke">Evidarium</p>
-          <Link href="/login" className="ms-auto underline underline-offset-4">
-            Anmelden
-          </Link>
-        </div>
-      </header>
+    <div className="flex flex-1 flex-col overflow-x-clip">
+      <Kopf>
+        <Link href="/login" className="ms-auto underline underline-offset-4">
+          Anmelden
+        </Link>
+      </Kopf>
 
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-12 px-6 py-14">
+      <main id="inhalt" className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-12 px-6 py-14">
         <div className="flex max-w-[52rem] flex-col gap-7">
           <h1 className="max-w-[20ch] text-2xl leading-[var(--line-title)]">
             Antworten aus deinen Dokumenten, mit Quellen zum Nachlesen.

@@ -81,6 +81,15 @@
   --tinte-leise: #aaa49a;
   --kante: #3a362f;
   --kante-stark: #565147;
+  /*
+   * Rand für Bedienelemente — Eingabefelder, Dateifeld, Auswahlkästchen.
+   *
+   * Eigener Wert, weil `--kante` für Flächen gedacht ist und dafür bewusst
+   * leise bleibt: 1,22:1. WCAG 1.4.11 verlangt für das, woran man ein
+   * Bedienelement erkennt, 3:1 — gerechnet gegen Panel, Fläche und
+   * Feldfüllung, nicht geschätzt. Befund B5 im Prüfbericht.
+   */
+  --rand-bedienung: #7a766f;
 
   /* Das Blatt. In beiden Schemata dasselbe Papier. */
   --blatt: #f7f2e6;
@@ -129,12 +138,18 @@
     --tinte-leise: #57524a;
     --kante: #b8b2a4;
     --kante-stark: #8d8779;
+    --rand-bedienung: #6c6860;
 
     --blatt: #fdfbf5;
     --blatt-tief: #f5f0e3;
     --blatt-tinte: #23211e;
     --blatt-leise: #5f594c;
-    --blatt-kante: #ded6c4;
+    /*
+     * Hell liegt helles Papier auf hellem Tisch: 1,46:1. Das Blatt ist aber
+     * ein Knopf, und seine Kante ist das, woran man ihn erkennt. Darum hier
+     * dunkler als dunkel — Befund S4 im Prüfbericht.
+     */
+    --blatt-kante: #757167;
     --blatt-markierung: #f0e4bd;
 
     --aktion-grund: #23211e;

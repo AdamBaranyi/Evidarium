@@ -77,6 +77,18 @@ Ausnahme weg.
   Der Hinweis darauf steht **vor** dem Formular. Die Trennung läuft über den
   Hash des Besuchercookies; die Dokumentliste stellt der Server zusammen.
   Siehe E34.
+- **Content Security Policy** mit Nonce je Anfrage (`src/proxy.ts`), ohne
+  `unsafe-inline` bei Skripten; Stilattribute erlaubt, Stilelemente nicht.
+  Im Browser geprüft: null Verstösse auf allen Seiten, und eine Gegenprobe mit
+  eingeschleustem HTML wird blockiert und gemeldet (`e2e/csp.spec.ts`)
+- Anmeldung prüft **immer gleich lang**: ohne Konto gegen einen Schein-Hash,
+  sonst verriete die Laufzeit, welche Adressen existieren
+- Anfragegrösse vor dem Lesen begrenzt, dazu `request_body` im Caddy-Auszug
+- Demo-Uploads auch **je Herkunft** (10 am Tag) und **gesamt** (300) begrenzt;
+  das Cookie allein wäre durch Löschen zu umgehen
+- IP-Hashes nach 24 Stunden entfernt, abgelaufene Sitzungen und alte
+  Anmeldeversuche aufgeräumt — im selben geplanten Auftrag
+- `security.txt` nach RFC 9116; `Expires` fest auf den 21.09.2027
 - Sicherheits-Header in `next.config.ts`
 - Geheimnisse nur in Umgebungsvariablen, `.env*` in `.gitignore`
 
@@ -138,6 +150,3 @@ freundliche Meldung, keinen Fehlerzustand — wer gegen ein Budget läuft, hat
 nichts falsch gemacht.
 
 ## Noch offen
-
-- Content Security Policy ohne `unsafe-inline` bei Skripten (kommt mit der
-  ausgearbeiteten Oberfläche)

@@ -1,4 +1,4 @@
-import { and, asc, eq, isNull, lte, ne } from 'drizzle-orm';
+import { and, asc, count, eq, gte, isNull, lte, ne } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { documentVersions, documents } from '@/lib/db/schema';
 import { dokumentLoeschen } from '@/lib/documents/loeschen';
@@ -72,4 +72,23 @@ export async function abgelaufeneLoeschen(jetzt: Date = new Date()): Promise<num
     if (ergebnis.ok) weg += 1;
   }
   return weg;
+}
+
+/** Wie viele Demo-Dateien heute von dieser Herkunft kamen. */
+export async function uploadsVonHerkunftHeute(herkunftHash: string): Promise<number> {
+  const seit = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const [zeile] = await db
+    .select({ anzahl: count() })
+    .from(documents)
+    .where(and(eq(documents.herkunftHash, herkunftHash), gte(documents.createdAt, seit)));
+  return zeile?.anzahl ?? 0;
+}
+
+/** Wie viele Demo-Dateien gerade insgesamt auf dem Server liegen. */
+export async function demoUploadsGesamt(): Promise<number> {
+  const [zeile] = await db
+    .select({ anzahl: count() })
+    .from(documents)
+    .where(and(ne(documents.besucherHash, ''), isNull(documents.deletedAt)));
+  return zeile?.anzahl ?? 0;
 }

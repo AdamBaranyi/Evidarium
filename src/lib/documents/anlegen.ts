@@ -21,6 +21,7 @@ export type AnlegenErgebnis =
  */
 export type AnlegenOptionen = {
   besucherHash?: string;
+  herkunftHash?: string;
   ablaufAm?: Date;
   maxBytes?: number;
   maxDateien?: number;
@@ -100,6 +101,7 @@ export async function dokumentAnlegen(
       contentHash,
       storagePath,
       besucherHash,
+      herkunftHash: optionen.herkunftHash ?? null,
       ablaufAm: optionen.ablaufAm ?? null,
     });
     const [version] = await tx

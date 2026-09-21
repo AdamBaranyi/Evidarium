@@ -31,6 +31,20 @@ export function Vorfuehrung() {
   const bereich = useRef<HTMLDivElement>(null);
   const ruhig = useWenigerBewegung();
 
+  /*
+   * **Anhalten muss man selbst können** (WCAG 2.2.2, Stufe A): Bewegung, die
+   * von allein startet, länger als fünf Sekunden läuft und neben anderem
+   * Inhalt steht, braucht eine Steuerung auf der Seite.
+   * `prefers-reduced-motion` genügt dafür nicht — es ist eine Einstellung
+   * des Betriebssystems, von der viele nichts wissen. Befund B3 im
+   * Prüfbericht.
+   *
+   * `null` heisst: noch nicht selbst gewählt, dann gilt die Einstellung des
+   * Systems.
+   */
+  const [gewaehlt, setGewaehlt] = useState<boolean | null>(null);
+  const steht = gewaehlt ?? ruhig;
+
   useEffect(() => {
     const element = bereich.current;
     if (!element) return;
@@ -42,22 +56,23 @@ export function Vorfuehrung() {
   }, []);
 
   useEffect(() => {
-    if (ruhig || !sichtbar) return;
+    if (steht || !sichtbar) return;
     const takt = setInterval(() => setUhr((wert) => wert + 100), 100);
     return () => clearInterval(takt);
-  }, [ruhig, sichtbar]);
+  }, [steht, sichtbar]);
 
   const runde = TAKT.ende + 100;
   const szene = Math.floor(uhr / runde) % SZENEN.length;
   const fall = SZENEN[szene] ?? SZENEN[0];
   if (!fall) return null;
 
-  const t = ruhig ? TAKT.markierung : uhr % runde;
+  // Angehalten zeigt das fertige Bild, nicht einen halben Zwischenstand.
+  const t = steht ? TAKT.markierung : uhr % runde;
   const da = (marke: number) => t >= marke;
-  const geht = !ruhig && t >= TAKT.verblassen;
+  const geht = !steht && t >= TAKT.verblassen;
 
   return (
-    <div ref={bereich} className={`vorfuehrung ${geht ? 'geht' : ''}`}>
+    <div ref={bereich} className={`vorfuehrung ${geht ? 'geht' : ''} ${steht ? 'steht' : ''}`}>
       {/*
        * Das Archiv lebt, aber nicht für sich: Jedes angedeutete Blatt steht
        * für ein Dokument im Korpus, und die Blätter, die zur laufenden
@@ -77,11 +92,19 @@ export function Vorfuehrung() {
       <div className="vorfuehrung-fenster">
         <div className="vorfuehrung-leiste">
           <span className="font-blatt">Evidarium</span>
-          <span className="text-tinte-leise">
+          <span className="ms-auto text-tinte-leise">
             {fall.blaetter.length === 1
               ? '1 Quelle geprüft'
               : `${fall.blaetter.length} Quellen geprüft`}
           </span>
+          <button
+            type="button"
+            aria-pressed={steht}
+            onClick={() => setGewaehlt(!steht)}
+            className="min-h-11 underline underline-offset-4"
+          >
+            {steht ? 'Abspielen' : 'Anhalten'}
+          </button>
         </div>
 
         <div className="vorfuehrung-rumpf">

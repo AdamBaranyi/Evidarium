@@ -6,7 +6,7 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
-import { verifyPassword } from '@/lib/auth/password';
+import { passwortPruefenGleichlang } from '@/lib/auth/password';
 import { createSession, hashOrigin, SESSION_COOKIE } from '@/lib/auth/session';
 import { fehlversucheLoeschen, fehlversuchNotieren, loginErlaubt } from '@/lib/auth/rate-limit';
 import { clientHerkunft, herkunftStimmt } from '@/lib/auth/request';
@@ -41,10 +41,13 @@ export async function login(_: LoginErgebnis, formData: FormData): Promise<Login
   // Dieselbe Meldung für «kein Konto», «falsches Passwort» und «deaktiviert» —
   // sonst lässt sich über die Anmeldemaske herausfinden, welche Adressen
   // registriert sind.
-  const stimmt =
-    konto !== undefined &&
-    konto.status === 'active' &&
-    (await verifyPassword(konto.passwordHash, eingabe.data.password));
+  // Immer eine volle Argon2-Prüfung, auch ohne Konto — sonst verriete die
+  // Laufzeit, welche Adressen registriert sind.
+  const passwortPasst = await passwortPruefenGleichlang(
+    konto?.passwordHash ?? null,
+    eingabe.data.password,
+  );
+  const stimmt = konto !== undefined && konto.status === 'active' && passwortPasst;
 
   if (!stimmt || konto === undefined) {
     await fehlversuchNotieren(originHash);

@@ -149,6 +149,11 @@
   }
 }
 
+/* Angehalten heisst: auch der Hintergrund steht. */
+.vorfuehrung.steht .archiv span {
+  animation-play-state: paused;
+}
+
 .vorfuehrung-fenster {
   background: var(--flaeche-tief);
   border: 1px solid var(--kante);

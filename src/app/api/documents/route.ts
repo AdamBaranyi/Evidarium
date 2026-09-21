@@ -33,6 +33,13 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ fehler: 'Nicht angemeldet.' }, { status: 401 });
   }
 
+  // Grösse vor dem Einlesen prüfen: `formData()` läse sonst alles in den
+  // Speicher, bevor irgendeine Grenze greift. Befund S6.
+  const laenge = Number(request.headers.get('content-length') ?? '0');
+  if (!Number.isFinite(laenge) || laenge > GRENZEN.maxBytes + 64 * 1024) {
+    return NextResponse.json({ fehler: MELDUNGEN.zu_gross }, { status: 413 });
+  }
+
   const formular = await request.formData();
   const datei = formular.get('datei');
 

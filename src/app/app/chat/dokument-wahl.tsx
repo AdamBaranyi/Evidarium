@@ -40,7 +40,7 @@ export function DokumentWahl({
   return (
     <div className="flex min-w-0 flex-col gap-2">
       <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-        <p className="text-tinte-leise">Durchsucht wird in</p>
+        <h2 className="text-tinte-leise">Durchsucht wird in</h2>
         {auswaehlbar && (
           <button
             type="button"

@@ -5,7 +5,12 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { documents, users } from '@/lib/db/schema';
 import { dokumentAnlegen } from '@/lib/documents/anlegen';
-import { abgelaufeneLoeschen, eigeneDokumente } from '@/lib/demo/besucher-dokumente';
+import {
+  abgelaufeneLoeschen,
+  demoUploadsGesamt,
+  eigeneDokumente,
+  uploadsVonHerkunftHeute,
+} from '@/lib/demo/besucher-dokumente';
 import { DEMO_GRENZEN } from '@/lib/demo/grenzen';
 
 /*
@@ -124,5 +129,37 @@ describe('Eigene Dateien in der Demo', () => {
     expect(
       await db.select().from(documents).where(eq(documents.id, dauerhaft.documentId)),
     ).toHaveLength(1);
+  });
+
+  it('zählt Dateien je Herkunft, auch über gelöschte Cookies hinweg', async () => {
+    /*
+     * Befund B7: Die Grenze je Besuch hängt am Cookie. Wer es löscht, ist ein
+     * neuer Besuch — aber dieselbe Herkunft. Genau das zählt dieser Zähler.
+     */
+    const herkunft = `herkunft-upload-${Date.now()}`;
+    expect(await uploadsVonHerkunftHeute(herkunft)).toBe(0);
+
+    for (const besuch of ['demo:f1', 'demo:f2', 'demo:f3']) {
+      const r = await dokumentAnlegen(konto, `${besuch}.md`, mitInhalt(besuch), {
+        besucherHash: besuch,
+        herkunftHash: herkunft,
+      });
+      expect(r.ok).toBe(true);
+    }
+
+    // Drei verschiedene Besuche, eine Herkunft.
+    expect(await uploadsVonHerkunftHeute(herkunft)).toBe(3);
+    expect(await uploadsVonHerkunftHeute(`${herkunft}-anders`)).toBe(0);
+  });
+
+  it('zählt gesamt nur Demo-Dateien, nicht den Korpus', async () => {
+    const vorher = await demoUploadsGesamt();
+    await dokumentAnlegen(konto, `korpus-${Date.now()}.md`, mitInhalt(`Korpus ${Date.now()}`));
+    expect(await demoUploadsGesamt()).toBe(vorher);
+
+    await dokumentAnlegen(konto, 'besuch.md', mitInhalt(`Besuch ${Date.now()}`), {
+      besucherHash: `demo:g-${Date.now()}`,
+    });
+    expect(await demoUploadsGesamt()).toBe(vorher + 1);
   });
 });

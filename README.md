@@ -38,9 +38,11 @@ bun run test:e2e   # Playwright bei 320, 768 und 1440 Pixeln
 Next.js mit App Router · TypeScript strict · Tailwind · PostgreSQL 18 mit
 pgvector · Drizzle · Bun als Paketmanager, Node als Laufzeit für Next.
 
-Embeddings laufen lokal auf dem eigenen Server; die Dokumente verlassen die
-Maschine nicht. Nur die Antwortgenerierung nutzt eine Schnittstelle nach
-aussen, mit hartem Monatsdeckel.
+**Was den Server verlässt, und was nicht.** Dateien werden auf dem eigenen
+Server eingelesen, zerlegt und eingebettet; die Suche läuft dort. Ganze
+Dateien verlassen ihn nie. Für eine Antwort gehen die gefundenen Abschnitte —
+höchstens acht je Frage — zusammen mit der Frage an die Schnittstelle von
+Anthropic, mit hartem Monatsdeckel. Im Demo-Modus geht gar nichts hinaus.
 
 ## Bewusst nicht gebaut
 
