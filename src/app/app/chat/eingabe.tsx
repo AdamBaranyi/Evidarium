@@ -73,6 +73,7 @@ export function Eingabe({
         if (bereit) senden();
       }}
       className="eingabe"
+      data-rundgang="eingabe"
     >
       <label htmlFor={EINGABE_ID} className="sr-only">
         {beschriftung}

@@ -156,7 +156,7 @@ Rechner.
 | Nicht angemeldet kein Upload, auch per API                    | `e2e/zugriff.spec.ts`                                                                    |
 | Sitzung, Tag und Monat greifen unabhängig                     | `tests/budget.test.ts`, `tests/abnahme.test.ts`                                          |
 | Schlüssel taucht nirgends auf                                 | `tests/abnahme.test.ts`, gitleaks im täglichen Lauf                                      |
-| Hauptablauf bei 320, 768, 1440                                | 436 Playwright-Prüfungen in Chromium, Firefox, Safari und auf dem iPhone, auch in der CI |
+| Hauptablauf bei 320, 768, 1440                                | 478 Playwright-Prüfungen in Chromium, Firefox, Safari und auf dem iPhone, auch in der CI |
 | Keine Datei über 400 Zeilen, Format, Lint, Typen              | `bun run verify`, CI                                                                     |
 | Täglicher Sicherheitslauf grün oder begründete Ausnahme       | `.github/workflows/sicherheit-taeglich.yml`                                              |
 
@@ -165,7 +165,7 @@ Rechner.
 
 ## Gestaltung
 
-Stand 22.09.2026, Entscheide E30 bis E33 und E38 bis E42:
+Stand 22.09.2026, Entscheide E30 bis E33 und E38 bis E43:
 
 - **Das Blatt:** matte Arbeitsfläche, Belege als Papier — das einzige helle
   Material. Archivo für die Anwendung, Source Serif 4 für das Dokument.
@@ -185,6 +185,9 @@ Stand 22.09.2026, Entscheide E30 bis E33 und E38 bis E42:
   Wahl per Knopf, sonst Browsereinstellung; Antwort in der Sprache der
   Frage, Zitate wörtlich in der Sprache ihres Dokuments. Übersetzungen noch
   nicht muttersprachlich gegengelesen.
+- **Rundgang** (E43): sechs Schritte in Demo und Anwendung, einmal von
+  selbst, danach über den Knopf «Rundgang». Modaler Dialog, Schleier mit
+  Ausschnitt, mit der Tastatur ganz zu gehen, auch bei 320 Pixeln im Bild.
 - Offen: Durchsicht mit Adam; danach drei Bildschirmfotos für die Fallstudie.
 
 ## Aufgefallen

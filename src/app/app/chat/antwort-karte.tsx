@@ -52,7 +52,7 @@ export function AntwortKarte({
 
   return (
     <article className="flex flex-col gap-5">
-      <header className="flex flex-col gap-1">
+      <header data-rundgang="urteil" className="flex flex-col gap-1">
         <h3 className="urteil-marke text-lg leading-tight">
           <span
             aria-hidden

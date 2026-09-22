@@ -8,6 +8,8 @@ import { DokumentWahl } from './dokument-wahl';
 import { Eingabe, EINGABE_ID } from './eingabe';
 import { LeererZustand, type Vorschlag } from './leerer-zustand';
 import { QuellenPanel, type PanelInhalt } from './quellen-panel';
+import { Rundgang } from './rundgang/rundgang';
+import type { Ort } from './rundgang/schritte';
 import { Schrittanzeige } from './schrittanzeige';
 import { alsEintrag, alsVerlauf, ansageFuer, frageSenden, hinweis } from './strom';
 import { CHAT } from './texte';
@@ -53,6 +55,8 @@ export type ChatEigenschaften = {
   modellAktiv: boolean;
   /** Dokumente, deren Text sicher deutsch ist — der Korpus der Demo. */
   deutscheDokumente?: string[];
+  /** Wo der Rundgang läuft; ohne Angabe gibt es keinen. */
+  rundgang?: Ort | undefined;
 };
 
 export function Chat({
@@ -67,6 +71,7 @@ export function Chat({
   vorschlaege = [],
   modellAktiv,
   deutscheDokumente = [],
+  rundgang,
 }: ChatEigenschaften) {
   const [gewaehlt, setGewaehlt] = useState<string[]>(() => dokumente.map((d) => d.id));
   const [eintraege, setEintraege] = useState<Eintrag[]>([]);
@@ -209,8 +214,10 @@ export function Chat({
               {t.leiste.neu}
             </button>
           )}
+          {rundgang && <Rundgang ort={rundgang} />}
           <button
             type="button"
+            data-rundgang="seitenspalte"
             aria-expanded={seiteOffen}
             aria-controls="chat-seite"
             onClick={() => setSeiteOffen(!seiteOffen)}
@@ -223,6 +230,7 @@ export function Chat({
         <div className="chat-rumpf">
           <aside
             id="chat-seite"
+            data-rundgang="seite"
             className={`chat-spalte ${seiteOffen ? 'flex' : 'hidden'} lg:flex`}
           >
             {seitenkopf}
@@ -281,7 +289,7 @@ export function Chat({
                 </div>
               </div>
 
-              <div className="chat-unten">
+              <div className="chat-unten" data-rundgang-deckel>
                 <div className="chat-spur">
                   <Eingabe
                     text={text}

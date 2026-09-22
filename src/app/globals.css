@@ -6,6 +6,7 @@
 @import '../styles/chat-teile.css';
 @import '../styles/licht.css';
 @import '../styles/rahmen.css';
+@import '../styles/rundgang.css';
 
 /*
  * Tailwind-Stufen unter 16 px abschalten, statt sich auf Disziplin zu

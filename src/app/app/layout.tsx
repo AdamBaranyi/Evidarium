@@ -17,7 +17,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <Link href="/app/chat" className="underline underline-offset-4">
             {t.fragen}
           </Link>
-          <Link href="/app/documents" className="underline underline-offset-4">
+          <Link
+            href="/app/documents"
+            data-rundgang="nav-dokumente"
+            className="underline underline-offset-4"
+          >
             {t.dokumente}
           </Link>
           <Link href="/app/usage" className="underline underline-offset-4">

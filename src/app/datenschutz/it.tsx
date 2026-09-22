@@ -47,6 +47,14 @@ export function DatenschutzIt({ live }: { live: boolean }) {
         del Suo browser e non nasce alcun cookie.
       </p>
 
+      <h2>Visita guidata</h2>
+      <p>
+        Il Suo browser memorizza nella propria memoria locale se ha già visto la visita guidata
+        («evidarium.rundgang.demo» per la demo, «evidarium.rundgang.app» dopo l’accesso). La voce
+        resta nel Suo browser e non viene mai inviata al server; può cancellarla con i dati dei siti
+        del Suo browser.
+      </p>
+
       <h2>Demo pubblica</h2>
       <ul>
         <li>

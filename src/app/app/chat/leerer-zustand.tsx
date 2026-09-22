@@ -52,7 +52,7 @@ export function LeererZustand({
       </div>
 
       {vorschlaege.length > 0 && (
-        <ul className="vorschlaege" aria-label={t.vorschlaege}>
+        <ul className="vorschlaege" aria-label={t.vorschlaege} data-rundgang="vorschlaege">
           {vorschlaege.map((vorschlag) => (
             <li key={vorschlag.frage}>
               <button type="button" className="vorschlag" onClick={() => fragen(vorschlag.frage)}>
@@ -64,7 +64,7 @@ export function LeererZustand({
         </ul>
       )}
 
-      <div className="flex flex-col gap-2">
+      <div data-rundgang="legende" className="flex flex-col gap-2">
         <p className="text-tinte-leise">{t.legende}</p>
         <ul className="legende">
           {URTEILE.map((urteil) => (

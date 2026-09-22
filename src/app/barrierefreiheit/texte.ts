@@ -26,6 +26,7 @@ export const BARRIEREFREIHEIT = texte({
       'Die bewegte Vorführung und das Licht auf der Startseite lassen sich anhalten und stehen still, wenn das Betriebssystem weniger Bewegung wünscht.',
       'Fertige Antworten und die einzelnen Arbeitsschritte werden Screenreadern angesagt.',
       'Die Seite ist auf Deutsch, Französisch, Italienisch und Englisch lesbar. Zitate aus deutschen Dokumenten sind als deutsch ausgezeichnet und werden so vorgelesen.',
+      'Der Rundgang ist ein echter Dialog: Der Fokus bleibt darin, Escape beendet ihn, jeder Schritt wird angesagt, und er lässt sich ganz mit der Tastatur gehen.',
     ],
     grenzen: 'Bekannte Grenzen',
     grenzenListe: [
@@ -58,6 +59,7 @@ export const BARRIEREFREIHEIT = texte({
       'La démonstration animée et la lumière de la page d’accueil peuvent être mises en pause et restent immobiles si le système d’exploitation demande moins de mouvement.',
       'Les réponses terminées et les étapes de travail sont annoncées aux lecteurs d’écran.',
       'Le site se lit en allemand, en français, en italien et en anglais. Les citations de documents allemands sont balisées comme allemandes et lues ainsi.',
+      'La visite guidée est un véritable dialogue\u00a0: le focus y reste, Échap la termine, chaque étape est annoncée, et elle se parcourt entièrement au clavier.',
     ],
     grenzen: 'Limites connues',
     grenzenListe: [
@@ -90,6 +92,7 @@ export const BARRIEREFREIHEIT = texte({
       'La dimostrazione animata e la luce della pagina iniziale si possono mettere in pausa e restano ferme se il sistema operativo chiede meno movimento.',
       'Le risposte pronte e i singoli passi di lavoro vengono annunciati ai lettori di schermo.',
       'Il sito si legge in tedesco, francese, italiano e inglese. Le citazioni da documenti tedeschi sono marcate come tedesche e lette così.',
+      'La visita guidata è un vero dialogo: il focus resta al suo interno, Esc la termina, ogni passo viene annunciato e si percorre interamente con la tastiera.',
     ],
     grenzen: 'Limiti noti',
     grenzenListe: [
@@ -122,6 +125,7 @@ export const BARRIEREFREIHEIT = texte({
       'The animated demo and the light on the start page can be paused and stand still when the operating system asks for less motion.',
       'Finished answers and the individual working steps are announced to screen readers.',
       'The site reads in German, French, Italian and English. Quotes from German documents are marked as German and read out that way.',
+      'The tour is a real dialog: focus stays inside it, Escape ends it, every step is announced, and it can be completed with the keyboard alone.',
     ],
     grenzen: 'Known limits',
     grenzenListe: [

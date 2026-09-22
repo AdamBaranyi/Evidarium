@@ -60,6 +60,7 @@ export default async function DemoPage() {
           vorschlaege={t.vorschlaege}
           modellAktiv={env.AI_MODE === 'live'}
           deutscheDokumente={korpus.dokumente.map((dokument) => dokument.id)}
+          rundgang="demo"
           seitenhinweis={
             <>
               <EigeneDateien dokumente={eigene} />

@@ -1,60 +1,32 @@
-import { randomBytes, randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { Pool } from 'pg';
+import { anmelden, kontoAnlegen, kontoEntfernen, type Konto } from './konto';
 
 /*
  * Der angemeldete Bereich im Browser: Fragen, Dokumente, Verbrauch.
  *
  * Bis zum 22.09.2026 prüften die Browsertests nur öffentliche Seiten — axe,
- * 320 px und die Schriftgrösse hatten die Anwendung selbst nie gesehen.
- *
- * Die Sitzung entsteht direkt in der Datenbank, nicht über das
- * Anmeldeformular: Ein Passwort im Test wäre ein Passwort im Repository. Das
- * Testkonto trägt als Hash eine Zeichenkette, die kein Argon2-Hash ist — mit
- * ihm kann sich niemand anmelden, auch nicht mit dem richtigen Raten.
+ * 320 px und die Schriftgrösse hatten die Anwendung selbst nie gesehen. Wie
+ * das Testkonto entsteht, steht in `konto.ts`.
  */
 
-const SESSION_COOKIE = 'evidarium_session';
 const SEITEN = ['/app/chat', '/app/documents', '/app/usage'];
 
-let pool: Pool;
-let nutzerId = '';
-let sitzung = '';
+let konto: Konto | undefined;
 
 test.beforeAll(async () => {
   const url = process.env.DATABASE_URL;
   test.skip(!url, 'DATABASE_URL fehlt');
-  pool = new Pool({ connectionString: url });
-  const email = `e2e-${randomUUID()}@evidarium.test`;
-  const nutzer = await pool.query<{ id: string }>(
-    `insert into users (email, password_hash) values ($1, 'kein-passwort') returning id`,
-    [email],
-  );
-  nutzerId = nutzer.rows[0]?.id ?? '';
-  sitzung = randomBytes(32).toString('base64url');
-  await pool.query(
-    `insert into sessions (id, user_id, expires_at) values ($1, $2, now() + interval '1 hour')`,
-    [sitzung, nutzerId],
-  );
+  konto = await kontoAnlegen(url ?? '');
 });
 
 test.afterAll(async () => {
-  // Die Sitzung hängt per Fremdschlüssel am Konto und geht mit.
-  if (nutzerId) await pool.query('delete from users where id = $1', [nutzerId]);
-  await pool?.end();
+  await kontoEntfernen(konto);
 });
 
 test.beforeEach(async ({ context, baseURL }) => {
-  await context.addCookies([
-    {
-      name: SESSION_COOKIE,
-      value: sitzung,
-      url: baseURL ?? 'http://localhost:3100',
-      httpOnly: true,
-      sameSite: 'Lax',
-    },
-  ]);
+  if (konto) await anmelden(context, konto, baseURL ?? 'http://localhost:3100');
 });
 
 test('ohne Dokumente zeigt der Chat den Weg zum Hochladen', async ({ page }) => {

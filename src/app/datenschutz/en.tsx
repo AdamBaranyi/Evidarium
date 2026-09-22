@@ -46,6 +46,14 @@ export function DatenschutzEn({ live }: { live: boolean }) {
         browser settings and no cookie is created.
       </p>
 
+      <h2>Tour</h2>
+      <p>
+        Whether you have already seen the tour is remembered by your browser in its local storage
+        (“evidarium.rundgang.demo” for the demo, “evidarium.rundgang.app” after signing in). The
+        entry stays in your browser and is never sent to the server; you can delete it with your
+        browser’s site data.
+      </p>
+
       <h2>Public demo</h2>
       <ul>
         <li>

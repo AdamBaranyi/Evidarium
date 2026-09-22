@@ -892,3 +892,37 @@ nur der Server; darum übersetzt er, nicht der Browser.
 Nebenbei gefunden: Das Quellen-Panel verlinkte in der Demo auf die
 Dokumentseite, die nur Angemeldeten offensteht — Besucher landeten bei der
 Anmeldung. Der Link erscheint jetzt nur angemeldet.
+
+## E43 — Rundgang durch Demo und Anwendung
+
+_22.09.2026._ Adams Wunsch: ein Rundgang «wie bei Tallyroom», damit man
+versteht, wozu Evidarium da ist und wie man es benutzt. Übernommen ist
+Tallyrooms Verhalten; Aussehen und Schritte sind Evidariums eigene.
+
+- **Einmal von selbst, dann auf Wunsch.** Beim ersten Besuch öffnet er sich,
+  danach steht der Knopf «Rundgang» in der Leiste des Chat-Fensters. Ob er
+  gesehen wurde, merkt sich der Browser im lokalen Speicher, getrennt für
+  Demo und Anwendung: Wer die Demo kennt, sieht beim ersten Anmelden
+  trotzdem, wo Hochladen und Projekte liegen. Der Server erfährt davon
+  nichts; die Datenschutzerklärung nennt die beiden Einträge.
+- **Sechs Schritte je Ort**, jeder mit einem Ziel auf dem Bildschirm: was
+  Evidarium tut, welche Dokumente durchsucht werden (in der Anwendung:
+  Hochladen, Projekte, Auswahl), wo man fragt, was die vier Urteile heissen
+  und dass ein Klick auf den Beleg die Stelle öffnet, eigene Dateien in der
+  Demo, wo der Rundgang wieder startet. Gibt es ein Ziel gerade nicht —
+  mitten im Gespräch stehen keine Einstiegsfragen mehr da —, fällt der
+  Schritt weg oder zeigt auf das Gegenstück, statt etwas Falsches zu
+  erklären. Die Namen der Urteile kommen aus demselben Katalog wie in der
+  Antwort.
+- **Ein echter modaler Dialog**, wie das Quellen-Panel: Fokusfalle, inerter
+  Hintergrund und Escape kommen vom Browser. Der Fokus steht nach jedem
+  Schritt auf «Weiter», mit Enter geht es durch; «Loslegen» setzt ihn ins
+  Eingabefeld. Ein Klick daneben beendet nichts.
+- **Schleier mit Loch statt Abdunkelung.** Ein Vieleck mit gleich vielen
+  Ecken in jedem Schritt, damit Loch und Karte gemeinsam zum nächsten Ziel
+  gleiten (300 ms, nur `clip-path`, `transform` und Deckkraft). Der
+  Ausschnitt endet, wo das Ziel sichtbar endet — die Einstiegsfragen ragen
+  sonst unter das Eingabefeld. Was der Rundgang dafür rollt, rollt er am
+  Ende zurück.
+- **Die Karte ist aus dem Material des Panels**, nicht aus Papier. Papier
+  bleibt den Belegen vorbehalten (E30).

@@ -67,6 +67,7 @@ export default async function ChatPage({
         titel={t.titel(aktiv?.name)}
         einleitung={aktiv ? t.einleitungProjekt : t.einleitung}
         modellAktiv={env.AI_MODE === 'live'}
+        rundgang="app"
       />
     </main>
   );

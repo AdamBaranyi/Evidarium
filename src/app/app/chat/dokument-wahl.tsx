@@ -41,7 +41,7 @@ export function DokumentWahl({
   }
 
   return (
-    <div className="flex min-w-0 flex-col gap-2">
+    <div data-rundgang="dokumente" className="flex min-w-0 flex-col gap-2">
       <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
         <h2>{t.titel}</h2>
         {auswaehlbar && (

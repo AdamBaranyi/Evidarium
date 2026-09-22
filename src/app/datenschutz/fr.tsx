@@ -48,6 +48,14 @@ export function DatenschutzFr({ live }: { live: boolean }) {
         part, la langue suit les réglages de votre navigateur, et aucun cookie n’est créé.
       </p>
 
+      <h2>Visite guidée</h2>
+      <p>
+        Votre navigateur mémorise dans son stockage local si vous avez déjà vu la visite guidée
+        («&nbsp;evidarium.rundgang.demo&nbsp;» pour la démo, «&nbsp;evidarium.rundgang.app&nbsp;»
+        après la connexion). Cette entrée reste dans votre navigateur et n’est jamais envoyée au
+        serveur&nbsp;; vous pouvez l’effacer avec les données de site de votre navigateur.
+      </p>
+
       <h2>Démo publique</h2>
       <ul>
         <li>

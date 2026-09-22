@@ -35,6 +35,23 @@ export default defineConfig({
   reporter: process.env.CI ? 'github' : 'list',
   use: {
     baseURL: `http://localhost:${PORT}`,
+    /*
+     * Der Rundgang (E43) kommt beim ersten Besuch von selbst und legt sich
+     * als modaler Dialog über die Seite. Alle Tests ausser seinen eigenen
+     * beginnen darum als Besucher, die ihn schon kennen.
+     */
+    storageState: {
+      cookies: [],
+      origins: [
+        {
+          origin: `http://localhost:${PORT}`,
+          localStorage: [
+            { name: 'evidarium.rundgang.demo', value: 'gesehen' },
+            { name: 'evidarium.rundgang.app', value: 'gesehen' },
+          ],
+        },
+      ],
+    },
     locale: 'de-CH',
     timezoneId: 'Europe/Zurich',
     trace: 'on-first-retry',

@@ -1,0 +1,128 @@
+/*
+ * **Der Rundgang** (E43): ein Schleier mit Loch über der Seite und eine
+ * Karte daneben. Die Karte ist aus dem Material des Panels, nicht aus
+ * Papier — Papier bleibt den Belegen vorbehalten.
+ *
+ * Bewegung: Zweck ist räumlicher Zusammenhang. Loch und Karte gleiten
+ * gemeinsam zum nächsten Ziel, 300 ms, Ease-in-out wie alles, was sich auf
+ * dem Bildschirm verschiebt; nur `clip-path`, `transform` und Deckkraft.
+ * Beim Öffnen blenden beide ein, ohne Weg. Ohne Bewegung (globale Regel in
+ * `globals.css`) springen sie.
+ */
+.rundgang {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background: transparent;
+  color: var(--tinte);
+}
+
+.rundgang::backdrop {
+  background: transparent;
+}
+
+.rundgang-schleier,
+.rundgang-rahmen {
+  position: fixed;
+  inset: 0;
+  transition: opacity var(--dauer-mittel) var(--ease-out);
+}
+
+.rundgang-schleier {
+  background: rgb(10 9 8 / 0.58);
+}
+
+.rundgang-rahmen {
+  background: var(--tinte-leise);
+}
+
+@starting-style {
+  .rundgang-schleier,
+  .rundgang-rahmen {
+    opacity: 0;
+  }
+}
+
+.rundgang-karte {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: min(24rem, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  padding: 1.1rem 1.25rem 1rem;
+  background: var(--flaeche-hoch);
+  border: 1px solid var(--kante-stark);
+  border-radius: 10px;
+  box-shadow: 0 22px 48px -24px rgb(0 0 0 / 0.75);
+  color: var(--tinte-leise);
+  opacity: 0;
+  transition: opacity var(--dauer-mittel) var(--ease-out);
+}
+
+.rundgang-karte[data-gemessen] {
+  opacity: 1;
+}
+
+.rundgang[data-gleitet] .rundgang-schleier,
+.rundgang[data-gleitet] .rundgang-rahmen {
+  transition:
+    opacity var(--dauer-mittel) var(--ease-out),
+    clip-path 300ms var(--ease-in-out);
+}
+
+.rundgang[data-gleitet] .rundgang-karte {
+  transition:
+    opacity var(--dauer-mittel) var(--ease-out),
+    transform 300ms var(--ease-in-out);
+}
+
+.rundgang-fortschritt {
+  padding-inline-end: 7rem;
+}
+
+.rundgang-beenden {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.6rem;
+  min-height: 2.75rem;
+  padding: 0 0.65rem;
+  color: var(--tinte);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.rundgang-knoepfe {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+}
+
+.rundgang-weiter,
+.rundgang-zurueck {
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  border-radius: 10px;
+}
+
+.rundgang-weiter {
+  background: var(--aktion-grund);
+  color: var(--aktion-tinte);
+}
+
+.rundgang-zurueck {
+  border: 1px solid var(--rand-bedienung);
+  color: var(--tinte);
+}

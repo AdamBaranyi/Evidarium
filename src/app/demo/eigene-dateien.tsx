@@ -20,7 +20,10 @@ export async function EigeneDateien({ dokumente }: { dokumente: BesucherDokument
   const voll = dokumente.length >= DEMO_GRENZEN.maxDateien;
 
   return (
-    <section className="flex min-w-0 flex-col gap-3 border-t border-kante pt-5">
+    <section
+      data-rundgang="eigene-dateien"
+      className="flex min-w-0 flex-col gap-3 border-t border-kante pt-5"
+    >
       <Nachladen aktiv={dokumente.some((d) => inArbeit(d.status))} />
       <h2>{t.titel}</h2>
       <p>

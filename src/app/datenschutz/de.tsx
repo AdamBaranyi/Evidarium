@@ -46,6 +46,14 @@ export function DatenschutzDe({ live }: { live: boolean }) {
         Einstellungen deines Browsers, und es entsteht kein Cookie.
       </p>
 
+      <h2>Rundgang</h2>
+      <p>
+        Ob du den Rundgang schon gesehen hast, merkt sich dein Browser in seinem lokalen Speicher
+        («evidarium.rundgang.demo» für die Demo, «evidarium.rundgang.app» nach der Anmeldung). Der
+        Eintrag bleibt in deinem Browser und geht nie an den Server; löschen kannst du ihn mit den
+        Websitedaten deines Browsers.
+      </p>
+
       <h2>Öffentliche Demo</h2>
       <ul>
         <li>
