@@ -44,6 +44,8 @@
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
     "@eslint/js": "10.0.1",
+    "@guidepup/guidepup": "0.34.0",
+    "@guidepup/playwright": "0.19.1",
     "@playwright/test": "1.63.0",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "26.5.1",

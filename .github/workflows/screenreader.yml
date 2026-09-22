@@ -1,0 +1,117 @@
+name: Screenreader
+
+# Tests mit einem echten Screenreader: VoiceOver auf macOS, gesteuert von
+# Guidepup, mit Safari (WebKit). Geprüft wird, was VoiceOver tatsächlich
+# sagt — die Ansage der fertigen Antwort, das Urteil als Wort, jeder Schritt
+# des Rundgangs. axe und die übrigen Browsertests prüfen Regeln; das hier
+# prüft, ob die Ansagen ankommen.
+#
+# Eigener Workflow, weil er auf einem Mac läuft und langsamer ist. Für ein
+# öffentliches Repository kosten die Mac-Minuten nichts.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: screenreader-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BUN_VERSION: 1.3.14
+  DATABASE_URL: postgres://evidarium_owner@127.0.0.1:5432/evidarium_test
+  TEST_DATABASE_URL: postgres://evidarium_owner@127.0.0.1:5432/evidarium_test
+  APP_ORIGIN: http://localhost:3100
+  STORAGE_PATH: ./storage-ci
+  DEMO_AKTIV: 'true'
+  TRUST_PROXY: 'true'
+  HOMEBREW_NO_AUTO_UPDATE: '1'
+  HOMEBREW_NO_INSTALL_CLEANUP: '1'
+
+jobs:
+  voiceover:
+    name: VoiceOver mit Safari
+    runs-on: macos-15
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # Erlaubt die Fernsteuerung von VoiceOver (AppleScript, Bedienungshilfen).
+      # Auf einem Mac der GitHub-Pipeline, nie auf einem Arbeitsrechner.
+      - name: VoiceOver für die Automatisierung einrichten
+        uses: guidepup/setup-action@0.21.0
+        with:
+          record: true
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - run: bun install --frozen-lockfile
+
+      # Auf den Mac-Rechnern gibt es kein Docker: Postgres 18 mit pgvector aus
+      # Homebrew, dieselbe Hauptversion wie in der übrigen CI und auf vps1.
+      # Nur lokal erreichbar, darum ohne Passwort.
+      - name: Postgres 18 mit pgvector
+        run: |
+          brew install postgresql@18 pgvector
+          PG="$(brew --prefix postgresql@18)/bin"
+          "$PG/initdb" -D "$RUNNER_TEMP/pgdata" -U evidarium_owner --auth=trust > /dev/null
+          "$PG/pg_ctl" -D "$RUNNER_TEMP/pgdata" -l "$RUNNER_TEMP/postgres.log" -o "-p 5432 -k $RUNNER_TEMP" -w start
+          "$PG/createdb" -h 127.0.0.1 -U evidarium_owner evidarium_test
+          "$PG/psql" -h 127.0.0.1 -U evidarium_owner -d evidarium_test -c 'CREATE EXTENSION IF NOT EXISTS vector;'
+
+      - name: Testgeheimnis erzeugen
+        run: echo "SESSION_SECRET=$(openssl rand -base64 48)" >> "$GITHUB_ENV"
+
+      # Dieselbe Einrichtung wie vor den Unit-Tests (tests/setup-datenbank.ts).
+      - name: Migrationen
+        run: |
+          bun -e "const { default: einrichten } = await import('./tests/setup-datenbank.ts'); await einrichten();"
+
+      - name: Embedding-Modell aus dem Zwischenspeicher
+        uses: actions/cache@v6
+        with:
+          path: .modelle
+          key: modelle-${{ runner.os }}-${{ hashFiles('src/lib/embeddings/modell.ts', 'src/worker/embeddings.ts') }}
+
+      - name: Worker starten und Demo-Korpus laden
+        run: |
+          nohup bun src/worker/index.ts > worker.log 2>&1 &
+          for versuch in $(seq 1 120); do
+            curl -sf http://127.0.0.1:3101/gesundheit > /dev/null && break
+            sleep 2
+          done
+          curl -sf http://127.0.0.1:3101/gesundheit > /dev/null || { cat worker.log; exit 1; }
+          bun scripts/demo-korpus-laden.ts
+
+      - name: Build
+        run: bun run build
+
+      - name: Safari (WebKit) für Playwright
+        run: bunx playwright install webkit
+
+      - name: VoiceOver-Tests
+        run: bunx playwright test -c playwright.screenreader.config.ts
+
+      - name: Protokolle, falls etwas scheiterte
+        if: failure()
+        run: |
+          cat worker.log || true
+          cat "$RUNNER_TEMP/postgres.log" || true
+
+      # Aufnahmen des Bildschirms und Spuren der Tests: Bei einem Screenreader
+      # ist ohne sie kaum zu sehen, woran es lag.
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: screenreader-${{ github.run_id }}
+          path: |
+            test-results/
+            recordings/
+          retention-days: 7

@@ -1,5 +1,7 @@
 import { existsSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
+import { pruefserver } from './e2e/pruefserver';
+import { rundgangGesehen } from './e2e/rundgang-gesehen';
 
 /*
  * Lokal stehen die Zugangsdaten in `.env`; die Tests für den angemeldeten
@@ -35,23 +37,8 @@ export default defineConfig({
   reporter: process.env.CI ? 'github' : 'list',
   use: {
     baseURL: `http://localhost:${PORT}`,
-    /*
-     * Der Rundgang (E43) kommt beim ersten Besuch von selbst und legt sich
-     * als modaler Dialog über die Seite. Alle Tests ausser seinen eigenen
-     * beginnen darum als Besucher, die ihn schon kennen.
-     */
-    storageState: {
-      cookies: [],
-      origins: [
-        {
-          origin: `http://localhost:${PORT}`,
-          localStorage: [
-            { name: 'evidarium.rundgang.demo', value: 'gesehen' },
-            { name: 'evidarium.rundgang.app', value: 'gesehen' },
-          ],
-        },
-      ],
-    },
+    // Alle Tests ausser denen des Rundgangs beginnen, als kennten sie ihn schon.
+    storageState: rundgangGesehen(`http://localhost:${PORT}`),
     locale: 'de-CH',
     timezoneId: 'Europe/Zurich',
     trace: 'on-first-retry',
@@ -82,20 +69,5 @@ export default defineConfig({
       use: { ...devices['iPhone 15'] },
     },
   ],
-  webServer: {
-    // In der CI hat der Build-Schritt davor schon gebaut; ein zweiter Build
-    // kostet nur Zeit.
-    command: process.env.CI
-      ? `bunx next start --port ${PORT}`
-      : `bun run build && bunx next start --port ${PORT}`,
-    url: `http://localhost:${PORT}`,
-    /*
-     * Die Herkunftsprüfung vergleicht mit `APP_ORIGIN`. Läuft der Prüfserver
-     * auf einem anderen Port als in `.env`, lehnte sie sonst jede Frage der
-     * Demo ab — zu Recht.
-     */
-    env: { APP_ORIGIN: `http://localhost:${PORT}` },
-    reuseExistingServer: !process.env.CI,
-    timeout: 180_000,
-  },
+  webServer: pruefserver(PORT),
 });
