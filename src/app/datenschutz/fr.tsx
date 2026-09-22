@@ -96,9 +96,17 @@ export function DatenschutzFr({ live }: { live: boolean }) {
           <p>
             Les fichiers sont lus et recherchés sur le serveur&nbsp;; des fichiers entiers ne le
             quittent jamais. Pour une réponse, la question et les passages trouvés, huit au plus,
-            sont transmis à Anthropic PBC, San Francisco, États-Unis. Anthropic les traite en tant
-            que sous-traitante uniquement pour produire la réponse. Il s’agit d’une communication à
-            l’étranger.
+            sont transmis à Anthropic. Le partenaire contractuel est Anthropic Ireland, Limited,
+            Dublin&nbsp;; les données sont aussi traitées aux États-Unis, notamment par Anthropic,
+            PBC, San Francisco.
+          </p>
+          <p>
+            Anthropic les traite en tant que sous-traitante uniquement pour produire la réponse,
+            n’entraîne aucun modèle avec elles et les supprime au plus tard après 30&nbsp;jours,
+            sauf si elles doivent être conservées plus longtemps pour faire respecter les règles
+            d’utilisation ou en vertu de la loi. La communication vers les États-Unis repose sur les
+            clauses contractuelles types de la Commission européenne, avec l’annexe pour la Suisse,
+            qui font partie du contrat de sous-traitance d’Anthropic.
           </p>
         </>
       )}

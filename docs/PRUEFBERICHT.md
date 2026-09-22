@@ -146,3 +146,24 @@ Prüfserver lief auf Port 3200 mit `APP_ORIGIN` auf 3100 — die Herkunftsprüfu
 lehnte Fragen darum ab, und zwei Zugriffstests bestanden nur deshalb, weil
 sie 3100 fest eingetragen hatten. Beides zieht die Adresse jetzt aus dem
 Prüfserver.
+
+## Nachtrag 22.09.2026, abends — Datenschutz, Screenreader, Betrieb
+
+**Datenschutzerklärung, Abschnitt Anthropic: falscher Empfänger, fehlende
+Grundlage.** Sie nannte Anthropic PBC in den USA und sagte nur «Bekanntgabe
+ins Ausland». Laut Anthropics Geschäftsbedingungen (gültig seit 17.06.2025)
+ist für Kundinnen und Kunden in der Schweiz **Anthropic Ireland, Limited** die
+Vertragspartnerin; die Vereinbarung über die Auftragsbearbeitung (gültig seit
+24.02.2025) ist Teil davon, mit den Standardvertragsklauseln der
+EU-Kommission (Module 2 und 3) und einem Anhang für die Schweiz, der den
+EDÖB als Behörde nennt. Anthropic trainiert nicht mit Kundendaten und löscht
+Ein- und Ausgaben der Schnittstelle nach spätestens 30 Tagen (Privacy Center,
+Stand 01.07.2026). Die Erklärung sagt das jetzt in allen vier Sprachen; der
+Abschnitt erscheint nur im Live-Modus. Quellen, abgerufen am 22.09.2026:
+`anthropic.com/legal/commercial-terms`,
+`anthropic.com/legal/data-processing-addendum`,
+`privacy.claude.com/en/articles/7996866`. Keine Rechtsberatung.
+
+**Screenreader (E44):** VoiceOver prüft in der CI Hauptüberschrift,
+Antwortansage, Urteil als Wort und Rundgang; alle drei Tests beim ersten
+Lauf grün. **Betrieb (E45):** N2 und N3 im Repository gelöst, siehe oben.

@@ -926,3 +926,50 @@ Tallyrooms Verhalten; Aussehen und Schritte sind Evidariums eigene.
   Ende zurück.
 - **Die Karte ist aus dem Material des Panels**, nicht aus Papier. Papier
   bleibt den Belegen vorbehalten (E30).
+
+## E44 — Ein echter Screenreader in der CI
+
+_22.09.2026._ Adams Wunsch: prüfen, was ein Screenreader tatsächlich sagt,
+nicht nur, was im Barrierefreiheitsbaum steht. axe prüft Regeln; ob eine
+Ansage ankommt, prüft es nicht.
+
+- **Guidepup mit VoiceOver und Safari (WebKit)** auf einem Mac der
+  GitHub-Pipeline, eigener Workflow `screenreader.yml`. Für ein öffentliches
+  Repository kosten die Mac-Minuten nichts.
+- **Nicht auf dem Entwicklungsrechner.** VoiceOver fernzusteuern verlangt
+  Eingriffe in die Systemeinstellungen, und der Rechner gehört nicht dem
+  Projekt. Guidepup richtet das auf dem Mac der Pipeline ein.
+- **Geprüft werden Ansagen, die ein Mensch ohne Bildschirm braucht:** die
+  Hauptüberschrift, die fertige Antwort in der Demo («Antwort da: …»), das
+  Urteil als Überschrift mit Wort und jeder Schritt des Rundgangs. Ansagen
+  aus Live-Regionen kommen ohne Befehl; der Test liest darum wiederholt ab,
+  was VoiceOver zuletzt gesagt hat.
+- **Geprüft wird auf Inhalte, nicht auf den Wortlaut von VoiceOver.** Der
+  ändert sich mit jeder macOS-Fassung; ein Schnappschuss des ganzen
+  Protokolls würde bei jedem Update rot.
+- Auf dem Mac gibt es in der Pipeline kein Docker: Postgres 18 mit pgvector
+  kommt aus Homebrew, dieselbe Hauptversion wie sonst.
+
+Nicht abgedeckt: NVDA unter Windows und ein Mensch, der Evidarium mit
+Screenreader ganz durchgeht. Beides steht in der Barrierefreiheitserklärung.
+
+## E45 — Sicherung jede Nacht, Gesundheit vor dem Fertig
+
+_22.09.2026._ Aus dem Prüfbericht offen: N2 (keine nächtliche Sicherung) und
+N3 (kein Gesundheitsendpunkt, keine Healthchecks).
+
+- **Datenbank und Dateien im selben Lauf, mit demselben Zeitstempel.** Eine
+  Datenbank ohne ihre Dateien hinterlässt Dokumente ohne Inhalt. Beide
+  Dateien werden nach dem Schreiben geprüft; eine halb geschriebene wird
+  entfernt, damit sie nie als letzte gute Sicherung dasteht. 14 Tage
+  Aufbewahrung, ein systemd-Timer startet den Lauf um 03:15.
+- **Eine Sicherung, die nie zurückgespielt wurde, ist eine Vermutung.**
+  `sicherung-pruefen.sh` spielt die neueste in eine vorübergehende Datenbank
+  zurück, zählt und entfernt sie wieder; die laufende bleibt unberührt.
+- **`/api/gesundheit` sagt nur ja oder nein.** Die Route ist öffentlich; ein
+  Fehlertext verriete Adressen und Fassungen.
+- **Das Deployment ist erst fertig, wenn Web und Worker gesund sind.**
+  Vorher meldete `deploy.sh` «Fertig», sobald die Container liefen — auch
+  wenn der Worker danach am Modell scheiterte.
+
+Offen: eine Kopie ausser Haus. Alle Sicherungen liegen auf vps1.

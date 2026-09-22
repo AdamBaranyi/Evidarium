@@ -89,9 +89,16 @@ export function DatenschutzEn({ live }: { live: boolean }) {
           <h2>Answers through an interface</h2>
           <p>
             Files are read and searched on the server; whole files never leave it. For an answer,
-            the question and the passages found, at most eight, go to Anthropic PBC, San Francisco,
-            USA. Anthropic processes them as a processor only to produce the answer. This is a
-            disclosure abroad.
+            the question and the passages found, at most eight, go to Anthropic. The contracting
+            party is Anthropic Ireland, Limited, Dublin; the data is also processed in the USA,
+            among others by Anthropic, PBC, San Francisco.
+          </p>
+          <p>
+            Anthropic processes it as a processor only to produce the answer, does not train models
+            on it and deletes it after 30 days at the latest, unless it must be kept longer to
+            enforce the usage policy or by law. The disclosure to the USA relies on the European
+            Commission’s standard contractual clauses with the addendum for Switzerland, which are
+            part of Anthropic’s data processing agreement.
           </p>
         </>
       )}

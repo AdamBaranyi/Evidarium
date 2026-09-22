@@ -19,6 +19,7 @@ export const BARRIEREFREIHEIT = texte({
       'Keine Schrift unter 16 Pixel, in Quelltext und Browser geprüft.',
       'Kontraste von Text und Bedienelementen gerechnet, nicht geschätzt.',
       'Bedienung mit der Tastatur, sichtbarer Fokus, Sprungmarke zum Inhalt.',
+      'Mit dem echten Screenreader VoiceOver und Safari, automatisch bei jeder Änderung: Die Hauptüberschrift wird gelesen, die fertige Antwort angesagt, das Urteil als Wort genannt und jeder Schritt des Rundgangs vorgelesen.',
     ],
     gebaut: 'Was bewusst so gebaut ist',
     bauweisen: [
@@ -30,7 +31,7 @@ export const BARRIEREFREIHEIT = texte({
     ],
     grenzen: 'Bekannte Grenzen',
     grenzenListe: [
-      'Mit einem echten Screenreader ist Evidarium noch nicht durchgespielt worden. Die Ansagen sind technisch vorhanden, aber nicht im Gebrauch erprobt.',
+      'Die Prüfung mit VoiceOver ist automatisch und deckt die wichtigsten Abläufe ab. Von einem Menschen mit Screenreader ist Evidarium noch nicht ganz durchgespielt worden, und NVDA unter Windows ist noch nicht geprüft.',
       'Wie gut ein hochgeladenes PDF gelesen werden kann, hängt von der Datei ab: Gescannte Seiten ohne Textschicht lehnt Evidarium ab und sagt das.',
       'Die Übersetzungen ins Französische, Italienische und Englische sind nicht muttersprachlich geprüft.',
     ],
@@ -52,6 +53,7 @@ export const BARRIEREFREIHEIT = texte({
       'Aucun texte en dessous de 16 pixels, vérifié dans le code source et dans le navigateur.',
       'Contrastes du texte et des éléments de commande calculés, pas estimés.',
       'Utilisation au clavier, focus visible, lien d’accès direct au contenu.',
+      'Avec le véritable lecteur d’écran VoiceOver et Safari, automatiquement à chaque modification\u00a0: le titre principal est lu, la réponse terminée est annoncée, le verdict est nommé en toutes lettres et chaque étape de la visite guidée est lue.',
     ],
     gebaut: 'Ce qui est construit ainsi à dessein',
     bauweisen: [
@@ -63,7 +65,7 @@ export const BARRIEREFREIHEIT = texte({
     ],
     grenzen: 'Limites connues',
     grenzenListe: [
-      'Evidarium n’a pas encore été parcouru avec un véritable lecteur d’écran. Les annonces existent techniquement, mais n’ont pas été éprouvées à l’usage.',
+      'Le contrôle avec VoiceOver est automatique et couvre les parcours principaux. Evidarium n’a pas encore été parcouru en entier par une personne utilisant un lecteur d’écran, et NVDA sous Windows n’est pas encore testé.',
       'La lisibilité d’un PDF téléversé dépend du fichier\u00a0: Evidarium refuse les pages numérisées sans couche de texte et le dit.',
       'Les traductions en français, en italien et en anglais n’ont pas été relues par des personnes de langue maternelle.',
     ],
@@ -85,6 +87,7 @@ export const BARRIEREFREIHEIT = texte({
       'Nessun testo sotto i 16 pixel, verificato nel codice sorgente e nel browser.',
       'Contrasti di testo ed elementi di comando calcolati, non stimati.',
       'Uso con la tastiera, focus visibile, collegamento diretto al contenuto.',
+      'Con il vero lettore di schermo VoiceOver e Safari, automaticamente a ogni modifica: il titolo principale viene letto, la risposta pronta annunciata, il giudizio nominato a parole e ogni passo della visita guidata letto.',
     ],
     gebaut: 'Che cosa è costruito così di proposito',
     bauweisen: [
@@ -96,7 +99,7 @@ export const BARRIEREFREIHEIT = texte({
     ],
     grenzen: 'Limiti noti',
     grenzenListe: [
-      'Evidarium non è ancora stato provato con un vero lettore di schermo. Gli annunci ci sono tecnicamente, ma non sono stati sperimentati nell’uso.',
+      'Il controllo con VoiceOver è automatico e copre i percorsi principali. Evidarium non è ancora stato percorso per intero da una persona con un lettore di schermo, e NVDA su Windows non è ancora verificato.',
       'Quanto bene si legga un PDF caricato dipende dal file: Evidarium rifiuta le pagine scansionate senza livello di testo e lo dice.',
       'Le traduzioni in francese, italiano e inglese non sono state riviste da madrelingua.',
     ],
@@ -118,6 +121,7 @@ export const BARRIEREFREIHEIT = texte({
       'No text below 16 pixels, checked in the source code and in the browser.',
       'Contrast of text and controls calculated, not estimated.',
       'Keyboard operation, visible focus, skip link to the content.',
+      'With the real screen reader VoiceOver and Safari, automatically on every change: the main heading is read, the finished answer is announced, the verdict is named in words and every step of the tour is read out.',
     ],
     gebaut: 'What is built this way on purpose',
     bauweisen: [
@@ -129,7 +133,7 @@ export const BARRIEREFREIHEIT = texte({
     ],
     grenzen: 'Known limits',
     grenzenListe: [
-      'Evidarium has not yet been worked through with a real screen reader. The announcements exist technically but have not been tried in use.',
+      'The VoiceOver check is automated and covers the main flows. Evidarium has not yet been worked through end to end by a person using a screen reader, and NVDA on Windows is not yet tested.',
       'How well an uploaded PDF can be read depends on the file: Evidarium rejects scanned pages without a text layer and says so.',
       'The French, Italian and English translations have not been reviewed by native speakers.',
     ],

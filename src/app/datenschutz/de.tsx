@@ -92,8 +92,16 @@ export function DatenschutzDe({ live }: { live: boolean }) {
           <p>
             Dateien werden auf dem Server eingelesen und durchsucht; ganze Dateien verlassen ihn
             nie. Für eine Antwort gehen die Frage und die gefundenen Abschnitte, höchstens acht, an
-            Anthropic PBC, San Francisco, USA. Anthropic bearbeitet sie als Auftragsbearbeiterin
-            nur, um die Antwort zu erzeugen. Das ist eine Bekanntgabe ins Ausland.
+            Anthropic. Vertragspartnerin ist Anthropic Ireland, Limited, Dublin; bearbeitet werden
+            die Daten auch in den USA, unter anderem durch Anthropic, PBC, San Francisco.
+          </p>
+          <p>
+            Anthropic bearbeitet sie als Auftragsbearbeiterin nur, um die Antwort zu erzeugen,
+            trainiert damit keine Modelle und löscht sie nach spätestens 30 Tagen, ausser sie müssen
+            zur Durchsetzung der Nutzungsrichtlinien oder von Gesetzes wegen länger bleiben. Die
+            Bekanntgabe in die USA stützt sich auf die Standardvertragsklauseln der EU-Kommission
+            mit dem Anhang für die Schweiz; sie sind Teil von Anthropics Vertrag über die
+            Auftragsbearbeitung.
           </p>
         </>
       )}

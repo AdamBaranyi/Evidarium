@@ -92,8 +92,16 @@ export function DatenschutzIt({ live }: { live: boolean }) {
           <p>
             I file vengono letti e cercati sul server; file interi non lo lasciano mai. Per una
             risposta, la domanda e i passaggi trovati, al massimo otto, vengono trasmessi ad
-            Anthropic PBC, San Francisco, USA. Anthropic li tratta come responsabile del trattamento
-            solo per generare la risposta. Si tratta di una comunicazione all’estero.
+            Anthropic. La controparte contrattuale è Anthropic Ireland, Limited, Dublino; i dati
+            vengono trattati anche negli USA, tra l’altro da Anthropic, PBC, San Francisco.
+          </p>
+          <p>
+            Anthropic li tratta come responsabile del trattamento solo per generare la risposta, non
+            li usa per addestrare modelli e li cancella al più tardi dopo 30 giorni, salvo che
+            debbano essere conservati più a lungo per far rispettare le regole d’uso o per legge. La
+            comunicazione verso gli USA si basa sulle clausole contrattuali tipo della Commissione
+            europea con l’allegato per la Svizzera, che fanno parte del contratto di trattamento dei
+            dati di Anthropic.
           </p>
         </>
       )}

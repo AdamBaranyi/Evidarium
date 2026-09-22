@@ -103,7 +103,7 @@ jobs:
         run: bunx playwright install webkit
 
       - name: VoiceOver-Tests
-        run: bunx playwright test -c playwright.screenreader.config.ts
+        run: bun run test:screenreader
 
       - name: Protokolle, falls etwas scheiterte
         if: failure()

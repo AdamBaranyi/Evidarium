@@ -35,6 +35,7 @@ Die Anwendung läuft auf http://localhost:3100, die Datenbank auf Port 5450
 bun run verify     # Format, Dateilänge, Schriftgrösse, Lint, Typen
 bun run test       # Unit- und Integrationstests
 bun run test:e2e   # Playwright: 320, 768, 1440 px; Chromium, Firefox, Safari, iPhone
+bun run test:screenreader  # VoiceOver mit Guidepup; nur auf einem eingerichteten Mac (CI)
 ```
 
 ## Stack
