@@ -93,4 +93,5 @@ lokalen Anmeldung, damit der Rundgang unabhängig bleibt.
 | `docs/BETRIEB.md`          | Migrationen, Sicherung, Wiederherstellung, Messwerte  |
 | `docs/ENTSCHEIDE.md`       | Nummerierte Entscheidungen mit Begründung             |
 | `docs/EVALUATION.md`       | Ergebnis des letzten Prüflaufs, Antworten im Wortlaut |
+| `docs/SCREENREADER.md`     | VoiceOver automatisch in der CI und von Hand          |
 | `docs/FALLSTUDIE.md`       | Die Fallstudie für die Portfolio-Seite                |
