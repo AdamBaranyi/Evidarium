@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { demoOeffnen } from './demo-oeffnen';
 
 /*
  * Vier Sprachen (E42): Die Wahl greift per Knopf, per Cookie und per
@@ -83,10 +84,7 @@ test('englische Demo: deutsche Zitate sind als deutsch ausgezeichnet', async ({
   await context.addCookies([
     { name: 'evidarium_sprache', value: 'en', url: baseURL ?? 'http://localhost:3100' },
   ]);
-  const zufall = () => Math.floor(Math.random() * 254) + 1;
-  await page.setExtraHTTPHeaders({ 'x-forwarded-for': `198.18.${zufall()}.${zufall()}` });
-  const antwort = await page.goto('/demo');
-  test.skip(antwort?.status() === 404, 'Demo ist nicht eingeschaltet oder nicht befüllt');
+  await demoOeffnen(page);
 
   await page.getByRole('button', { name: /Who helps with onboarding/ }).click();
   const urteil = page.getByRole('heading', { level: 3 }).first();

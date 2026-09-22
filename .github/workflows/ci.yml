@@ -101,23 +101,56 @@ jobs:
           STORAGE_PATH: ./storage-ci
         run: bun run build
 
+      # Die Demo ist das, was Besucher zuerst sehen. Ihre Tests brauchen den
+      # Demo-Korpus, der Korpus braucht den Worker, und der Worker braucht das
+      # Embedding-Modell (rund 470 MB). Einmal geladen, kommt es danach aus
+      # dem Zwischenspeicher; ändert sich das Modell, ändert sich der Schlüssel.
+      - name: Embedding-Modell aus dem Zwischenspeicher
+        uses: actions/cache@v6
+        with:
+          path: .modelle
+          key: modelle-${{ runner.os }}-${{ hashFiles('src/lib/embeddings/modell.ts', 'src/worker/embeddings.ts') }}
+
+      # Der Worker bleibt für die Browsertests an: Er liest ein, was die Tests
+      # hochladen, und rechnet den Vektor jeder Frage. Sein Endpunkt antwortet
+      # erst, wenn das Modell geladen ist. Der Korpus geht über denselben Weg
+      # wie ein Upload und ist fertig, wenn das Skript endet.
+      - name: Worker starten und Demo-Korpus laden
+        env:
+          DATABASE_URL: postgres://evidarium_owner:ci@127.0.0.1:5432/evidarium_test
+          APP_ORIGIN: http://localhost:3100
+          STORAGE_PATH: ./storage-ci
+        run: |
+          nohup bun src/worker/index.ts > worker.log 2>&1 &
+          for versuch in $(seq 1 120); do
+            curl -sf http://127.0.0.1:3101/gesundheit > /dev/null && break
+            sleep 2
+          done
+          curl -sf http://127.0.0.1:3101/gesundheit > /dev/null || { cat worker.log; exit 1; }
+          bun scripts/demo-korpus-laden.ts
+
       # Die drei Prüfbreiten im echten Browser: 320, 768, 1440 in Chromium,
       # dazu Firefox, Safari (WebKit) und ein iPhone. Ohne diesen Schritt
       # liefe der Nachweis nur auf dem Entwicklungsrechner — und «geprüft in
       # allen Engines» wäre eine Behauptung.
       #
-      # Der Demo-Korpus fehlt hier: Ihn zu laden bräuchte das Embedding-Modell.
-      # Die Demo-Tests überspringen sich darum selbst und melden das als
-      # «skipped», nicht als bestanden.
+      # TRUST_PROXY, weil jeder Demo-Test von einer eigenen Adresse kommt
+      # (X-Forwarded-For); sonst zählten alle gegen dieselbe Grenze je Herkunft.
       - name: Browser für E2E
         run: bunx playwright install --with-deps chromium firefox webkit
 
-      - name: E2E in drei Breiten und drei Engines
+      - name: E2E in drei Breiten und drei Engines, mit Demo
         env:
           DATABASE_URL: postgres://evidarium_owner:ci@127.0.0.1:5432/evidarium_test
           APP_ORIGIN: http://localhost:3100
           STORAGE_PATH: ./storage-ci
+          DEMO_AKTIV: 'true'
+          TRUST_PROXY: 'true'
         run: bun run test:e2e
+
+      - name: Worker-Protokoll, falls etwas scheiterte
+        if: failure()
+        run: cat worker.log || true
 
       # Abhängigkeiten blockieren ab "hoch". Der tägliche Lauf ist strenger
       # (ab "moderat") — dort geht es ums Bemerken, hier ums Durchlassen.

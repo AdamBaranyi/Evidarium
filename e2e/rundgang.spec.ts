@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
+import { demoOeffnen } from './demo-oeffnen';
 import { anmelden, fertigesDokument, kontoAnlegen, kontoEntfernen, type Konto } from './konto';
 
 /*
@@ -13,13 +14,6 @@ import { anmelden, fertigesDokument, kontoAnlegen, kontoEntfernen, type Konto } 
 test.use({ storageState: { cookies: [], origins: [] } });
 
 const DIALOG = 'Rundgang durch Evidarium';
-
-async function demoOeffnen(page: Page) {
-  const zufall = () => Math.floor(Math.random() * 254) + 1;
-  await page.setExtraHTTPHeaders({ 'x-forwarded-for': `198.18.${zufall()}.${zufall()}` });
-  const antwort = await page.goto('/demo');
-  test.skip(antwort?.status() === 404, 'Demo ist nicht eingeschaltet oder nicht befüllt');
-}
 
 /*
  * Liegt die Karte ganz im Bild? Bei 320 Pixeln ist das nicht
