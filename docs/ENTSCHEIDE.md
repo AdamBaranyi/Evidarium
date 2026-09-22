@@ -782,3 +782,14 @@ Umgesetzt in CSS: radiale Verläufe aus `color-mix` mit den Urteilsfarben,
 Übergänge über die Deckkraft, feines Korn gegen Streifen auf dunklem Grund.
 Kein WebGL wie bei Tallyroom — zwei Portfolio-Anwendungen mit demselben
 Effekt sähen nach Vorlage aus.
+
+**Nachgebessert am selben Tag**, Adams Befund: Das Licht wirkte, «wie wenn
+jemand eine Lampe eingeschaltet hat». Zutreffend — es lief auf der
+Ease-out-Kurve der Oberfläche, die fast die ganze Änderung in die ersten
+200 ms legt. Richtig für einen Knopf, falsch für Licht, das schon im Raum
+steht und nur heller wird. Jetzt: sanfte Sinuskurve (easeInOutSine),
+3,2 Sekunden hinein und 2,4 hinaus, dazu eine leichte Weitung von 92 auf
+100 Prozent — das Licht breitet sich aus, statt anzugehen. Gemessen: nach
+einer halben Sekunde 6 Prozent, nach 1,6 Sekunden die Hälfte. Die Blätter
+des Archivs folgen derselben Kurve. Bei reduzierter Bewegung entfällt die
+Weitung, das Überblenden bleibt.

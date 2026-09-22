@@ -74,15 +74,17 @@
      * Raum nicht tot ist.
      */
     animation: archiv-schweben 26s var(--ease-in-out) infinite alternate;
+    /* Dieselbe sanfte Kurve wie das Licht: Das Archiv gehört zum Raum, nicht zur Oberfläche. */
     transition:
-      opacity var(--dauer-lang, 320ms) var(--ease-out),
-      transform var(--dauer-lang, 320ms) var(--ease-out);
+      opacity var(--dauer-licht-aus) var(--ease-licht),
+      filter var(--dauer-licht-aus) var(--ease-licht);
   }
 
-  /* Ein Blatt, das zur Antwort beiträgt, kommt nach vorn. */
+  /* Ein Blatt, das zur Antwort beiträgt, kommt nach vorn — so langsam, wie das Licht kommt. */
   .archiv span.zaehlt {
     opacity: 0.16;
     filter: blur(1.5px);
+    transition-duration: var(--dauer-licht-an);
   }
 
   .archiv span:nth-child(1) {

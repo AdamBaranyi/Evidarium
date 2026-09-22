@@ -66,6 +66,20 @@
   --dauer-mittel: 200ms;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /*
+   * **Licht ist keine Oberfläche.** Das Urteilslicht lag zuerst auf
+   * `--ease-out`: Die Kurve legt fast die ganze Änderung in die ersten
+   * 200 ms — Adam am 22.09.2026: «wie jemand eine Lampe eingeschaltet hat».
+   * Ein Licht, das schon im Raum steht und nur heller wird, verändert sich
+   * auf der Fläche; dafür gilt Ease-in-out, und zwar die sanfte Sinusform
+   * (easeInOutSine, easings.net), nicht die steile der Oberfläche.
+   * Einblenden langsamer als Ausblenden: Das neue Licht soll sich ausbreiten,
+   * das alte darf zügig gehen, bevor die nächste Frage beginnt.
+   */
+  --ease-licht: cubic-bezier(0.37, 0, 0.63, 1);
+  --dauer-licht-an: 3200ms;
+  --dauer-licht-aus: 2400ms;
 }
 
 /*

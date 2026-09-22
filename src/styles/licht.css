@@ -41,19 +41,30 @@
   }
 }
 
+/*
+ * Ein Licht geht nicht an, es breitet sich aus: Deckkraft und eine leichte
+ * Weitung (92 auf 100 %) laufen zusammen, über Sekunden und mit sanfter
+ * Kurve (`--ease-licht` in tokens.css). `transform` statt `scale`, weil die
+ * Drift unten `scale` und `translate` belegt — beide setzen sich zusammen.
+ * Hier der Weg hinaus; der Weg hinein steht beim Urteil weiter unten.
+ */
 .licht span {
   position: absolute;
   width: 84vmax;
   height: 84vmax;
   border-radius: 50%;
   opacity: 0;
-  transition: opacity 1400ms var(--ease-out);
+  transform: scale(0.92);
+  transition:
+    opacity var(--dauer-licht-aus) var(--ease-licht),
+    transform var(--dauer-licht-aus) var(--ease-licht);
 }
 
 .licht .licht-lampe {
   top: -52vmax;
   left: -34vmax;
   opacity: 1;
+  transform: none;
   background: radial-gradient(closest-side, var(--licht-lampe), transparent);
 }
 
@@ -103,6 +114,8 @@ body:has([data-urteil='teilweise_belegt']) .licht-teilweise,
 body:has([data-urteil='widerspruch']) .licht-widerspruch-a,
 body:has([data-urteil='widerspruch']) .licht-widerspruch-b {
   opacity: 1;
+  transform: none;
+  transition-duration: var(--dauer-licht-an);
 }
 
 body:has([data-urteil='keine_grundlage']) .licht .licht-lampe {
@@ -180,5 +193,17 @@ body:has(.vorfuehrung.steht) .licht span {
 @media (prefers-reduced-motion: reduce) {
   .licht.licht-bewegt span {
     animation: none;
+  }
+
+  /*
+   * Weniger Bewegung heisst hier: keine Weitung, aber weiter ein weiches
+   * Überblenden — Deckkraft ist keine Bewegung. Gegen die allgemeine Regel
+   * in globals.css (`0s` für alles) braucht es dafür `!important` mit
+   * höherer Spezifität.
+   */
+  .licht span {
+    transform: none;
+    transition-property: opacity !important;
+    transition-duration: var(--dauer-licht-an) !important;
   }
 }
