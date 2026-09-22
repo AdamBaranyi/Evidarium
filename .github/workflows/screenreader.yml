@@ -54,6 +54,12 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
+      # Die VoiceOver-Einstellungen, die zur installierten Guidepup-Fassung
+      # gehören (Manifest mit Prüfsumme in @guidepup/guidepup). Ohne sie
+      # startet VoiceOver nicht: «Failed to mount Guidepup preferences».
+      - name: Guidepup-Einstellungen für VoiceOver
+        run: bunx @guidepup/setup@0.25.3 install voiceover
+
       # Auf den Mac-Rechnern gibt es kein Docker: Postgres 18 mit pgvector aus
       # Homebrew, dieselbe Hauptversion wie in der übrigen CI und auf vps1.
       # Nur lokal erreichbar, darum ohne Passwort.
