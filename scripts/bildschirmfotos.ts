@@ -1,11 +1,12 @@
+import { spawnSync } from 'node:child_process';
 import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { chromium, type Page } from 'playwright';
 import { rundgangGesehen } from '../e2e/rundgang-gesehen';
 
 /*
- * Die drei Bilder für die Fallstudie, reproduzierbar statt von Hand:
- * Startseite, eine Antwort in der Demo und der geöffnete Beleg.
+ * Die Bilder für die Fallstudie, reproduzierbar statt von Hand:
+ * Startseite, zwei Antworten in der Demo und die geöffnete Belegstelle.
  *
  *   bun scripts/bildschirmfotos.ts [basis-url] [zielordner]
  *
@@ -19,7 +20,25 @@ import { rundgangGesehen } from '../e2e/rundgang-gesehen';
 
 const BASIS = process.argv[2] ?? 'http://localhost:3100';
 const ZIEL = process.argv[3] ?? join(import.meta.dirname, '..', 'docs', 'bilder');
-const FRAGE = 'Wie lange werden Sicherungen aufbewahrt?';
+
+/*
+ * Genau zwei Fragen, zwei Bilder: eine, die in den Dokumenten steht, und
+ * eine, bei der zwei Richtlinien Verschiedenes sagen. Mehr kostet nur Geld.
+ */
+const FRAGEN = [
+  { datei: 'antwort-belegt.png', frage: 'Wer hilft beim Onboarding?' },
+  { datei: 'antwort-widerspruch.png', frage: 'Wie lange werden Sicherungen aufbewahrt?' },
+] as const;
+
+/*
+ * Aufgenommen wird in doppelter Auflösung und danach auf 1440 Pixel Breite
+ * gerechnet: schärfer als direkt einfach aufgenommen, und ein Drittel der
+ * Dateigrösse. `sips` gehört zu macOS; anderswo fällt der Schritt weg.
+ */
+function verkleinern(datei: string): void {
+  const ergebnis = spawnSync('sips', ['-Z', '1440', datei, '--out', datei]);
+  if (ergebnis.status !== 0) console.warn(`sips hat ${datei} nicht verkleinert.`);
+}
 
 async function ruhig(page: Page): Promise<void> {
   await page.evaluate(() => document.fonts.ready);
@@ -31,7 +50,7 @@ await mkdir(ZIEL, { recursive: true });
 const browser = await chromium.launch();
 try {
   const kontext = await browser.newContext({
-    viewport: { width: 1440, height: 900 },
+    viewport: { width: 1440, height: 980 },
     deviceScaleFactor: 2,
     colorScheme: 'dark',
     locale: 'de-CH',
@@ -42,19 +61,25 @@ try {
   await page.goto(`${BASIS}/`);
   await ruhig(page);
   await page.screenshot({ path: join(ZIEL, 'startseite.png') });
+  verkleinern(join(ZIEL, 'startseite.png'));
 
-  await page.goto(`${BASIS}/demo`);
-  await page.getByRole('button', { name: new RegExp(FRAGE) }).click();
-  await page.getByRole('button', { name: 'Neu beginnen' }).waitFor({ timeout: 60_000 });
-  await ruhig(page);
-  await page.screenshot({ path: join(ZIEL, 'antwort.png') });
+  for (const { datei, frage } of FRAGEN) {
+    await page.goto(`${BASIS}/demo`);
+    await page.getByRole('button', { name: new RegExp(frage) }).click();
+    await page.getByRole('button', { name: 'Neu beginnen' }).waitFor({ timeout: 120_000 });
+    await ruhig(page);
+    await page.screenshot({ path: join(ZIEL, datei) });
+    verkleinern(join(ZIEL, datei));
+  }
 
+  // Die Stelle im Dokument, aus der letzten Antwort geöffnet.
   await page.locator('.blatt-knopf').first().click();
   await page.getByRole('dialog').waitFor();
   await ruhig(page);
   await page.screenshot({ path: join(ZIEL, 'beleg.png') });
+  verkleinern(join(ZIEL, 'beleg.png'));
 
-  console.log(`Drei Bilder in ${ZIEL}`);
+  console.log(`Vier Bilder in ${ZIEL}`);
 } finally {
   await browser.close();
 }

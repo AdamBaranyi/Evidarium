@@ -6,6 +6,9 @@ Ein Wissensassistent für eigene Dokumente: hochladen, fragen, Antworten mit
 anklickbaren Belegen erhalten. Gebaut in fünf Arbeitstagen, allein, von der
 leeren Ablage bis zur öffentlichen Demo.
 
+![Startseite von Evidarium: dunkle Arbeitsfläche, darin ein Fenster mit einer
+Beispielantwort; der Hintergrund leuchtet in der Farbe des Urteils.](bilder/startseite.png)
+
 ---
 
 ## Das Problem ist nicht das Antworten
@@ -49,6 +52,10 @@ Server anhand der Quellen-ID. Dürfte das Modell sie selbst setzen, könnte es
 zu einem echten Abschnitt eine falsche Seitenzahl schreiben — und die Antwort
 sähe vollkommen glaubwürdig aus.
 
+![Antwort in der Demo, Urteil «Belegt»: eine Aussage, darunter das wörtliche
+Zitat auf einem hellen Blatt mit Dateiname und Seitenzahl; in der Seitenspalte
+leuchtet ein grüner Punkt beim benutzten Dokument.](bilder/antwort-belegt.png)
+
 Ein Beispiel aus dem echten Betrieb: Das Modell schreibt in seiner eigenen
 Aussage «Zugänge» mit Umlaut, zitiert aber «Zugaenge» — so, wie es im Dokument
 steht. Hätte es geglättet, wäre die Antwort verworfen worden.
@@ -65,6 +72,16 @@ sich widersprechen, nennt die Antwort beide mit je eigenem Zitat und löst den
 Widerspruch **nicht** auf. Das ist keine Schwäche, sondern der Punkt: Welche
 Regelung gilt, steht nicht in den Dokumenten. Eine Anwendung, die sich hier
 für eine Seite entscheidet, erfindet eine Rangfolge.
+
+![Antwort mit dem Urteil «Widerspruch zwischen Quellen»: zwei Blätter
+nebeneinander, 30 Tage gegen 90 Tage, beide mit eigenem Zitat; der Hintergrund
+leuchtet rot.](bilder/antwort-widerspruch.png)
+
+Ein Klick auf ein Blatt öffnet die Stelle im Dokument, mit dem Zitat markiert
+und dem ganzen Abschnitt darum herum:
+
+![Geöffneter Beleg: der Abschnitt aus Backup_Richtlinie_A.pdf, Seite 2, das
+zitierte Stück ist hervorgehoben.](bilder/beleg.png)
 
 ## Gemessen, nicht behauptet
 

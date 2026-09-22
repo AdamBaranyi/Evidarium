@@ -191,7 +191,8 @@ Stand 22.09.2026, Entscheide E30 bis E33 und E38 bis E43:
 - **Rundgang** (E43): sechs Schritte in Demo und Anwendung, einmal von
   selbst, danach über den Knopf «Rundgang». Modaler Dialog, Schleier mit
   Ausschnitt, mit der Tastatur ganz zu gehen, auch bei 320 Pixeln im Bild.
-- Offen: Durchsicht mit Adam; danach drei Bildschirmfotos für die Fallstudie.
+- Bilder in der Fallstudie (22.09.2026, Adams OK für zwei Fragen im Live-Modus): Startseite, belegte Antwort, Widerspruch, geöffneter Beleg; `bun scripts/bildschirmfotos.ts` macht sie neu.
+- Offen: Durchsicht mit Adam; danach die Bilder neu aufnehmen, falls sich etwas ändert.
 
 ## Aufgefallen
 
