@@ -1,3 +1,4 @@
+import type { Sprache } from '@/lib/i18n/sprachen';
 import { belegePruefen, type Abschnitt, type GeprüfteAussage } from './belegpruefung';
 import { DemoProvider } from './demo-provider';
 import { providerWaehlen } from './anthropic-provider';
@@ -63,6 +64,8 @@ export type FrageErgebnis =
   | { art: 'fehler'; code: string; nachricht: string };
 
 export type FrageAuftrag = {
+  /** Sprache der Oberfläche — für die Sätze des Demo-Adapters. Das Modell antwortet in der Sprache der Frage. */
+  sprache?: Sprache;
   userId: string;
   documentIds: string[];
   frage: string;
@@ -101,13 +104,14 @@ export async function frageBeantworten(auftrag: FrageAuftrag): Promise<FrageErge
   try {
     vektor = await frageEinbetten(frage);
   } catch (fehler) {
+    const aus = fehler instanceof Error && fehler.message.includes('nicht erreichbar');
     return {
       art: 'fehler',
-      code: 'einbetten',
-      nachricht:
-        fehler instanceof Error && fehler.message.includes('nicht erreichbar')
-          ? 'Der Suchdienst läuft gerade nicht. Bitte später erneut versuchen.'
-          : 'Die Frage konnte nicht verarbeitet werden.',
+      // Zwei Codes, weil es zwei verschiedene Sätze sind — übersetzt wird am Code.
+      code: aus ? 'einbetten_aus' : 'einbetten',
+      nachricht: aus
+        ? 'Der Suchdienst läuft gerade nicht. Bitte später erneut versuchen.'
+        : 'Die Frage konnte nicht verarbeitet werden.',
     };
   }
 
@@ -150,7 +154,12 @@ export async function frageBeantworten(auftrag: FrageAuftrag): Promise<FrageErge
   melden('antworten');
   let ergebnis;
   try {
-    ergebnis = await provider.antworten({ frage, abschnitte, verlauf });
+    ergebnis = await provider.antworten({
+      frage,
+      abschnitte,
+      verlauf,
+      sprache: auftrag.sprache ?? 'de',
+    });
   } catch (fehler) {
     // Die Reservierung bleibt stehen: Fehlende Messwerte sind keine
     // Nullkosten, und der Anbieter kann die Anfrage verarbeitet haben.

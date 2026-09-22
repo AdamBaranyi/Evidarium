@@ -1,4 +1,6 @@
+import { sprache } from '@/lib/i18n/server';
 import { Kopf } from './kopf';
+import { GEMEINSAM } from './texte';
 
 /*
  * Rahmen für Textseiten: Impressum, Datenschutz, Barrierefreiheit.
@@ -7,7 +9,7 @@ import { Kopf } from './kopf';
  * Rechtstexte werden gelesen, wenn es darauf ankommt — dann soll nichts
  * davon ablenken.
  */
-export function Textseite({
+export async function Textseite({
   titel,
   stand,
   children,
@@ -17,13 +19,15 @@ export function Textseite({
   stand: string;
   children: React.ReactNode;
 }) {
+  const t = GEMEINSAM[await sprache()];
   return (
     <div className="flex flex-1 flex-col">
       <Kopf />
       <main id="inhalt" className="mx-auto w-full max-w-3xl flex-1 px-6 py-12">
         <article className="textseite flex max-w-[var(--mass-blatt)] flex-col gap-4">
           <h1 className="text-xl leading-[var(--line-title)]">{titel}</h1>
-          <p className="text-tinte-leise">Stand: {stand}</p>
+          <p className="text-tinte-leise">{t.stand(stand)}</p>
+          {t.originalGilt !== '' && <p className="panel p-4">{t.originalGilt}</p>}
           {children}
         </article>
       </main>
@@ -32,7 +36,7 @@ export function Textseite({
 }
 
 /** Angaben des Betreibers — oder ein ehrlicher Hinweis, dass sie fehlen. */
-export function Betreiber({
+export async function Betreiber({
   name,
   adresse,
   email,
@@ -42,12 +46,7 @@ export function Betreiber({
   email: string | undefined;
 }) {
   if (!name || !adresse || !email) {
-    return (
-      <p className="panel p-4">
-        Die Angaben zum Betreiber sind auf diesem Server nicht gesetzt. In Produktion startet
-        Evidarium ohne sie nicht.
-      </p>
-    );
+    return <p className="panel p-4">{GEMEINSAM[await sprache()].betreiberFehlt}</p>;
   }
   return (
     <address className="not-italic">

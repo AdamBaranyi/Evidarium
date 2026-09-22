@@ -5,9 +5,14 @@ import { readSession, sitzungsKennung, SESSION_COOKIE } from '@/lib/auth/session
 import { fragenInSitzung, nutzungsprotokoll, nutzungsstand } from '@/lib/budget/budget';
 import { PREISSTAND, WAEHRUNG } from '@/lib/budget/preise';
 import { env } from '@/lib/config/env';
+import { sprache } from '@/lib/i18n/server';
+import { sprachTag } from '@/lib/i18n/sprachen';
 import { Balken } from './balken';
+import { VERBRAUCH } from './texte';
 
-export const metadata: Metadata = { title: 'Verbrauch – Evidarium' };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: VERBRAUCH[await sprache()].metaTitel };
+}
 export const dynamic = 'force-dynamic';
 
 /*
@@ -18,17 +23,14 @@ export const dynamic = 'force-dynamic';
  * übrig ist, erklärt sich selbst — auch dann, wenn sie sperrt.
  */
 
-const STATUSTEXT: Record<string, string> = {
-  reserviert: 'reserviert',
-  abgerechnet: 'abgerechnet',
-  unklar: 'unklar – Reservierung bleibt stehen',
-};
-
 export default async function VerbrauchPage() {
   const cookie = (await cookies()).get(SESSION_COOKIE)?.value;
   const sitzung = await readSession(cookie);
   if (!sitzung || !cookie) redirect('/login');
 
+  const s = await sprache();
+  const t = VERBRAUCH[s];
+  const tag = sprachTag(s);
   const [stand, protokoll, gestellt] = await Promise.all([
     nutzungsstand(),
     nutzungsprotokoll(sitzung.userId),
@@ -45,30 +47,28 @@ export default async function VerbrauchPage() {
       <section aria-labelledby="verbrauch-titel" className="panel overflow-hidden">
         <div className="panel-leiste min-h-[3.25rem] items-center py-1">
           <h1 id="verbrauch-titel" className="text-tinte">
-            Verbrauch
+            {t.titel}
           </h1>
-          <span className="me-auto">
-            Schätzung in {WAEHRUNG}, Preisliste vom {PREISSTAND}
-          </span>
+          <span className="me-auto">{t.schaetzung(WAEHRUNG, PREISSTAND)}</span>
         </div>
         <div className="grid gap-6 p-5 md:grid-cols-3">
           <Balken
-            name="Heute"
+            name={t.heute}
             wert={stand.tagUsd}
             grenze={stand.tagGrenzeUsd}
-            text={`${stand.tagUsd.toFixed(4)} von ${stand.tagGrenzeUsd.toFixed(2)} USD`}
+            text={t.betrag(stand.tagUsd.toFixed(4), stand.tagGrenzeUsd.toFixed(2), WAEHRUNG)}
           />
           <Balken
-            name="Diesen Monat"
+            name={t.monat}
             wert={stand.monatUsd}
             grenze={stand.monatGrenzeUsd}
-            text={`${stand.monatUsd.toFixed(4)} von ${stand.monatGrenzeUsd.toFixed(2)} USD`}
+            text={t.betrag(stand.monatUsd.toFixed(4), stand.monatGrenzeUsd.toFixed(2), WAEHRUNG)}
           />
           <Balken
-            name="Diese Anmeldung"
+            name={t.anmeldung}
             wert={gestellt}
             grenze={env.FRAGEN_JE_SITZUNG}
-            text={`${gestellt} von ${env.FRAGEN_JE_SITZUNG} Fragen`}
+            text={t.fragen(gestellt, env.FRAGEN_JE_SITZUNG)}
           />
         </div>
       </section>
@@ -76,15 +76,13 @@ export default async function VerbrauchPage() {
       <section aria-labelledby="aufrufe-titel" className="fenster-voll panel overflow-hidden">
         <div className="panel-leiste min-h-[3.25rem] items-center py-1">
           <h2 id="aufrufe-titel" className="text-tinte">
-            Letzte Aufrufe
+            {t.aufrufe}
           </h2>
           <span className="me-auto">{protokoll.length}</span>
         </div>
 
         {protokoll.length === 0 ? (
-          <p className="p-5 text-tinte-leise">
-            Noch kein Aufruf. Im Demo-Modus entsteht kein Eintrag – es wird kein Modell gefragt.
-          </p>
+          <p className="p-5 text-tinte-leise">{t.keine}</p>
         ) : (
           /*
            * Schmal rollt die Tabelle seitlich. Ein rollbarer Bereich muss mit
@@ -102,28 +100,28 @@ export default async function VerbrauchPage() {
             <table className="aufrufe">
               <thead>
                 <tr>
-                  <th scope="col">Zeitpunkt</th>
-                  <th scope="col">Modell</th>
-                  <th scope="col">Stand</th>
+                  <th scope="col">{t.spalten.zeitpunkt}</th>
+                  <th scope="col">{t.spalten.modell}</th>
+                  <th scope="col">{t.spalten.stand}</th>
                   <th scope="col" className="zahl">
-                    Gelesen
+                    {t.spalten.gelesen}
                   </th>
                   <th scope="col" className="zahl">
-                    Geschrieben
+                    {t.spalten.geschrieben}
                   </th>
                   <th scope="col" className="zahl">
-                    Kosten
+                    {t.spalten.kosten}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {protokoll.map((zeile) => (
                   <tr key={zeile.id}>
-                    <td>{zeile.createdAt.toLocaleString('de-CH')}</td>
+                    <td>{zeile.createdAt.toLocaleString(tag)}</td>
                     <td>{zeile.modell}</td>
-                    <td>{STATUSTEXT[zeile.status] ?? zeile.status}</td>
-                    <td className="zahl">{zeile.eingabeTokens?.toLocaleString('de-CH') ?? '–'}</td>
-                    <td className="zahl">{zeile.ausgabeTokens?.toLocaleString('de-CH') ?? '–'}</td>
+                    <td>{(t.status as Record<string, string>)[zeile.status] ?? zeile.status}</td>
+                    <td className="zahl">{zeile.eingabeTokens?.toLocaleString(tag) ?? '–'}</td>
+                    <td className="zahl">{zeile.ausgabeTokens?.toLocaleString(tag) ?? '–'}</td>
                     <td className="zahl">{zeile.kostenUsd.toFixed(6)}</td>
                   </tr>
                 ))}
@@ -132,11 +130,7 @@ export default async function VerbrauchPage() {
           </div>
         )}
 
-        <p className="border-t border-kante px-[1.1rem] py-3 text-tinte-leise">
-          Alle Beträge sind Schätzungen. Der Anbieter rechnet nach eigenen Regeln ab;
-          zwischengespeicherte Eingaben kosten weniger. Jede Zeile ist nach dem Preisstand ihres
-          Aufrufs gerechnet.
-        </p>
+        <p className="border-t border-kante px-[1.1rem] py-3 text-tinte-leise">{t.hinweis}</p>
       </section>
     </main>
   );

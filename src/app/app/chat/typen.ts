@@ -1,4 +1,5 @@
 import type { FrageErgebnis, Phase } from '@/lib/antwort/fragen';
+import type { URTEIL } from './texte-urteil';
 
 /** Eine Zeile aus dem NDJSON-Strom des Endpunkts. */
 export type StromZeile = { art: 'phase'; phase: Phase } | FrageErgebnis;
@@ -39,46 +40,21 @@ export type Dokument = { id: string; filename: string };
  */
 export type Schritt = { phase: Phase; seit: number; dauerMs: number | null };
 
-export const PHASENTEXT: Record<Phase, string> = {
-  einbetten: 'Frage wird eingebettet',
-  suchen: 'Dokumente werden durchsucht',
-  antworten: 'Modell formuliert die Antwort',
-  pruefen: 'Belege werden geprüft',
-};
-
-export const KATEGORIETEXT: Record<Antwort['kategorie'], string> = {
-  belegt: 'Belegt',
-  teilweise_belegt: 'Teilweise belegt',
-  keine_grundlage: 'Keine Grundlage in den Dokumenten',
-  widerspruch: 'Widerspruch zwischen Quellen',
-};
-
-/** Kurzform für die Legende im leeren Chat. */
-export const KATEGORIEKURZ: Record<Antwort['kategorie'], string> = {
-  belegt: 'Belegt',
-  teilweise_belegt: 'Teilweise belegt',
-  keine_grundlage: 'Keine Grundlage',
-  widerspruch: 'Widerspruch',
-};
-
-/** Was die Kategorie bedeutet — einmal ausgeschrieben, nicht nur als Etikett. */
-export const KATEGORIEERKLAERUNG: Record<Antwort['kategorie'], string> = {
-  belegt: 'Jede Aussage trägt ein wörtliches Zitat aus deinen Dokumenten.',
-  teilweise_belegt: 'Die Dokumente decken die Frage nur zum Teil ab.',
-  keine_grundlage: 'Die Dokumente beantworten diese Frage nicht.',
-  widerspruch: 'Zwei Stellen sagen Verschiedenes. Beide stehen unten, unaufgelöst.',
-};
+/*
+ * Die Wörter zu Schritten und Urteilen stehen in `texte-urteil.ts`, in vier
+ * Sprachen. Hier bleibt, was in jeder Sprache gleich ist: Farben und Typen.
+ */
 
 /** Die Herkunft einer Stelle: bei PDF die Seite, bei Text der Zeilenbereich. */
-export function herkunft(stelle: {
-  page: number | null;
-  lineStart: number | null;
-  lineEnd: number | null;
-}): string | null {
-  if (stelle.page !== null) return `S. ${stelle.page}`;
+export function herkunft(
+  stelle: { page: number | null; lineStart: number | null; lineEnd: number | null },
+  t: (typeof URTEIL)['de']['herkunft'],
+): string | null {
+  if (stelle.page !== null) return t.seite(stelle.page);
   if (stelle.lineStart === null) return null;
-  if (stelle.lineEnd === stelle.lineStart) return `Zeile ${stelle.lineStart}`;
-  return `Zeilen ${stelle.lineStart}–${stelle.lineEnd}`;
+  if (stelle.lineEnd === null || stelle.lineEnd === stelle.lineStart)
+    return t.zeile(stelle.lineStart);
+  return t.zeilen(stelle.lineStart, stelle.lineEnd);
 }
 
 /**

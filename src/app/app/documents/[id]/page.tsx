@@ -5,6 +5,9 @@ import { readSession, SESSION_COOKIE } from '@/lib/auth/session';
 import { abschnitteHolen, dokumentHolen } from '@/lib/documents/abfragen';
 import { artText, fehlerText, groesseText, statusText } from '@/lib/documents/zustaende';
 import { ohneDateinamensvorsatz } from '@/lib/documents/anzeigetext';
+import { sprache } from '@/lib/i18n/server';
+import { sprachTag } from '@/lib/i18n/sprachen';
+import { DOKUMENTE } from '../texte';
 import { LoeschenForm } from './loeschen-form';
 
 export const dynamic = 'force-dynamic';
@@ -20,8 +23,10 @@ export default async function DokumentDetail({ params }: { params: Promise<{ id:
   // verraten, dass es die ID gibt.
   if (!dokument) notFound();
 
+  const s = await sprache();
+  const t = DOKUMENTE[s];
   const abschnitte = dokument.status === 'ready' ? await abschnitteHolen(sitzung.userId, id) : [];
-  const fehler = fehlerText(dokument.errorCode);
+  const fehler = fehlerText(dokument.errorCode, s);
 
   /*
    * Dieselbe Fensterform wie die Liste: Leiste mit Name und Rückweg, darunter
@@ -35,7 +40,7 @@ export default async function DokumentDetail({ params }: { params: Promise<{ id:
             href="/app/documents"
             className="min-h-11 content-center underline underline-offset-4"
           >
-            Dokumente
+            {t.detail.zurueck}
           </Link>
           <h1 id="dokument-titel" className="me-auto min-w-0 text-tinte">
             {dokument.filename}
@@ -45,13 +50,15 @@ export default async function DokumentDetail({ params }: { params: Promise<{ id:
         <div className="fenster-rollt flex flex-col gap-6 p-5">
           <header className="flex flex-col gap-1">
             <p className="text-tinte-leise">
-              {artText(dokument.kind)}, {groesseText(dokument.sizeBytes)}.{' '}
-              {statusText(dokument.status)}
-              {dokument.pageCount !== null && `, ${dokument.pageCount} Seiten`}
-              {dokument.charCount !== null && `, ${dokument.charCount} Zeichen`}.
+              {artText(dokument.kind, s)}, {groesseText(dokument.sizeBytes, s)}.{' '}
+              {statusText(dokument.status, s)}
+              {dokument.pageCount !== null && `, ${t.seiten(dokument.pageCount)}`}
+              {dokument.charCount !== null &&
+                `, ${t.zeichen(dokument.charCount.toLocaleString(sprachTag(s)))}`}
+              .
             </p>
             <p className="text-tinte-leise">
-              Gelesen mit Parser {dokument.parserVersion}, zerlegt mit {dokument.chunkerVersion}.
+              {t.detail.parser(dokument.parserVersion ?? '–', dokument.chunkerVersion ?? '–')}
             </p>
           </header>
 
@@ -65,14 +72,16 @@ export default async function DokumentDetail({ params }: { params: Promise<{ id:
 
           {dokument.status === 'ready' && (
             <section className="flex flex-col gap-4">
-              <h2 className="text-lg leading-tight">Gelesener Text</h2>
+              <h2 className="text-lg leading-tight">{t.detail.gelesen}</h2>
               {abschnitte.map((abschnitt) => (
                 /* Dokumentinhalt gehört auf ein Blatt, auch hier. */
                 <article
                   key={abschnitt.ordinal}
                   className="blatt max-w-[var(--mass-blatt)] px-5 py-4"
                 >
-                  <p className="folio border-b border-blatt-kante pb-2">{herkunft(abschnitt)}</p>
+                  <p className="folio border-b border-blatt-kante pb-2">
+                    {herkunft(abschnitt, t.detail)}
+                  </p>
                   <p className="mt-3 whitespace-pre-wrap">
                     {ohneDateinamensvorsatz(abschnitt.text, dokument.filename)}
                   </p>
@@ -91,13 +100,14 @@ export default async function DokumentDetail({ params }: { params: Promise<{ id:
  * Zeilenbereich. **Niemals eine erfundene Seitenzahl**: Was nicht aus dem
  * Dokument stammt, steht auch nicht da.
  */
-function herkunft(abschnitt: {
-  page: number | null;
-  lineStart: number | null;
-  lineEnd: number | null;
-}): string {
-  if (abschnitt.page !== null) return `Seite ${abschnitt.page}`;
-  if (abschnitt.lineStart === null) return 'Abschnitt';
-  if (abschnitt.lineEnd === abschnitt.lineStart) return `Zeile ${abschnitt.lineStart}`;
-  return `Zeilen ${abschnitt.lineStart}–${abschnitt.lineEnd}`;
+function herkunft(
+  abschnitt: { page: number | null; lineStart: number | null; lineEnd: number | null },
+  t: (typeof DOKUMENTE)['de']['detail'],
+): string {
+  if (abschnitt.page !== null) return t.seite(abschnitt.page);
+  if (abschnitt.lineStart === null) return t.abschnitt;
+  if (abschnitt.lineEnd === null || abschnitt.lineEnd === abschnitt.lineStart) {
+    return t.zeile(abschnitt.lineStart);
+  }
+  return t.zeilen(abschnitt.lineStart, abschnitt.lineEnd);
 }

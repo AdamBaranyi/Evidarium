@@ -9,6 +9,8 @@ import { demoKorpus } from '@/lib/demo/korpus';
 import { eigeneDokumente } from '@/lib/demo/besucher-dokumente';
 import { besucherKennung, cookieKopf, neueBesucherkennung, DEMO_COOKIE } from '@/lib/demo/besucher';
 import { env } from '@/lib/config/env';
+import { MELDUNGEN } from '@/lib/i18n/meldungen';
+import { sprache } from '@/lib/i18n/server';
 
 /*
  * Die öffentliche Demo.
@@ -29,16 +31,18 @@ export const dynamic = 'force-dynamic';
 const Eingabe = z.object({ frage: z.string().trim().min(1).max(2000) });
 
 export async function POST(request: Request): Promise<Response> {
+  const s = await sprache();
+  const t = MELDUNGEN[s];
   if (!env.DEMO_AKTIV) {
-    return NextResponse.json({ fehler: 'Die Demo ist nicht eingeschaltet.' }, { status: 404 });
+    return NextResponse.json({ fehler: t.demoAus }, { status: 404 });
   }
   if (!(await herkunftStimmt())) {
-    return NextResponse.json({ fehler: 'Anfrage abgelehnt.' }, { status: 403 });
+    return NextResponse.json({ fehler: t.abgelehnt }, { status: 403 });
   }
 
   const korpus = await demoKorpus();
   if (!korpus) {
-    return NextResponse.json({ fehler: 'Die Demo ist gerade nicht bereit.' }, { status: 503 });
+    return NextResponse.json({ fehler: t.demoNichtBereit }, { status: 503 });
   }
 
   /*
@@ -48,13 +52,13 @@ export async function POST(request: Request): Promise<Response> {
    */
   const laenge = Number(request.headers.get('content-length') ?? '0');
   if (!Number.isFinite(laenge) || laenge > 64 * 1024) {
-    return NextResponse.json({ fehler: 'Anfrage zu gross.' }, { status: 413 });
+    return NextResponse.json({ fehler: t.zuGross }, { status: 413 });
   }
 
   const roh: unknown = await request.json().catch(() => null);
   const eingabe = Eingabe.safeParse(roh);
   if (!eingabe.success) {
-    return NextResponse.json({ fehler: 'Bitte eine Frage stellen.' }, { status: 400 });
+    return NextResponse.json({ fehler: t.frageFehlt }, { status: 400 });
   }
 
   const vorhandenesCookie = (await cookies()).get(DEMO_COOKIE)?.value;
@@ -70,7 +74,7 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({
       art: 'budget',
       grund: 'herkunft',
-      nachricht: `Von hier kamen heute schon ${env.DEMO_FRAGEN_JE_HERKUNFT_TAG} Fragen. Morgen geht es weiter.`,
+      nachricht: t.strom.herkunft(env.DEMO_FRAGEN_JE_HERKUNFT_TAG),
     });
   }
 
@@ -98,5 +102,7 @@ export async function POST(request: Request): Promise<Response> {
       originHash,
     },
     kopf,
+    s,
+    true,
   );
 }

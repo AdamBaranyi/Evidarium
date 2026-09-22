@@ -1,8 +1,10 @@
 'use client';
 
+import { useTexte } from '@/lib/i18n/client';
 import { AntwortKarte } from './antwort-karte';
 import type { PanelInhalt } from './quellen-panel';
 import { SchrittZusammenfassung } from './schrittanzeige';
+import { CHAT } from './texte';
 import { KATEGORIEWERT, type Eintrag } from './typen';
 
 /*
@@ -40,6 +42,7 @@ export function Verlauf({
  * der Anwendung, keine Antworten.
  */
 function Hinweis({ eintrag }: { eintrag: Extract<Eintrag, { art: 'hinweis' }> }) {
+  const t = useTexte(CHAT).antwort;
   if (eintrag.ton === 'leer') {
     return (
       <article className="flex flex-col gap-3">
@@ -49,7 +52,7 @@ function Hinweis({ eintrag }: { eintrag: Extract<Eintrag, { art: 'hinweis' }> })
             className="urteil-punkt"
             style={{ background: KATEGORIEWERT.keine_grundlage }}
           />
-          Nichts gefunden
+          {t.nichtsGefunden}
         </h3>
         <p className="max-w-[var(--mass)] text-tinte-leise">{eintrag.nachricht}</p>
         {eintrag.lauf && (

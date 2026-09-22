@@ -1,15 +1,18 @@
 'use client';
 
 import { useActionState } from 'react';
+import { useTexte } from '@/lib/i18n/client';
 import { login, type LoginErgebnis } from './actions';
+import { ANMELDUNG } from './texte';
 
 export function LoginForm() {
+  const t = useTexte(ANMELDUNG);
   const [ergebnis, aktion, laeuft] = useActionState<LoginErgebnis, FormData>(login, undefined);
 
   return (
     <form action={aktion} className="flex flex-col gap-4">
       <label className="flex flex-col gap-2">
-        <span>E-Mail</span>
+        <span>{t.email}</span>
         <input
           type="email"
           name="email"
@@ -20,7 +23,7 @@ export function LoginForm() {
       </label>
 
       <label className="flex flex-col gap-2">
-        <span>Passwort</span>
+        <span>{t.passwort}</span>
         <input
           type="password"
           name="password"
@@ -41,7 +44,7 @@ export function LoginForm() {
         disabled={laeuft}
         className="min-h-11 bg-aktion-grund px-5 py-2 text-aktion-tinte disabled:opacity-60"
       >
-        {laeuft ? 'Wird geprüft …' : 'Anmelden'}
+        {laeuft ? t.laeuft : t.knopf}
       </button>
     </form>
   );

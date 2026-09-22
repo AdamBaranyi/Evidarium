@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { useEffect } from 'react';
+import { useTexte } from '@/lib/i18n/client';
+import { GEMEINSAM } from './_teile/texte';
 
 /*
  * Fehlerseite für unerwartete Fehler innerhalb einer Seite.
@@ -17,6 +19,7 @@ export default function Fehler({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTexte(GEMEINSAM).fehler;
   useEffect(() => {
     console.error('[seite] unerwarteter Fehler', error);
   }, [error]);
@@ -27,10 +30,10 @@ export default function Fehler({
       className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center gap-6 px-6 py-16"
     >
       <p className="wortmarke">Evidarium</p>
-      <h1 className="text-xl leading-[var(--line-title)]">Hier ist etwas schiefgegangen.</h1>
+      <h1 className="text-xl leading-[var(--line-title)]">{t.titel}</h1>
       <p className="max-w-[var(--mass)] text-tinte-leise">
-        Der Fehler ist protokolliert. Meist hilft es, die Seite noch einmal zu laden.
-        {error.digest !== undefined && ` Kennung für die Fehlersuche: ${error.digest}.`}
+        {t.text}
+        {error.digest !== undefined && t.kennung(error.digest)}
       </p>
       <p className="flex flex-wrap items-center gap-x-6 gap-y-2">
         <button
@@ -38,10 +41,10 @@ export default function Fehler({
           onClick={reset}
           className="min-h-11 bg-aktion-grund px-5 py-2 text-aktion-tinte"
         >
-          Noch einmal versuchen
+          {t.nochmal}
         </button>
         <Link href="/" className="underline underline-offset-4">
-          Zur Startseite
+          {t.start}
         </Link>
       </p>
     </main>

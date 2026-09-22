@@ -22,7 +22,7 @@ export function GET(): Response {
   const text = [
     `Contact: mailto:${env.BETREIBER_EMAIL}`,
     `Expires: ${GUELTIG_BIS}`,
-    'Preferred-Languages: de, en',
+    'Preferred-Languages: de, fr, it, en',
     `Canonical: ${env.APP_ORIGIN}/.well-known/security.txt`,
     '',
   ].join('\n');

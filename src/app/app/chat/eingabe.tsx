@@ -1,6 +1,8 @@
 'use client';
 
 import { useLayoutEffect, useRef } from 'react';
+import { useTexte } from '@/lib/i18n/client';
+import { CHAT } from './texte';
 
 /*
  * Das Eingabefeld des Chats.
@@ -43,6 +45,7 @@ export function Eingabe({
   platzhalter,
   umfang,
 }: EingabeEigenschaften) {
+  const t = useTexte(CHAT).eingabe;
   const feld = useRef<HTMLTextAreaElement>(null);
   const leer = text.trim() === '';
   const bereit = !leer && !laeuft && !gesperrt;
@@ -90,13 +93,13 @@ export function Eingabe({
       <div className="eingabe-leiste">
         <span id="frage-umfang" className="eingabe-umfang">
           {umfang}
-          {rest < 200 && `, noch ${rest} Zeichen`}
+          {rest < 200 && t.rest(rest)}
         </span>
-        <span className="eingabe-tastatur">Enter sendet</span>
+        <span className="eingabe-tastatur">{t.enter}</span>
         <button
           type="submit"
           disabled={!bereit}
-          aria-label={laeuft ? 'Wird beantwortet' : 'Frage stellen'}
+          aria-label={laeuft ? t.laeuft : t.senden}
           className="senden"
         >
           <svg aria-hidden width="18" height="18" viewBox="0 0 18 18" fill="none">

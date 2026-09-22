@@ -26,7 +26,7 @@ Wähle die Kategorie:
 - "keine_grundlage": Die Stellen beantworten die Frage nicht. Gib keine Belege an und rate nicht.
 - "widerspruch": Zwei Stellen sagen Verschiedenes. Nenne beide mit Zitat und löse den Widerspruch NICHT eigenmächtig auf.
 
-Antworte auf Deutsch, ausser die Frage ist auf Englisch gestellt. Fasse dich kurz.`;
+Antworte in der Sprache der Frage: Deutsch, Französisch, Italienisch oder Englisch. Die Zitate bleiben wörtlich in der Sprache ihres Dokuments — übersetze sie nie. Fasse dich kurz.`;
 
 /**
  * Baut die Nutzernachricht aus Fundstellen und Frage.

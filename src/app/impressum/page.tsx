@@ -1,32 +1,33 @@
 import type { Metadata } from 'next';
 import { Betreiber, Textseite } from '../_teile/textseite';
 import { env } from '@/lib/config/env';
+import { sprache } from '@/lib/i18n/server';
+import { IMPRESSUM } from './texte';
 
-export const metadata: Metadata = { title: 'Impressum – Evidarium' };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: IMPRESSUM[await sprache()].metaTitel };
+}
 
 // Die Angaben kommen zur Laufzeit vom Server, nie aus dem Repository.
 export const dynamic = 'force-dynamic';
 
-export default function ImpressumPage() {
+export default async function ImpressumPage() {
+  const t = IMPRESSUM[await sprache()];
   return (
-    <Textseite titel="Impressum" stand="21. September 2026">
-      <h2>Verantwortlich</h2>
+    <Textseite titel={t.titel} stand={t.stand}>
+      <h2>{t.verantwortlich}</h2>
       <Betreiber
         name={env.BETREIBER_NAME}
         adresse={env.BETREIBER_ADRESSE}
         email={env.BETREIBER_EMAIL}
       />
 
-      <h2>Worum es sich handelt</h2>
-      <p>
-        Evidarium ist ein Portfolio-Projekt: ein Wissensassistent, der Fragen aus hochgeladenen
-        Dokumenten beantwortet und jede Aussage mit einem wörtlichen Zitat belegt. Es ist kein
-        kommerzielles Angebot. Die Dokumente der Vorführung stammen von einer erfundenen Firma.
-      </p>
+      <h2>{t.worum}</h2>
+      <p>{t.worumText}</p>
 
-      <h2>Quelltext</h2>
+      <h2>{t.quelltext}</h2>
       <p>
-        Der vollständige Quelltext ist öffentlich:{' '}
+        {t.quelltextText}{' '}
         <a
           href="https://github.com/AdamBaranyi/Evidarium"
           className="underline underline-offset-4"

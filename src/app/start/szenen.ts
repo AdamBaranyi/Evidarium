@@ -18,29 +18,28 @@ export type Blatt = {
   nach: string;
 };
 
+/*
+ * Frage, Urteil und Aussage stehen in den Textkatalogen (`texte.ts`), in der
+ * Reihenfolge dieser Szenen. Hier steht, was in jeder Sprache gleich ist —
+ * auch die Zitate: Sie sind wörtlich aus den deutschen Dokumenten.
+ */
 export type Szene = {
-  frage: string;
   /** Welche Dokumente für diese Antwort zählten — für die Seitenleiste. */
   benutzt: string[];
   /** Dauer des Modellaufrufs, wie gemessen. */
   modellDauer: string;
-  urteil: string;
   /** Die Kategorie, wie die Anwendung sie liefert. Das Licht im Hintergrund folgt ihr. */
   kategorie: 'belegt' | 'widerspruch';
   farbe: string;
-  aussage: string;
   blaetter: Blatt[];
 };
 
 export const SZENEN: Szene[] = [
   {
-    frage: 'Wer hilft beim Onboarding?',
     benutzt: ['Teamhandbuch.pdf'],
     modellDauer: '2.4 s',
-    urteil: 'Belegt',
     kategorie: 'belegt',
     farbe: 'var(--urteil-belegt)',
-    aussage: 'Beim Onboarding hilft Mara Keller.',
     blaetter: [
       {
         datei: 'Teamhandbuch.pdf',
@@ -52,13 +51,10 @@ export const SZENEN: Szene[] = [
     ],
   },
   {
-    frage: 'Wie lange werden Sicherungen aufbewahrt?',
     benutzt: ['Backup_Richtlinie_A.pdf', 'Backup_Richtlinie_B.pdf'],
     modellDauer: '3.0 s',
-    urteil: 'Widerspruch zwischen Quellen',
     kategorie: 'widerspruch',
     farbe: 'var(--urteil-widerspruch)',
-    aussage: 'Zwei Richtlinien sagen Verschiedenes. Aufgelöst wird das hier nicht.',
     blaetter: [
       {
         datei: 'Backup_Richtlinie_A.pdf',
@@ -86,13 +82,6 @@ export const KORPUS = [
   'Backup_Richtlinie_B.pdf',
   'Projekt_Atlas.md',
   'Besprechungsnotiz.txt',
-] as const;
-
-export const SCHRITTE = [
-  'Frage wird eingebettet',
-  'Dokumente werden durchsucht',
-  'Modell formuliert die Antwort',
-  'Belege werden geprüft',
 ] as const;
 
 /** Die Marken einer Szene in Millisekunden, von ihrem Beginn an. */

@@ -6,14 +6,18 @@ import { readSession, SESSION_COOKIE } from '@/lib/auth/session';
 import { dokumenteListen } from '@/lib/documents/abfragen';
 import { GRENZEN } from '@/lib/documents/grenzen';
 import { artText, fehlerText, groesseText, inArbeit, statusText } from '@/lib/documents/zustaende';
+import { sprache } from '@/lib/i18n/server';
 import { projekteListen } from '@/lib/projekte/projekte';
 import { DateiKnopf } from '../../_teile/datei-knopf';
 import { Nachladen } from '../../_teile/nachladen';
 import { DokumentProjekt } from './dokument-projekt';
 import { ProjektEintrag } from './projekt-eintrag';
 import { ProjektNeu } from './projekt-neu';
+import { DOKUMENTE } from './texte';
 
-export const metadata: Metadata = { title: 'Dokumente – Evidarium' };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: DOKUMENTE[await sprache()].metaTitel };
+}
 
 // Die Liste zeigt Verarbeitungsstände; ein zwischengespeicherter Stand wäre
 // sofort falsch.
@@ -23,6 +27,8 @@ export default async function DokumentePage() {
   const sitzung = await readSession((await cookies()).get(SESSION_COOKIE)?.value);
   if (!sitzung) redirect('/login');
 
+  const s = await sprache();
+  const t = DOKUMENTE[s];
   const [dokumente, projekte] = await Promise.all([
     dokumenteListen(sitzung.userId),
     projekteListen(sitzung.userId),
@@ -41,16 +47,10 @@ export default async function DokumentePage() {
       <section aria-labelledby="dokumente-titel" className="fenster-voll panel overflow-hidden">
         <div className="panel-leiste min-h-[3.25rem] items-center py-1">
           <h1 id="dokumente-titel" className="text-tinte">
-            Dokumente
+            {t.titel}
           </h1>
-          <span className="me-auto">
-            {dokumente.length === 1 ? '1 Dokument' : `${dokumente.length} Dokumente`}
-          </span>
-          <DateiKnopf
-            id="dokument-datei"
-            endpunkt="/api/documents"
-            beschriftung="Dokument hinzufügen"
-          />
+          <span className="me-auto">{t.anzahl(dokumente.length)}</span>
+          <DateiKnopf id="dokument-datei" endpunkt="/api/documents" beschriftung={t.hinzufuegen} />
         </div>
 
         {/*
@@ -62,10 +62,8 @@ export default async function DokumentePage() {
         <div className="chat-rumpf">
           <aside aria-labelledby="projekte-titel" className="chat-spalte flex">
             <div className="flex flex-col gap-1">
-              <h2 id="projekte-titel">Projekte</h2>
-              <p className="text-tinte-leise">
-                Gruppen von Dokumenten. Beim Fragen lässt sich die Suche auf ein Projekt eingrenzen.
-              </p>
+              <h2 id="projekte-titel">{t.projekte.titel}</h2>
+              <p className="text-tinte-leise">{t.projekte.erklaerung}</p>
             </div>
             {projekte.length > 0 && (
               <ul className="flex flex-col">
@@ -78,13 +76,11 @@ export default async function DokumentePage() {
           </aside>
 
           {dokumente.length === 0 ? (
-            <p className="p-5 text-tinte-leise">
-              Noch keine Dokumente. Lade ein PDF, eine Textdatei oder Markdown hoch.
-            </p>
+            <p className="p-5 text-tinte-leise">{t.keine}</p>
           ) : (
             <ul className="dokument-liste rollt">
               {dokumente.map((dokument) => {
-                const fehler = fehlerText(dokument.errorCode);
+                const fehler = fehlerText(dokument.errorCode, s);
                 return (
                   <li key={dokument.id} className="dokument-zeile">
                     <div className="flex min-w-0 flex-col gap-0.5">
@@ -95,12 +91,12 @@ export default async function DokumentePage() {
                         {dokument.filename}
                       </Link>
                       <p className="text-tinte-leise">
-                        {artText(dokument.kind)}, {groesseText(dokument.sizeBytes)}
-                        {dokument.pageCount !== null && `, ${dokument.pageCount} Seiten`}
+                        {artText(dokument.kind, s)}, {groesseText(dokument.sizeBytes, s)}
+                        {dokument.pageCount !== null && `, ${t.seiten(dokument.pageCount)}`}
                         {dokument.chunkCount !== null &&
-                          `, ${dokument.chunkCount} Abschnitte`}.{' '}
+                          `, ${t.abschnitte(dokument.chunkCount)}`}.{' '}
                         <span className={inArbeit(dokument.status) ? 'text-tinte' : ''}>
-                          {statusText(dokument.status)}
+                          {statusText(dokument.status, s)}
                         </span>
                       </p>
                       {fehler !== null && (
@@ -123,8 +119,7 @@ export default async function DokumentePage() {
         </div>
 
         <p className="border-t border-kante px-[1.1rem] py-3 text-tinte-leise">
-          PDF mit Textschicht, TXT oder Markdown. Höchstens {GRENZEN.maxBytes / 1024 / 1024} MiB und{' '}
-          {GRENZEN.maxSeiten} Seiten.
+          {t.grenzen(GRENZEN.maxBytes / 1024 / 1024, GRENZEN.maxSeiten)}
         </p>
       </section>
     </main>

@@ -1,3 +1,4 @@
+import type { Sprache } from '@/lib/i18n/sprachen';
 import type { Abschnitt } from './belegpruefung';
 import type { Modellantwort } from './schema';
 
@@ -16,6 +17,8 @@ export type AntwortAnfrage = {
   abschnitte: Abschnitt[];
   /** Begrenzter Gesprächskontext: die letzten Wechsel, schon gekürzt. */
   verlauf: { rolle: 'nutzer' | 'assistent'; text: string }[];
+  /** Sprache der Oberfläche, für feste Sätze wie die des Demo-Adapters. */
+  sprache?: Sprache;
 };
 
 export type AntwortErgebnis = {

@@ -1,30 +1,33 @@
 import Link from 'next/link';
+import { sprache } from '@/lib/i18n/server';
 import { abmelden } from './actions';
 import { Kopf } from '../_teile/kopf';
+import { ANWENDUNG } from './texte';
 
 /*
  * Kopfzeile des angemeldeten Bereichs: dieselbe wie überall, dazu drei Ziele
  * und Abmelden. Kein ausklappbares Menü — drei Ziele brauchen keines.
  */
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  const t = ANWENDUNG[await sprache()];
   return (
     <div className="seite-rahmen flex flex-1 flex-col">
       <Kopf ziel="/app/chat">
-        <nav aria-label="Hauptnavigation" className="flex flex-wrap items-baseline gap-x-7 gap-y-2">
+        <nav aria-label={t.navigation} className="flex flex-wrap items-baseline gap-x-7 gap-y-2">
           <Link href="/app/chat" className="underline underline-offset-4">
-            Fragen
+            {t.fragen}
           </Link>
           <Link href="/app/documents" className="underline underline-offset-4">
-            Dokumente
+            {t.dokumente}
           </Link>
           <Link href="/app/usage" className="underline underline-offset-4">
-            Verbrauch
+            {t.verbrauch}
           </Link>
         </nav>
 
         <form action={abmelden} className="ms-auto">
           <button type="submit" className="min-h-11 underline underline-offset-4">
-            Abmelden
+            {t.abmelden}
           </button>
         </form>
       </Kopf>

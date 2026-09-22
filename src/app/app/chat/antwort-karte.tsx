@@ -2,16 +2,15 @@
 
 import { useState } from 'react';
 import { kostenSchaetzen } from '@/lib/budget/preise';
+import { useSprache, useTexte } from '@/lib/i18n/client';
+import { sprachTag } from '@/lib/i18n/sprachen';
 import type { PanelInhalt } from './quellen-panel';
 import { SchrittZusammenfassung } from './schrittanzeige';
 import { alsText } from './strom';
-import {
-  KATEGORIEERKLAERUNG,
-  KATEGORIETEXT,
-  KATEGORIEWERT,
-  type Antwort,
-  type Lauf,
-} from './typen';
+import { CHAT } from './texte';
+import { URTEIL } from './texte-urteil';
+import { KATEGORIEWERT, type Antwort, type Lauf } from './typen';
+import { useZitatSprache } from './zitat-sprache';
 
 /*
  * Eine geprüfte Antwort.
@@ -40,6 +39,8 @@ export function AntwortKarte({
   lauf: Lauf;
   oeffnen: (inhalt: PanelInhalt) => void;
 }) {
+  const u = useTexte(URTEIL);
+  const t = useTexte(CHAT);
   const stellen = new Map(antwort.stellen.map((s) => [s.sourceId, s]));
 
   /*
@@ -58,11 +59,11 @@ export function AntwortKarte({
             className="urteil-punkt"
             style={{ background: KATEGORIEWERT[antwort.kategorie] }}
           />
-          {KATEGORIETEXT[antwort.kategorie]}
+          {u.urteil[antwort.kategorie]}
         </h3>
         <p className="max-w-[var(--mass)] text-tinte-leise">
-          {KATEGORIEERKLAERUNG[antwort.kategorie]}
-          {antwort.demo && ' Diese Antwort stammt aus dem Demo-Adapter, es lief kein Modell.'}
+          {u.urteilErklaerung[antwort.kategorie]}
+          {antwort.demo && t.antwort.demo}
         </p>
       </header>
 
@@ -84,6 +85,7 @@ export function AntwortKarte({
                 return (
                   <li key={j}>
                     <Belegblatt
+                      documentId={stelle.documentId}
                       dateiname={stelle.filename}
                       seite={stelle.page}
                       zitat={beleg.zitat}
@@ -114,10 +116,12 @@ export function AntwortKarte({
  */
 function Kopieren({ antwort }: { antwort: Antwort }) {
   const [kopiert, setKopiert] = useState(false);
+  const chat = useTexte(CHAT);
+  const urteil = useTexte(URTEIL);
 
   async function kopieren() {
     try {
-      await navigator.clipboard.writeText(alsText(antwort));
+      await navigator.clipboard.writeText(alsText(antwort, { chat, urteil }));
       setKopiert(true);
       setTimeout(() => setKopiert(false), 2000);
     } catch {
@@ -127,7 +131,7 @@ function Kopieren({ antwort }: { antwort: Antwort }) {
 
   return (
     <button type="button" onClick={() => void kopieren()} aria-live="polite">
-      {kopiert ? 'Kopiert, mit Belegen' : 'Kopieren'}
+      {kopiert ? chat.antwort.kopiert : chat.antwort.kopieren}
     </button>
   );
 }
@@ -140,12 +144,14 @@ function Kopieren({ antwort }: { antwort: Antwort }) {
  * daneben.
  */
 function Belegblatt({
+  documentId,
   dateiname,
   seite,
   zitat,
   versatz,
   oeffnen,
 }: {
+  documentId: string;
   dateiname: string;
   seite: number | null;
   zitat: string;
@@ -153,6 +159,7 @@ function Belegblatt({
   versatz: number;
   oeffnen: () => void;
 }) {
+  const sprache = useZitatSprache(documentId);
   return (
     <button
       type="button"
@@ -169,7 +176,9 @@ function Belegblatt({
         {seite !== null && <span className="folio shrink-0">{seite}</span>}
       </span>
 
-      <q className="before:content-['«'] after:content-['»']">{zitat}</q>
+      <q lang={sprache} className="before:content-['«'] after:content-['»']">
+        {zitat}
+      </q>
     </button>
   );
 }
@@ -182,6 +191,8 @@ function Belegblatt({
  * dieses Wort wäre eine Behauptung, die niemand einlösen kann.
  */
 function Verbrauch({ verbrauch }: { verbrauch: NonNullable<Antwort['verbrauch']> }) {
+  const t = useTexte(CHAT);
+  const tag = sprachTag(useSprache());
   const kosten = kostenSchaetzen(
     verbrauch.modell,
     verbrauch.eingabeTokens,
@@ -190,9 +201,12 @@ function Verbrauch({ verbrauch }: { verbrauch: NonNullable<Antwort['verbrauch']>
 
   return (
     <p className="max-w-[var(--mass)] text-tinte-leise">
-      {verbrauch.modell} hat {verbrauch.eingabeTokens.toLocaleString('de-CH')} Token gelesen und{' '}
-      {verbrauch.ausgabeTokens.toLocaleString('de-CH')} geschrieben
-      {kosten !== null && `, geschätzt ${kosten.toFixed(4)} USD`}.
+      {t.antwort.verbrauch(
+        verbrauch.modell,
+        verbrauch.eingabeTokens.toLocaleString(tag),
+        verbrauch.ausgabeTokens.toLocaleString(tag),
+        kosten === null ? null : kosten.toFixed(4),
+      )}
     </p>
   );
 }

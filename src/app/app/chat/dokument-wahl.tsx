@@ -1,5 +1,7 @@
 'use client';
 
+import { useTexte } from '@/lib/i18n/client';
+import { CHAT } from './texte';
 import type { Dokument } from './typen';
 
 /*
@@ -31,6 +33,7 @@ export function DokumentWahl({
   /** Farbe des letzten Urteils. */
   farbe: string | undefined;
 }) {
+  const t = useTexte(CHAT).wahl;
   const alle = gewaehlt.length === dokumente.length;
 
   function umschalten(id: string, an: boolean) {
@@ -40,14 +43,14 @@ export function DokumentWahl({
   return (
     <div className="flex min-w-0 flex-col gap-2">
       <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-        <h2>Dokumente</h2>
+        <h2>{t.titel}</h2>
         {auswaehlbar && (
           <button
             type="button"
             onClick={() => setzen(alle ? [] : dokumente.map((d) => d.id))}
             className="min-h-11 underline underline-offset-4"
           >
-            {alle ? 'Keines' : 'Alle'}
+            {alle ? t.keines : t.alle}
           </button>
         )}
       </div>
@@ -79,11 +82,7 @@ export function DokumentWahl({
         })}
       </ul>
 
-      {auswaehlbar && gewaehlt.length === 0 && (
-        <p className="text-tinte-leise">
-          Ohne Auswahl gibt es nichts zu durchsuchen. Wähle mindestens ein Dokument.
-        </p>
-      )}
+      {auswaehlbar && gewaehlt.length === 0 && <p className="text-tinte-leise">{t.ohneAuswahl}</p>}
     </div>
   );
 }

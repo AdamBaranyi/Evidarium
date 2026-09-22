@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import { useTexte } from '@/lib/i18n/client';
 import type { ProjektZeile } from '@/lib/projekte/grenzen';
+import { CHAT } from './texte';
 
 /*
  * Die Projekte in der Seitenspalte des Chats — als Links, nicht als
@@ -21,12 +23,13 @@ export function ProjektWahl({
   aktiv: string | null;
   gesamt: number;
 }) {
+  const t = useTexte(CHAT).projekte;
   return (
     <nav aria-labelledby="projekte-wahl" className="flex flex-col gap-1">
-      <h2 id="projekte-wahl">Projekte</h2>
+      <h2 id="projekte-wahl">{t.titel}</h2>
       <ul className="flex flex-col">
         <li>
-          <Eintrag href="/app/chat" name="Alle Dokumente" anzahl={gesamt} aktiv={aktiv === null} />
+          <Eintrag href="/app/chat" name={t.alle} anzahl={gesamt} aktiv={aktiv === null} />
         </li>
         {projekte.map((projekt) => (
           <li key={projekt.id}>
@@ -40,7 +43,7 @@ export function ProjektWahl({
         ))}
       </ul>
       <Link href="/app/documents" className="min-h-11 content-center underline underline-offset-4">
-        Projekte verwalten
+        {t.verwalten}
       </Link>
     </nav>
   );
@@ -57,6 +60,7 @@ function Eintrag({
   anzahl: number;
   aktiv: boolean;
 }) {
+  const t = useTexte(CHAT).projekte;
   return (
     <Link
       href={href}
@@ -66,7 +70,7 @@ function Eintrag({
       <span className="min-w-0 flex-1">{name}</span>
       <span className="text-tinte-leise">
         {anzahl}
-        <span className="sr-only"> {anzahl === 1 ? 'Dokument' : 'Dokumente'}</span>
+        <span className="sr-only"> {t.anzahl(anzahl)}</span>
       </span>
     </Link>
   );

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+import { useSprache, useTexte } from '@/lib/i18n/client';
 import { useWenigerBewegung } from '@/lib/ui/bewegung';
 import { DokumentWahl } from './dokument-wahl';
 import { Eingabe, EINGABE_ID } from './eingabe';
@@ -9,6 +10,8 @@ import { LeererZustand, type Vorschlag } from './leerer-zustand';
 import { QuellenPanel, type PanelInhalt } from './quellen-panel';
 import { Schrittanzeige } from './schrittanzeige';
 import { alsEintrag, alsVerlauf, ansageFuer, frageSenden, hinweis } from './strom';
+import { CHAT } from './texte';
+import { URTEIL } from './texte-urteil';
 import {
   belegteDokumente,
   KATEGORIEWERT,
@@ -17,6 +20,7 @@ import {
   type Schritt,
 } from './typen';
 import { Verlauf } from './verlauf';
+import { ZitatSprache } from './zitat-sprache';
 
 /*
  * Die Oberfläche hält bewusst wenig Zustand: Fragen und Antworten stehen
@@ -47,6 +51,8 @@ export type ChatEigenschaften = {
   einleitung: string;
   vorschlaege?: Vorschlag[];
   modellAktiv: boolean;
+  /** Dokumente, deren Text sicher deutsch ist — der Korpus der Demo. */
+  deutscheDokumente?: string[];
 };
 
 export function Chat({
@@ -60,6 +66,7 @@ export function Chat({
   einleitung,
   vorschlaege = [],
   modellAktiv,
+  deutscheDokumente = [],
 }: ChatEigenschaften) {
   const [gewaehlt, setGewaehlt] = useState<string[]>(() => dokumente.map((d) => d.id));
   const [eintraege, setEintraege] = useState<Eintrag[]>([]);
@@ -76,6 +83,12 @@ export function Chat({
   const [ansage, setAnsage] = useState('');
   const verlauf = useRef<HTMLDivElement>(null);
   const ruhig = useWenigerBewegung();
+  const t = useTexte(CHAT);
+  const urteil = useTexte(URTEIL);
+  const oberflaeche = useSprache();
+  const deutsch = new Set(deutscheDokumente);
+  // Nur auszeichnen, wo die Sprache vom Rest der Seite abweicht.
+  const zitatSprache = (id: string) => (oberflaeche !== 'de' && deutsch.has(id) ? 'de' : undefined);
 
   const gesperrt = auswaehlbar && gewaehlt.length === 0;
 
@@ -122,14 +135,15 @@ export function Chat({
           schritt: setSchritte,
           ergebnis: (zeile, lauf) => {
             setSchritte([]);
-            setEintraege([...bisher, alsEintrag(zeile, lauf)]);
-            setAnsage(ansageFuer(zeile));
+            setEintraege([...bisher, alsEintrag(zeile, lauf, { chat: t, urteil })]);
+            setAnsage(ansageFuer(zeile, { chat: t, urteil }));
           },
         },
+        t.meldung.nichtMoeglich,
       );
       if (fehler !== null) setEintraege([...bisher, hinweis('fehler', fehler)]);
     } catch {
-      setEintraege([...bisher, hinweis('fehler', 'Die Verbindung wurde unterbrochen.')]);
+      setEintraege([...bisher, hinweis('fehler', t.meldung.unterbrochen)]);
     } finally {
       setSchritte([]);
       setLaeuft(false);
@@ -156,9 +170,9 @@ export function Chat({
   if (dokumente.length === 0 && !seitenkopf) {
     return (
       <p className="max-w-[var(--mass)] panel p-4">
-        Hier ist noch nichts zu durchsuchen.{' '}
+        {t.nichtsDa}{' '}
         <Link href="/app/documents" className="underline underline-offset-4">
-          Lade zuerst ein Dokument hoch
+          {t.ersteHochladen}
         </Link>
         .
       </p>
@@ -176,116 +190,121 @@ export function Chat({
   const anzahl = auswaehlbar ? gewaehlt.length : dokumente.length;
 
   return (
-    <div className="chat panel" data-urteil={letzte?.antwort.kategorie}>
-      {/* Gleich hoch mit und ohne Knopf: Die Leiste springt nicht, wenn «Neu beginnen» kommt. */}
-      <div className="panel-leiste min-h-[3.25rem] items-center py-1">
-        <span className="font-blatt text-tinte">Evidarium</span>
-        <span className="ms-auto">
-          {letzte
-            ? `${letzte.antwort.stellen.length === 1 ? '1 Quelle' : `${letzte.antwort.stellen.length} Quellen`} geprüft`
-            : `${dokumente.length === 1 ? '1 Dokument' : `${dokumente.length} Dokumente`} bereit`}
-        </span>
-        {eintraege.length > 0 && !laeuft && (
+    <ZitatSprache value={zitatSprache}>
+      <div className="chat panel" data-urteil={letzte?.antwort.kategorie}>
+        {/* Gleich hoch mit und ohne Knopf: Die Leiste springt nicht, wenn «Neu beginnen» kommt. */}
+        <div className="panel-leiste min-h-[3.25rem] items-center py-1">
+          <span className="font-blatt text-tinte">Evidarium</span>
+          <span className="ms-auto">
+            {letzte
+              ? t.leiste.quellen(letzte.antwort.stellen.length)
+              : t.leiste.bereit(dokumente.length)}
+          </span>
+          {eintraege.length > 0 && !laeuft && (
+            <button
+              type="button"
+              onClick={neuBeginnen}
+              className="min-h-11 underline underline-offset-4"
+            >
+              {t.leiste.neu}
+            </button>
+          )}
           <button
             type="button"
-            onClick={neuBeginnen}
-            className="min-h-11 underline underline-offset-4"
+            aria-expanded={seiteOffen}
+            aria-controls="chat-seite"
+            onClick={() => setSeiteOffen(!seiteOffen)}
+            className="min-h-11 underline underline-offset-4 lg:hidden"
           >
-            Neu beginnen
+            {t.leiste.seitenspalte}
           </button>
-        )}
-        <button
-          type="button"
-          aria-expanded={seiteOffen}
-          aria-controls="chat-seite"
-          onClick={() => setSeiteOffen(!seiteOffen)}
-          className="min-h-11 underline underline-offset-4 lg:hidden"
-        >
-          Dokumente
-        </button>
-      </div>
+        </div>
 
-      <div className="chat-rumpf">
-        <aside id="chat-seite" className={`chat-spalte ${seiteOffen ? 'flex' : 'hidden'} lg:flex`}>
-          {seitenkopf}
-          {dokumente.length > 0 && (
-            <DokumentWahl
-              dokumente={dokumente}
-              gewaehlt={gewaehlt}
-              setzen={setGewaehlt}
-              auswaehlbar={auswaehlbar}
-              belegt={belegt}
-              farbe={farbe}
-            />
-          )}
-          {seitenhinweis}
-        </aside>
+        <div className="chat-rumpf">
+          <aside
+            id="chat-seite"
+            className={`chat-spalte ${seiteOffen ? 'flex' : 'hidden'} lg:flex`}
+          >
+            {seitenkopf}
+            {dokumente.length > 0 && (
+              <DokumentWahl
+                dokumente={dokumente}
+                gewaehlt={gewaehlt}
+                setzen={setGewaehlt}
+                auswaehlbar={auswaehlbar}
+                belegt={belegt}
+                farbe={farbe}
+              />
+            )}
+            {seitenhinweis}
+          </aside>
 
-        {dokumente.length === 0 ? (
-          /* Ein Projekt ohne fertige Dokumente: Die Seitenspalte bleibt, damit man weiterkommt. */
-          <div className="chat-haupt">
-            <div className="chat-verlauf">
-              <div className="chat-spur ist-leer flex flex-col gap-3">
-                <h2 className="text-xl leading-[var(--line-title)]">{titel}</h2>
-                <p className="max-w-[var(--mass)] text-tinte-leise">
-                  In {bereich ?? 'diesem Bereich'} liegt noch kein fertiges Dokument.{' '}
-                  <Link href="/app/documents" className="text-tinte underline underline-offset-4">
-                    Unter Dokumente
-                  </Link>{' '}
-                  lädst du welche hoch oder ordnest sie dem Projekt zu.
-                </p>
+          {dokumente.length === 0 ? (
+            /* Ein Projekt ohne fertige Dokumente: Die Seitenspalte bleibt, damit man weiterkommt. */
+            <div className="chat-haupt">
+              <div className="chat-verlauf">
+                <div className="chat-spur ist-leer flex flex-col gap-3">
+                  <h2 className="text-xl leading-[var(--line-title)]">{titel}</h2>
+                  <p className="max-w-[var(--mass)] text-tinte-leise">
+                    {t.leeresProjekt(bereich ?? t.diesemBereich)}{' '}
+                    <Link href="/app/documents" className="text-tinte underline underline-offset-4">
+                      {t.unterDokumente}
+                    </Link>{' '}
+                    {t.hochladenOderZuordnen}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="chat-haupt">
-            <div ref={verlauf} className="chat-verlauf">
-              <div
-                className={`chat-spur flex flex-col gap-10 ${eintraege.length === 0 ? 'ist-leer' : ''}`}
-              >
-                {eintraege.length === 0 ? (
-                  <LeererZustand
-                    titel={titel}
-                    einleitung={einleitung}
-                    vorschlaege={vorschlaege}
-                    fragen={(frage) => void stellen(frage)}
-                    modellAktiv={modellAktiv}
+          ) : (
+            <div className="chat-haupt">
+              <div ref={verlauf} className="chat-verlauf">
+                <div
+                  className={`chat-spur flex flex-col gap-10 ${eintraege.length === 0 ? 'ist-leer' : ''}`}
+                >
+                  {eintraege.length === 0 ? (
+                    <LeererZustand
+                      titel={titel}
+                      einleitung={einleitung}
+                      vorschlaege={vorschlaege}
+                      fragen={(frage) => void stellen(frage)}
+                      modellAktiv={modellAktiv}
+                    />
+                  ) : (
+                    /* Die Antworten tragen h3; ohne diese h2 fehlte eine Stufe. Befund S2. */
+                    <h2 className="sr-only">{t.unterhaltung}</h2>
+                  )}
+                  <p role="status" className="sr-only">
+                    {ansage}
+                  </p>
+                  <Verlauf eintraege={eintraege} oeffnen={setPanel} />
+                  <Schrittanzeige schritte={schritte} laeuft={laeuft} />
+                </div>
+              </div>
+
+              <div className="chat-unten">
+                <div className="chat-spur">
+                  <Eingabe
+                    text={text}
+                    setText={setText}
+                    senden={() => void stellen(text)}
+                    laeuft={laeuft}
+                    gesperrt={gesperrt}
+                    beschriftung={auswaehlbar ? t.eingabe.beschriftungWahl : t.eingabe.beschriftung}
+                    platzhalter={t.eingabe.platzhalter}
+                    umfang={gesperrt ? t.eingabe.keinDokument : t.eingabe.umfang(anzahl, bereich)}
                   />
-                ) : (
-                  /* Die Antworten tragen h3; ohne diese h2 fehlte eine Stufe. Befund S2. */
-                  <h2 className="sr-only">Unterhaltung</h2>
-                )}
-                <p role="status" className="sr-only">
-                  {ansage}
-                </p>
-                <Verlauf eintraege={eintraege} oeffnen={setPanel} />
-                <Schrittanzeige schritte={schritte} laeuft={laeuft} />
+                </div>
               </div>
             </div>
+          )}
+        </div>
 
-            <div className="chat-unten">
-              <div className="chat-spur">
-                <Eingabe
-                  text={text}
-                  setText={setText}
-                  senden={() => void stellen(text)}
-                  laeuft={laeuft}
-                  gesperrt={gesperrt}
-                  beschriftung={auswaehlbar ? 'Frage an die ausgewählten Dokumente' : 'Deine Frage'}
-                  platzhalter="Frag etwas zu diesen Dokumenten"
-                  umfang={
-                    gesperrt
-                      ? 'Kein Dokument ausgewählt'
-                      : `Sucht in ${anzahl === 1 ? 'einem Dokument' : `${anzahl} Dokumenten`}${bereich ? ` aus ${bereich}` : ''}`
-                  }
-                />
-              </div>
-            </div>
-          </div>
-        )}
+        <QuellenPanel
+          inhalt={panel}
+          schliessen={() => setPanel(null)}
+          mitDokumentLink={auswaehlbar}
+        />
       </div>
-
-      <QuellenPanel inhalt={panel} schliessen={() => setPanel(null)} />
-    </div>
+    </ZitatSprache>
   );
 }

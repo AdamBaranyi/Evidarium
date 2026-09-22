@@ -1,8 +1,14 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { URTEIL } from '@/app/app/chat/texte-urteil';
+import { useSprache, useTexte } from '@/lib/i18n/client';
 import { useWenigerBewegung } from '@/lib/ui/bewegung';
-import { KORPUS, SCHRITTE, SZENEN, TAKT } from './szenen';
+import { KORPUS, SZENEN, TAKT } from './szenen';
+import { START } from './texte';
+
+/** Die Schritte in ihrer Reihenfolge — die Namen kommen aus dem Chat. */
+const PHASEN = ['einbetten', 'suchen', 'antworten', 'pruefen'] as const;
 
 /*
  * Die Vorführung auf der Startseite: **das Programmfenster selbst**, dicht
@@ -30,6 +36,14 @@ export function Vorfuehrung() {
   const [sichtbar, setSichtbar] = useState(false);
   const bereich = useRef<HTMLDivElement>(null);
   const ruhig = useWenigerBewegung();
+  const worte = useTexte(START).vorfuehrung;
+  const phasen = useTexte(URTEIL).phasen;
+  /*
+   * Die Zitate sind deutsch, wörtlich aus dem Korpus. Läuft die Oberfläche
+   * in einer anderen Sprache, sagen die Blätter das dem Screenreader (WCAG
+   * 3.1.2), damit er sie deutsch vorliest.
+   */
+  const blattSprache = useSprache() === 'de' ? undefined : 'de';
 
   /*
    * **Anhalten muss man selbst können** (WCAG 2.2.2, Stufe A): Bewegung, die
@@ -64,7 +78,8 @@ export function Vorfuehrung() {
   const runde = TAKT.ende + 100;
   const szene = Math.floor(uhr / runde) % SZENEN.length;
   const fall = SZENEN[szene] ?? SZENEN[0];
-  if (!fall) return null;
+  const text = worte.szenen[szene] ?? worte.szenen[0];
+  if (!fall || !text) return null;
 
   // Angehalten zeigt das fertige Bild, nicht einen halben Zwischenstand.
   const t = steht ? TAKT.markierung : uhr % runde;
@@ -100,25 +115,21 @@ export function Vorfuehrung() {
       <div className="vorfuehrung-fenster">
         <div className="vorfuehrung-leiste">
           <span className="font-blatt">Evidarium</span>
-          <span className="ms-auto text-tinte-leise">
-            {fall.blaetter.length === 1
-              ? '1 Quelle geprüft'
-              : `${fall.blaetter.length} Quellen geprüft`}
-          </span>
+          <span className="ms-auto text-tinte-leise">{worte.quellen(fall.blaetter.length)}</span>
           <button
             type="button"
             aria-pressed={steht}
             onClick={() => setGewaehlt(!steht)}
             className="min-h-11 underline underline-offset-4"
           >
-            {steht ? 'Abspielen' : 'Anhalten'}
+            {steht ? worte.abspielen : worte.anhalten}
           </button>
         </div>
 
         <div className="vorfuehrung-rumpf">
           {/* Die Seitenleiste zeigt den Korpus und hebt hervor, was zählte. */}
           <aside aria-hidden className="vorfuehrung-spalte">
-            <p className="vorfuehrung-spalte-titel">Durchsucht wird in</p>
+            <p className="vorfuehrung-spalte-titel">{worte.durchsucht}</p>
             <ul>
               {KORPUS.map((datei) => {
                 const zaehlt = da(TAKT.urteil) && fall.benutzt.includes(datei);
@@ -136,16 +147,16 @@ export function Vorfuehrung() {
           </aside>
 
           <div className="vorfuehrung-inhalt">
-            <p className={`vorfuehrung-frage ${da(TAKT.frage) ? 'ist-da' : ''}`}>{fall.frage}</p>
+            <p className={`vorfuehrung-frage ${da(TAKT.frage) ? 'ist-da' : ''}`}>{text.frage}</p>
 
             <ol className="vorfuehrung-schritte">
-              {SCHRITTE.map((schritt, i) => {
+              {PHASEN.map((phase, i) => {
                 const beginn = TAKT.schritt[i] ?? 0;
                 const fertig = TAKT.fertig[i] ?? 0;
                 const dauer = i === 2 ? fall.modellDauer : '0.0 s';
                 return (
-                  <li key={schritt} className={da(beginn) ? 'ist-da' : ''}>
-                    <span className={da(fertig) ? 'text-tinte-leise' : ''}>{schritt}</span>
+                  <li key={phase} className={da(beginn) ? 'ist-da' : ''}>
+                    <span className={da(fertig) ? 'text-tinte-leise' : ''}>{phasen[phase]}</span>
                     <span className="text-tinte-leise">{da(fertig) ? dauer : '…'}</span>
                   </li>
                 );
@@ -155,9 +166,9 @@ export function Vorfuehrung() {
             <div className={`vorfuehrung-urteil ${da(TAKT.urteil) ? 'ist-da' : ''}`}>
               <p className="urteil-marke text-tinte-leise">
                 <span aria-hidden className="urteil-punkt" style={{ background: fall.farbe }} />
-                {fall.urteil}
+                {text.urteil}
               </p>
-              <p className="vorfuehrung-aussage-text">{fall.aussage}</p>
+              <p className="vorfuehrung-aussage-text">{text.aussage}</p>
             </div>
           </div>
         </div>
@@ -168,6 +179,7 @@ export function Vorfuehrung() {
         {fall.blaetter.map((blatt, i) => (
           <div
             key={blatt.datei}
+            lang={blattSprache}
             className={`vorfuehrung-blatt blatt ${da(TAKT.blatt + i * 250) ? 'ist-da' : ''}`}
           >
             <span className="flex items-baseline justify-between gap-4 border-b border-blatt-kante pb-2">

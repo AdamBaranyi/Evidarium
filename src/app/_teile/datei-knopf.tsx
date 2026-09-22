@@ -2,6 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
+import { useTexte } from '@/lib/i18n/client';
+import { GEMEINSAM } from './texte';
 
 /*
  * Der Knopf zum Hochladen — in der Demo und in der Anwendung derselbe.
@@ -22,6 +24,7 @@ export function DateiKnopf({
   endpunkt: string;
   beschriftung: string;
 }) {
+  const t = useTexte(GEMEINSAM).upload;
   const router = useRouter();
   const eingabe = useRef<HTMLInputElement>(null);
   const [laeuft, setLaeuft] = useState(false);
@@ -36,12 +39,12 @@ export function DateiKnopf({
       const antwort = await fetch(endpunkt, { method: 'POST', body: formular });
       if (!antwort.ok) {
         const daten = (await antwort.json().catch(() => null)) as { fehler?: string } | null;
-        setFehler(daten?.fehler ?? 'Upload nicht möglich.');
+        setFehler(daten?.fehler ?? t.nichtMoeglich);
         return;
       }
       router.refresh();
     } catch {
-      setFehler('Die Verbindung wurde unterbrochen. Bitte noch einmal versuchen.');
+      setFehler(t.unterbrochen);
     } finally {
       if (eingabe.current) eingabe.current.value = '';
       setLaeuft(false);
@@ -73,7 +76,7 @@ export function DateiKnopf({
               strokeLinecap="round"
             />
           </svg>
-          {laeuft ? 'Wird übertragen …' : beschriftung}
+          {laeuft ? t.laeuft : beschriftung}
         </label>
       </div>
 

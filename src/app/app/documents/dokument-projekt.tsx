@@ -1,8 +1,10 @@
 'use client';
 
 import { useActionState, useId, useRef } from 'react';
+import { useTexte } from '@/lib/i18n/client';
 import type { ProjektZeile } from '@/lib/projekte/grenzen';
 import { dokumentVerschieben, type ProjektAntwort } from './projekt-aktionen';
+import { DOKUMENTE } from './texte';
 
 /*
  * Das Projekt eines Dokuments, direkt in seiner Zeile.
@@ -23,6 +25,7 @@ export function DokumentProjekt({
   projektId: string | null;
   projekte: ProjektZeile[];
 }) {
+  const t = useTexte(DOKUMENTE).projekte;
   const formular = useRef<HTMLFormElement>(null);
   const feld = useId();
   const [antwort, absenden, laeuft] = useActionState<ProjektAntwort, FormData>(
@@ -34,7 +37,7 @@ export function DokumentProjekt({
     <form ref={formular} action={absenden} className="flex min-w-0 flex-col gap-1">
       <input type="hidden" name="documentId" value={documentId} />
       <label htmlFor={feld} className="sr-only">
-        Projekt für {dateiname}
+        {t.projektFuer(dateiname)}
       </label>
       <select
         id={feld}
@@ -44,7 +47,7 @@ export function DokumentProjekt({
         onChange={() => formular.current?.requestSubmit()}
         className="min-h-11 max-w-full rounded-[10px] bg-flaeche-tief px-3"
       >
-        <option value="">Ohne Projekt</option>
+        <option value="">{t.ohneProjekt}</option>
         {projekte.map((projekt) => (
           <option key={projekt.id} value={projekt.id}>
             {projekt.name}

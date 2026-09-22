@@ -1,8 +1,10 @@
 'use client';
 
 import { useActionState, useId, useState } from 'react';
+import { useTexte } from '@/lib/i18n/client';
 import { PROJEKT_GRENZEN, type ProjektZeile } from '@/lib/projekte/grenzen';
 import { projektEntfernen, projektNeuerName, type ProjektAntwort } from './projekt-aktionen';
+import { DOKUMENTE } from './texte';
 
 /*
  * Ein Projekt in der Seitenspalte: Name und Zahl, dahinter aufklappbar
@@ -12,6 +14,7 @@ import { projektEntfernen, projektNeuerName, type ProjektAntwort } from './proje
  * was wirklich passiert: Das Projekt geht, die Dokumente bleiben.
  */
 export function ProjektEintrag({ projekt }: { projekt: ProjektZeile }) {
+  const t = useTexte(DOKUMENTE).projekte;
   const [offen, setOffen] = useState(false);
   const [sicher, setSicher] = useState(false);
   const bereich = useId();
@@ -31,7 +34,7 @@ export function ProjektEintrag({ projekt }: { projekt: ProjektZeile }) {
         <span className="min-w-0 flex-1">{projekt.name}</span>
         <span className="text-tinte-leise">
           {projekt.anzahl}
-          <span className="sr-only"> {projekt.anzahl === 1 ? 'Dokument' : 'Dokumente'}</span>
+          <span className="sr-only"> {t.einheit(projekt.anzahl)}</span>
         </span>
         {/*
          * Der Name gehört in den Namen des Knopfs, sonst hört man fünfmal
@@ -43,14 +46,14 @@ export function ProjektEintrag({ projekt }: { projekt: ProjektZeile }) {
           type="button"
           aria-expanded={offen}
           aria-controls={bereich}
-          aria-label={`Bearbeiten: ${projekt.name}`}
+          aria-label={t.bearbeitenName(projekt.name)}
           onClick={() => {
             setOffen(!offen);
             setSicher(false);
           }}
           className="min-h-11 underline underline-offset-4"
         >
-          Bearbeiten
+          {t.bearbeiten}
         </button>
       </div>
 
@@ -58,7 +61,7 @@ export function ProjektEintrag({ projekt }: { projekt: ProjektZeile }) {
         <form action={umbenennen} className="flex flex-col gap-2">
           <input type="hidden" name="projektId" value={projekt.id} />
           <label htmlFor={feld} className="text-tinte-leise">
-            Neuer Name
+            {t.neuerName}
           </label>
           <div className="flex gap-2">
             <input
@@ -75,7 +78,7 @@ export function ProjektEintrag({ projekt }: { projekt: ProjektZeile }) {
               disabled={benenntUm}
               className="min-h-11 shrink-0 rounded-[10px] border border-rand-bedienung px-3 disabled:opacity-55"
             >
-              Speichern
+              {t.speichern}
             </button>
           </div>
           <Rueckmeldung antwort={umbenannt} />
@@ -85,8 +88,7 @@ export function ProjektEintrag({ projekt }: { projekt: ProjektZeile }) {
           <form action={loeschen} className="flex flex-col gap-2">
             <input type="hidden" name="projektId" value={projekt.id} />
             <p>
-              <strong>{projekt.name}</strong> wird gelöscht. Die Dokumente darin bleiben und stehen
-              danach ohne Projekt da.
+              <strong>{projekt.name}</strong> {t.loeschenWarnung}
             </p>
             <div className="flex flex-wrap gap-3">
               <button
@@ -94,14 +96,14 @@ export function ProjektEintrag({ projekt }: { projekt: ProjektZeile }) {
                 disabled={loescht}
                 className="min-h-11 rounded-[10px] bg-aktion-grund px-4 text-aktion-tinte disabled:opacity-55"
               >
-                {loescht ? 'Wird gelöscht …' : 'Projekt löschen'}
+                {loescht ? t.loescht : t.loeschen}
               </button>
               <button
                 type="button"
                 onClick={() => setSicher(false)}
                 className="min-h-11 underline underline-offset-4"
               >
-                Abbrechen
+                {t.abbrechen}
               </button>
             </div>
             <Rueckmeldung antwort={geloescht} />
@@ -112,7 +114,7 @@ export function ProjektEintrag({ projekt }: { projekt: ProjektZeile }) {
             onClick={() => setSicher(true)}
             className="min-h-11 self-start underline underline-offset-4"
           >
-            Projekt löschen …
+            {t.loeschenFrage}
           </button>
         )}
       </div>

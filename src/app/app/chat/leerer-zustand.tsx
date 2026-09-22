@@ -1,6 +1,9 @@
 'use client';
 
-import { KATEGORIEKURZ, KATEGORIEWERT, type Antwort } from './typen';
+import { useTexte } from '@/lib/i18n/client';
+import { CHAT } from './texte';
+import { URTEIL } from './texte-urteil';
+import { KATEGORIEWERT, type Antwort } from './typen';
 
 /*
  * Was im Chat steht, bevor jemand fragt.
@@ -37,22 +40,19 @@ export function LeererZustand({
   /** Ohne Modell zeigt Evidarium nur die passendste Stelle. Das steht dann hier. */
   modellAktiv: boolean;
 }) {
+  const t = useTexte(CHAT).leer;
+  const kurz = useTexte(URTEIL).urteilKurz;
   return (
     <div className="flex flex-col gap-7">
       <div className="flex flex-col gap-3">
         {/* h2: Die h1 der Seite steht über dem Fenster und bleibt, wenn der Chat nicht mehr leer ist. */}
         <h2 className="text-xl leading-[var(--line-title)]">{titel}</h2>
         <p className="max-w-[var(--mass)] text-tinte-leise">{einleitung}</p>
-        {!modellAktiv && (
-          <p className="max-w-[var(--mass)] text-tinte-leise">
-            Im Moment läuft kein Sprachmodell. Evidarium zeigt dann die passendste Stelle,
-            formuliert aber keine Antwort — die Belegprüfung läuft trotzdem.
-          </p>
-        )}
+        {!modellAktiv && <p className="max-w-[var(--mass)] text-tinte-leise">{t.ohneModell}</p>}
       </div>
 
       {vorschlaege.length > 0 && (
-        <ul className="vorschlaege" aria-label="Fragen zum Ausprobieren">
+        <ul className="vorschlaege" aria-label={t.vorschlaege}>
           {vorschlaege.map((vorschlag) => (
             <li key={vorschlag.frage}>
               <button type="button" className="vorschlag" onClick={() => fragen(vorschlag.frage)}>
@@ -65,7 +65,7 @@ export function LeererZustand({
       )}
 
       <div className="flex flex-col gap-2">
-        <p className="text-tinte-leise">Jede Antwort bekommt eines von vier Urteilen:</p>
+        <p className="text-tinte-leise">{t.legende}</p>
         <ul className="legende">
           {URTEILE.map((urteil) => (
             <li key={urteil}>
@@ -74,7 +74,7 @@ export function LeererZustand({
                 className="urteil-punkt"
                 style={{ background: KATEGORIEWERT[urteil] }}
               />
-              {KATEGORIEKURZ[urteil]}
+              {kurz[urteil]}
             </li>
           ))}
         </ul>

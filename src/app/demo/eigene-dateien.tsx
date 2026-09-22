@@ -1,8 +1,10 @@
 import type { BesucherDokument } from '@/lib/demo/besucher-dokumente';
 import { DEMO_GRENZEN } from '@/lib/demo/grenzen';
 import { fehlerText, inArbeit, statusText } from '@/lib/documents/zustaende';
+import { sprache } from '@/lib/i18n/server';
 import { DateiKnopf } from '../_teile/datei-knopf';
 import { Nachladen } from '../_teile/nachladen';
+import { DEMO } from './texte';
 
 /*
  * Eigene Dateien in der Demo.
@@ -12,16 +14,17 @@ import { Nachladen } from '../_teile/nachladen';
  * verschwindet — und dass er nichts Vertrauliches hochladen soll. Ein
  * Hinweis, den man erst nach dem Hochladen liest, ist keiner.
  */
-export function EigeneDateien({ dokumente }: { dokumente: BesucherDokument[] }) {
+export async function EigeneDateien({ dokumente }: { dokumente: BesucherDokument[] }) {
+  const s = await sprache();
+  const t = DEMO[s].eigene;
   const voll = dokumente.length >= DEMO_GRENZEN.maxDateien;
 
   return (
     <section className="flex min-w-0 flex-col gap-3 border-t border-kante pt-5">
       <Nachladen aktiv={dokumente.some((d) => inArbeit(d.status))} />
-      <h2>Eigene Dateien</h2>
+      <h2>{t.titel}</h2>
       <p>
-        <strong>Wird nach {DEMO_GRENZEN.stunden} Stunden automatisch gelöscht.</strong> Lade nichts
-        Vertrauliches hoch — das hier ist eine öffentliche Vorführung auf fremdem Server.
+        <strong>{t.geloescht(DEMO_GRENZEN.stunden)}</strong> {t.vertraulich}
       </p>
 
       {dokumente.length > 0 && (
@@ -30,7 +33,7 @@ export function EigeneDateien({ dokumente }: { dokumente: BesucherDokument[] }) 
             <li key={dokument.id} className="min-w-0">
               <p>{dokument.filename}</p>
               <p className="text-tinte-leise">
-                {fehlerText(dokument.errorCode) ?? statusText(dokument.status)}
+                {fehlerText(dokument.errorCode, s) ?? statusText(dokument.status, s)}
               </p>
             </li>
           ))}
@@ -38,22 +41,17 @@ export function EigeneDateien({ dokumente }: { dokumente: BesucherDokument[] }) 
       )}
 
       {voll ? (
-        <p className="text-tinte-leise">
-          Mehr als {DEMO_GRENZEN.maxDateien} Dateien gehen in der Demo nicht. Die vorhandenen
-          verschwinden von selbst.
-        </p>
+        <p className="text-tinte-leise">{t.voll(DEMO_GRENZEN.maxDateien)}</p>
       ) : (
-        <DateiKnopf
-          id="demo-datei"
-          endpunkt="/api/demo/documents"
-          beschriftung="Datei hinzufügen"
-        />
+        <DateiKnopf id="demo-datei" endpunkt="/api/demo/documents" beschriftung={t.knopf} />
       )}
 
       <p className="text-tinte-leise">
-        Bis zu {DEMO_GRENZEN.maxDateien} Dateien je Besuch, je höchstens{' '}
-        {DEMO_GRENZEN.maxBytes / 1024 / 1024} MiB und {DEMO_GRENZEN.maxSeiten} Seiten. PDF mit
-        Textschicht, TXT oder Markdown.
+        {t.grenzen(
+          DEMO_GRENZEN.maxDateien,
+          DEMO_GRENZEN.maxBytes / 1024 / 1024,
+          DEMO_GRENZEN.maxSeiten,
+        )}
       </p>
     </section>
   );

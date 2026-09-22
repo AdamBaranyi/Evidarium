@@ -5,6 +5,8 @@ import { GRENZEN } from '@/lib/documents/grenzen';
 import { einlesenBeauftragen } from '@/lib/jobs/queue';
 import { readSession, SESSION_COOKIE } from '@/lib/auth/session';
 import { herkunftStimmt } from '@/lib/auth/request';
+import { MELDUNGEN } from '@/lib/i18n/meldungen';
+import { sprache } from '@/lib/i18n/server';
 
 /*
  * Upload als Route Handler, nicht als Server Action: Server Actions haben
@@ -15,42 +17,45 @@ import { herkunftStimmt } from '@/lib/auth/request';
  * die Verarbeitung.
  */
 
-const MELDUNGEN: Record<string, string> = {
-  zu_gross: `Die Datei ist grösser als ${GRENZEN.maxBytes / 1024 / 1024} MiB.`,
-  typ_nicht_unterstuetzt:
-    'Dieses Format wird nicht unterstützt. Erlaubt sind PDF mit Textschicht, TXT und Markdown.',
-  zu_viele_dokumente: `Mehr als ${GRENZEN.maxDokumenteJeNutzer} Dokumente sind zurzeit nicht vorgesehen.`,
-  schon_vorhanden: 'Diese Datei ist bereits vorhanden.',
-};
+function anlegenMeldung(t: (typeof MELDUNGEN)['de'], fehler: string): string {
+  const texte: Record<string, string> = {
+    zu_gross: t.dateiZuGross(GRENZEN.maxBytes / 1024 / 1024),
+    typ_nicht_unterstuetzt: t.typNichtUnterstuetzt,
+    zu_viele_dokumente: t.zuVieleDokumente(GRENZEN.maxDokumenteJeNutzer),
+    schon_vorhanden: t.schonVorhanden,
+  };
+  return texte[fehler] ?? t.uploadNichtMoeglich;
+}
 
 export async function POST(request: Request): Promise<NextResponse> {
+  const t = MELDUNGEN[await sprache()];
   if (!(await herkunftStimmt())) {
-    return NextResponse.json({ fehler: 'Anfrage abgelehnt.' }, { status: 403 });
+    return NextResponse.json({ fehler: t.abgelehnt }, { status: 403 });
   }
 
   const sitzung = await readSession((await cookies()).get(SESSION_COOKIE)?.value);
   if (!sitzung) {
-    return NextResponse.json({ fehler: 'Nicht angemeldet.' }, { status: 401 });
+    return NextResponse.json({ fehler: t.nichtAngemeldet }, { status: 401 });
   }
 
   // Grösse vor dem Einlesen prüfen: `formData()` läse sonst alles in den
   // Speicher, bevor irgendeine Grenze greift. Befund S6.
   const laenge = Number(request.headers.get('content-length') ?? '0');
   if (!Number.isFinite(laenge) || laenge > GRENZEN.maxBytes + 64 * 1024) {
-    return NextResponse.json({ fehler: MELDUNGEN.zu_gross }, { status: 413 });
+    return NextResponse.json({ fehler: anlegenMeldung(t, 'zu_gross') }, { status: 413 });
   }
 
   const formular = await request.formData();
   const datei = formular.get('datei');
 
   if (!(datei instanceof File) || datei.size === 0) {
-    return NextResponse.json({ fehler: 'Keine Datei erhalten.' }, { status: 400 });
+    return NextResponse.json({ fehler: t.keineDatei }, { status: 400 });
   }
 
   // Grösse vor dem Lesen prüfen, damit eine überlange Datei nicht erst
   // vollständig im Speicher landet.
   if (datei.size > GRENZEN.maxBytes) {
-    return NextResponse.json({ fehler: MELDUNGEN.zu_gross }, { status: 413 });
+    return NextResponse.json({ fehler: anlegenMeldung(t, 'zu_gross') }, { status: 413 });
   }
 
   // Dateinamen vom Mac kommen in NFD zerlegt und erscheinen sonst als
@@ -61,10 +66,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   const ergebnis = await dokumentAnlegen(sitzung.userId, dateiname, bytes);
 
   if (!ergebnis.ok) {
-    return NextResponse.json(
-      { fehler: MELDUNGEN[ergebnis.fehler] ?? 'Upload nicht möglich.' },
-      { status: 400 },
-    );
+    return NextResponse.json({ fehler: anlegenMeldung(t, ergebnis.fehler) }, { status: 400 });
   }
 
   await einlesenBeauftragen({

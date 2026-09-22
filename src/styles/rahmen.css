@@ -53,3 +53,32 @@
     overflow-y: auto;
   }
 }
+
+/*
+ * **Die Sprachwahl**: vier Kürzel, die gewählte in voller Tinte und
+ * unterstrichen, die anderen leise. Keine Fahnen — Sprachen sind keine
+ * Länder, und in der Schweiz schon gar nicht.
+ */
+.sprachwahl {
+  display: flex;
+  gap: 0.15rem;
+}
+
+.sprachwahl button {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  color: var(--tinte-leise);
+  text-underline-offset: 4px;
+  transition: color var(--dauer-kurz) var(--ease-out);
+}
+
+.sprachwahl button[aria-current='true'] {
+  color: var(--tinte);
+  text-decoration: underline;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sprachwahl button:hover {
+    color: var(--tinte);
+  }
+}

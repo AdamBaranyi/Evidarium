@@ -1,7 +1,11 @@
 'use client';
 
 import { useId, useState } from 'react';
-import { PHASENTEXT, type Lauf, type Schritt } from './typen';
+import { useSprache, useTexte } from '@/lib/i18n/client';
+import { sprachTag, type Sprache } from '@/lib/i18n/sprachen';
+import { CHAT } from './texte';
+import { URTEIL } from './texte-urteil';
+import type { Lauf, Schritt } from './typen';
 
 /*
  * **Keine erfundene Fortschrittsanzeige.**
@@ -23,6 +27,8 @@ export function Schrittanzeige({ schritte, laeuft }: { schritte: Schritt[]; laeu
 }
 
 function SchrittListe({ schritte, laeuft }: { schritte: Schritt[]; laeuft: boolean }) {
+  const phasen = useTexte(URTEIL).phasen;
+  const sprache = useSprache();
   return (
     <ol className="flex max-w-[26rem] flex-col gap-1 border-l border-kante-stark py-1 pl-4">
       {schritte.map((schritt) => {
@@ -30,11 +36,11 @@ function SchrittListe({ schritte, laeuft }: { schritte: Schritt[]; laeuft: boole
         return (
           <li key={schritt.phase} className="flex flex-wrap justify-between gap-x-6">
             <span className={offen ? '' : 'text-tinte-leise'}>
-              {PHASENTEXT[schritt.phase]}
+              {phasen[schritt.phase]}
               {offen && ' …'}
             </span>
             {schritt.dauerMs !== null && (
-              <span className="text-tinte-leise">{sekunden(schritt.dauerMs)}</span>
+              <span className="text-tinte-leise">{sekunden(schritt.dauerMs, sprache)}</span>
             )}
           </li>
         );
@@ -51,6 +57,8 @@ function SchrittListe({ schritte, laeuft }: { schritte: Schritt[]; laeuft: boole
 export function SchrittZusammenfassung({ lauf }: { lauf: Lauf }) {
   const [offen, setOffen] = useState(false);
   const liste = useId();
+  const t = useTexte(CHAT).antwort;
+  const sprache = useSprache();
 
   return (
     <>
@@ -60,7 +68,7 @@ export function SchrittZusammenfassung({ lauf }: { lauf: Lauf }) {
         aria-controls={liste}
         onClick={() => setOffen(!offen)}
       >
-        Geprüft in {sekunden(lauf.wartezeitMs)}
+        {t.geprueft(sekunden(lauf.wartezeitMs, sprache))}
       </button>
       <div id={liste} hidden={!offen} className="basis-full pb-2">
         <SchrittListe schritte={lauf.schritte} laeuft={false} />
@@ -69,6 +77,11 @@ export function SchrittZusammenfassung({ lauf }: { lauf: Lauf }) {
   );
 }
 
-function sekunden(ms: number): string {
-  return `${(ms / 1000).toFixed(1)} s`;
+/** Eine Nachkommastelle, im Zahlformat der Sprache: 2.1 s, auf Französisch 2,1 s. */
+function sekunden(ms: number, sprache: Sprache): string {
+  const zahl = (ms / 1000).toLocaleString(sprachTag(sprache), {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
+  return `${zahl} s`;
 }

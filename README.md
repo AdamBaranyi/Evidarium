@@ -9,6 +9,10 @@ Das Produkt verspricht Nachprüfbarkeit, nicht Unfehlbarkeit. Jede Aussage
 trägt eine Fundstelle, die sich im Originaldokument öffnen lässt; findet die
 Suche keine Grundlage, sagt die Anwendung das, statt etwas zu erfinden.
 
+Die Oberfläche gibt es auf Deutsch, Französisch, Italienisch und Englisch.
+Geantwortet wird in der Sprache der Frage; die Zitate bleiben wörtlich in der
+Sprache ihres Dokuments.
+
 ## Start in unter zehn Minuten
 
 ```bash

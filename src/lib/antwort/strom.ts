@@ -1,4 +1,6 @@
+import type { Sprache } from '@/lib/i18n/sprachen';
 import { frageBeantworten, type FrageAuftrag, type Phase } from './fragen';
+import { ergebnisUebersetzen } from './uebersetzen';
 
 /*
  * Die Antwort als Strom von NDJSON-Zeilen: erst die Arbeitsschritte, zuletzt
@@ -18,6 +20,8 @@ import { frageBeantworten, type FrageAuftrag, type Phase } from './fragen';
 export function ndjsonAntwort(
   auftrag: Omit<FrageAuftrag, 'melden'>,
   zusatzKopf: Record<string, string> = {},
+  sprache: Sprache = 'de',
+  demo = false,
 ): Response {
   const strom = new ReadableStream<Uint8Array>({
     async start(steuerung) {
@@ -28,18 +32,25 @@ export function ndjsonAntwort(
       try {
         const ergebnis = await frageBeantworten({
           ...auftrag,
+          sprache,
           melden: (phase: Phase) => zeile({ art: 'phase', phase }),
         });
-        zeile(ergebnis);
+        zeile(ergebnisUebersetzen(ergebnis, sprache, demo));
       } catch (fehler) {
         // Bis hierher sind alle bekannten Fälle abgefangen. Was hier ankommt,
         // gehört ins Log — und in die Antwort nur als schlichter Satz.
         console.error('[antwort] unerwarteter Fehler', fehler);
-        zeile({
-          art: 'fehler',
-          code: 'unerwartet',
-          nachricht: 'Beim Beantworten ist ein unerwarteter Fehler aufgetreten.',
-        });
+        zeile(
+          ergebnisUebersetzen(
+            {
+              art: 'fehler',
+              code: 'unerwartet',
+              nachricht: 'Beim Beantworten ist ein unerwarteter Fehler aufgetreten.',
+            },
+            sprache,
+            demo,
+          ),
+        );
       } finally {
         steuerung.close();
       }

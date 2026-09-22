@@ -1,6 +1,8 @@
 'use client';
 
 import { useActionState, useState } from 'react';
+import { useTexte } from '@/lib/i18n/client';
+import { DOKUMENTE } from '../texte';
 import { dokumentEntfernen, type LoeschAntwort } from './actions';
 
 /*
@@ -11,6 +13,7 @@ import { dokumentEntfernen, type LoeschAntwort } from './actions';
  * — und die Warnung kann sagen, was tatsächlich passiert.
  */
 export function LoeschenForm({ documentId, dateiname }: { documentId: string; dateiname: string }) {
+  const t = useTexte(DOKUMENTE).loeschen;
   const [sicher, setSicher] = useState(false);
   const [antwort, absenden, laeuft] = useActionState<LoeschAntwort, FormData>(
     dokumentEntfernen,
@@ -24,7 +27,7 @@ export function LoeschenForm({ documentId, dateiname }: { documentId: string; da
         onClick={() => setSicher(true)}
         className="min-h-11 self-start border border-kante px-4 py-2"
       >
-        Dokument löschen
+        {t.knopf}
       </button>
     );
   }
@@ -34,8 +37,7 @@ export function LoeschenForm({ documentId, dateiname }: { documentId: string; da
       <input type="hidden" name="documentId" value={documentId} />
 
       <p>
-        <strong>{dateiname}</strong> wird mit allen Abschnitten und Vektoren entfernt. Die Datei
-        wird vom Datenträger gelöscht. Das lässt sich nicht rückgängig machen.
+        <strong>{dateiname}</strong> {t.warnung}
       </p>
 
       {antwort?.fehler !== undefined && (
@@ -50,14 +52,14 @@ export function LoeschenForm({ documentId, dateiname }: { documentId: string; da
           disabled={laeuft}
           className="min-h-11 bg-aktion-grund px-5 py-2 text-aktion-tinte disabled:opacity-60"
         >
-          {laeuft ? 'Wird gelöscht …' : 'Endgültig löschen'}
+          {laeuft ? t.loescht : t.endgueltig}
         </button>
         <button
           type="button"
           onClick={() => setSicher(false)}
           className="min-h-11 px-4 py-2 underline underline-offset-4"
         >
-          Abbrechen
+          {t.abbrechen}
         </button>
       </div>
     </form>

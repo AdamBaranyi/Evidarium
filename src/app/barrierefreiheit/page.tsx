@@ -1,69 +1,58 @@
 import type { Metadata } from 'next';
 import { Textseite } from '../_teile/textseite';
 import { env } from '@/lib/config/env';
+import { sprache } from '@/lib/i18n/server';
+import { BARRIEREFREIHEIT } from './texte';
 
-export const metadata: Metadata = { title: 'Barrierefreiheit – Evidarium' };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: BARRIEREFREIHEIT[await sprache()].metaTitel };
+}
+
 export const dynamic = 'force-dynamic';
 
 /*
- * Barrierefreiheitserklärung — wie bei Tallyroom.
- *
- * Sie behauptet nur, was geprüft ist, und sagt, wie. «Barrierefrei» ohne
- * Prüfweg wäre eine Behauptung, die niemand einlösen kann.
+ * Barrierefreiheitserklärung — wie bei Tallyroom. Die Texte, in vier
+ * Sprachen, stehen in `texte.ts`.
  */
-export default function BarrierefreiheitPage() {
+export default async function BarrierefreiheitPage() {
+  const t = BARRIEREFREIHEIT[await sprache()];
   return (
-    <Textseite titel="Barrierefreiheit" stand="21. September 2026">
-      <p>
-        Evidarium soll für alle bedienbar sein, auch mit Tastatur, Screenreader, Vergrösserung oder
-        ohne Farbsehen. Ziel sind die Richtlinien WCAG 2.2 auf Stufe AA.
-      </p>
+    <Textseite titel={t.titel} stand={t.stand}>
+      <p>{t.einleitung}</p>
 
-      <h2>Wie das geprüft wird</h2>
+      <h2>{t.geprueft}</h2>
       <ul>
-        <li>Automatisch mit axe gegen WCAG 2.2 AA, in heller und dunkler Darstellung getrennt.</li>
-        <li>Bei jeder Änderung auf drei Breiten: 320, 768 und 1440 Pixel.</li>
-        <li>Keine Schrift unter 16 Pixel, in Quelltext und Browser geprüft.</li>
-        <li>Kontraste von Text und Bedienelementen gerechnet, nicht geschätzt.</li>
-        <li>Bedienung mit der Tastatur, sichtbarer Fokus, Sprungmarke zum Inhalt.</li>
+        {t.pruefungen.map((punkt) => (
+          <li key={punkt}>{punkt}</li>
+        ))}
       </ul>
 
-      <h2>Was bewusst so gebaut ist</h2>
+      <h2>{t.gebaut}</h2>
       <ul>
-        <li>
-          Farbe trägt nie allein eine Aussage: Neben jeder Urteilsfarbe steht das Urteil als Wort.
-        </li>
-        <li>
-          Die bewegte Vorführung auf der Startseite lässt sich anhalten und steht still, wenn das
-          Betriebssystem weniger Bewegung wünscht.
-        </li>
-        <li>Fertige Antworten und die einzelnen Arbeitsschritte werden Screenreadern angesagt.</li>
+        {t.bauweisen.map((punkt) => (
+          <li key={punkt}>{punkt}</li>
+        ))}
       </ul>
 
-      <h2>Bekannte Grenzen</h2>
+      <h2>{t.grenzen}</h2>
       <ul>
-        <li>
-          Mit einem echten Screenreader ist Evidarium noch nicht durchgespielt worden. Die Ansagen
-          sind technisch vorhanden, aber nicht im Gebrauch erprobt.
-        </li>
-        <li>
-          Wie gut ein hochgeladenes PDF gelesen werden kann, hängt von der Datei ab: Gescannte
-          Seiten ohne Textschicht lehnt Evidarium ab und sagt das.
-        </li>
+        {t.grenzenListe.map((punkt) => (
+          <li key={punkt}>{punkt}</li>
+        ))}
       </ul>
 
-      <h2>Etwas funktioniert nicht?</h2>
+      <h2>{t.kontakt}</h2>
       <p>
         {env.BETREIBER_EMAIL ? (
           <>
-            Schreib an{' '}
+            {t.schreib}{' '}
             <a href={`mailto:${env.BETREIBER_EMAIL}`} className="underline underline-offset-4">
               {env.BETREIBER_EMAIL}
             </a>
-            . Hinweise auf Barrieren werden wie Fehler behandelt.
+            . {t.wieFehler}
           </>
         ) : (
-          'Die Kontaktadresse ist auf diesem Server nicht gesetzt.'
+          t.keineAdresse
         )}
       </p>
     </Textseite>

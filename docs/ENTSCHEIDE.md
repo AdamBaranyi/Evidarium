@@ -851,3 +851,44 @@ misst das auf jeder Seite bei 1440 Pixeln.
 Schmal bleibt es beim Fliessen: Auf dem Telefon kosteten eine feste Kopf- und
 Fusszeile zu viel der wenigen Höhe. Die öffentlichen Textseiten — Impressum,
 Datenschutz, Barrierefreiheit — sind Dokumente und dürfen rollen.
+
+## E42 — Vier Sprachen, eigene Kataloge
+
+_22.09.2026._ Adams Wunsch: Evidarium mehrsprachig «wie bei Tallyroom».
+Übernommen ist Tallyrooms Aufbau, angepasst an Next.js:
+
+- **Deutsch, Französisch, Italienisch, Englisch.** Französisch und
+  Italienisch in der Höflichkeitsform wie bei Tallyroom, Deutsch und
+  Englisch direkt. Die Übersetzungen sind nicht muttersprachlich geprüft;
+  die Barrierefreiheitsseite sagt das, und auf den Rechtsseiten steht in
+  jeder Übersetzung, dass die deutsche Fassung gilt.
+- **Eigene Kataloge statt Bibliothek.** Je Bereich eine Datei, alle Sprachen
+  nebeneinander. Deutsch gibt die Form vor; fehlt anderswo ein Text oder hat
+  eine Formel andere Parameter, bricht der Typecheck. So fielen beim Umbau
+  zwanzig Stellen auf, bevor eine Seite lief.
+- **Die Sprache ermittelt der Server**, je Anfrage: zuerst die eigene Wahl
+  (Cookie «evidarium_sprache», ein Jahr, nur das Kürzel), sonst der
+  Accept-Language-Kopf des Browsers. Der Browser rät nie selbst — sonst
+  stünde nach dem Laden kurz eine andere Sprache da als gerendert. Die Adresse
+  bleibt dieselbe, wie bei Tallyroom.
+- **Die Wahl sind vier Knöpfe, keine Auswahlliste.** Eine Liste, die beim
+  Ändern die ganze Seite umschreibt, verstiesse gegen WCAG 3.2.2. Jeder Knopf
+  trägt den Namen der Sprache in ihr selbst und `lang` dazu.
+
+**Die Dokumente bleiben, wie sie sind.** Der Demo-Korpus ist deutsch, und
+die Zitate bleiben es auch auf einer englischen Seite — das ist der Punkt:
+Man fragt auf Englisch, und der Beleg steht wörtlich da. Die Systeminstruktion
+sagt dem Modell jetzt, in der Sprache der Frage zu antworten und Zitate nie
+zu übersetzen. Wo die Sprache eines Zitats bekannt ist (Korpus der Demo,
+Vorführung), trägt es `lang="de"`, damit ein Screenreader es deutsch liest;
+bei hochgeladenen Dokumenten ist sie unbekannt, und ein falsches `lang` wäre
+schlechter als keines.
+
+**Meldungen des Servers übersetzt der Server**, an einer Stelle: an der
+Grenze des Antwortstroms und in den Endpunkten. Dahinter bleibt alles
+deutsch — Protokolle, Evaluation, Tests. Grenzwerte wie «10 Fragen» kennt
+nur der Server; darum übersetzt er, nicht der Browser.
+
+Nebenbei gefunden: Das Quellen-Panel verlinkte in der Demo auf die
+Dokumentseite, die nur Angemeldeten offensteht — Besucher landeten bei der
+Anmeldung. Der Link erscheint jetzt nur angemeldet.

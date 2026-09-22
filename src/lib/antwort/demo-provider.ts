@@ -1,3 +1,4 @@
+import { MELDUNGEN } from '@/lib/i18n/meldungen';
 import { normalisieren } from './belegpruefung';
 import type { AntwortAnfrage, AntwortErgebnis, AntwortProvider } from './provider';
 import type { Aussage } from './schema';
@@ -39,6 +40,7 @@ export class DemoProvider implements AntwortProvider {
   readonly istDemo = true;
 
   antworten(anfrage: AntwortAnfrage): Promise<AntwortErgebnis> {
+    const t = MELDUNGEN[anfrage.sprache ?? 'de'].demoAntwort;
     const besterAbschnitt = anfrage.abschnitte[0];
 
     // Ohne Fundstelle gibt es nichts zu zeigen — und das ist eine gültige,
@@ -49,7 +51,7 @@ export class DemoProvider implements AntwortProvider {
           kategorie: 'keine_grundlage',
           aussagen: [
             {
-              text: 'In den ausgewählten Dokumenten wurde keine passende Stelle gefunden.',
+              text: t.keineStelle,
               belege: [],
             },
           ],
@@ -63,14 +65,14 @@ export class DemoProvider implements AntwortProvider {
       return Promise.resolve({
         antwort: {
           kategorie: 'keine_grundlage',
-          aussagen: [{ text: 'Die gefundene Stelle enthält keinen lesbaren Satz.', belege: [] }],
+          aussagen: [{ text: t.keinSatz, belege: [] }],
         },
         verbrauch: null,
       });
     }
 
     const aussage: Aussage = {
-      text: `Demo-Antwort ohne Modell: Zur Frage «${anfrage.frage}» passt diese Stelle am besten.`,
+      text: t.stelle(anfrage.frage),
       belege: [{ sourceId: besterAbschnitt.sourceId, zitat }],
     };
 

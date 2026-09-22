@@ -6,13 +6,16 @@ import { Chat } from '@/app/app/chat/chat';
 import { demoKorpus } from '@/lib/demo/korpus';
 import { eigeneDokumente } from '@/lib/demo/besucher-dokumente';
 import { besucherKennung, DEMO_COOKIE } from '@/lib/demo/besucher';
-import { DEMO_VORSCHLAEGE } from '@/lib/demo/vorschlaege';
+import { sprache } from '@/lib/i18n/server';
 import { EigeneDateien } from './eigene-dateien';
+import { DEMO } from './texte';
 import { Kopf } from '../_teile/kopf';
 import { Licht } from '../_teile/licht';
 import { env } from '@/lib/config/env';
 
-export const metadata: Metadata = { title: 'Demo – Evidarium' };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: DEMO[await sprache()].metaTitel };
+}
 export const dynamic = 'force-dynamic';
 
 /*
@@ -25,6 +28,7 @@ export const dynamic = 'force-dynamic';
 export default async function DemoPage() {
   if (!env.DEMO_AKTIV) notFound();
 
+  const t = DEMO[await sprache()];
   const korpus = await demoKorpus();
   if (!korpus) notFound();
 
@@ -39,28 +43,28 @@ export default async function DemoPage() {
   return (
     <div className="seite-rahmen flex flex-1 flex-col">
       <Licht />
-      <Kopf unterzeile="Demo">
+      <Kopf unterzeile={t.unterzeile}>
         <Link href="/login" className="ms-auto underline underline-offset-4">
-          Anmelden
+          {t.anmelden}
         </Link>
       </Kopf>
 
       <main id="inhalt" className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-5 sm:px-6">
-        <h1 className="sr-only">Demo mit Beispieldokumenten</h1>
+        <h1 className="sr-only">{t.ueberschrift}</h1>
         <Chat
           dokumente={auswahl}
           endpunkt="/api/demo/chat"
           auswaehlbar={false}
-          titel="Frag diese Dokumente etwas."
-          einleitung="Sechs Dokumente der erfundenen Firma Nordstern Digital, dazu deine eigenen, wenn du magst. Jede Aussage trägt ein wörtliches Zitat, ein Klick öffnet die Stelle im Dokument."
-          vorschlaege={DEMO_VORSCHLAEGE}
+          titel={t.titel}
+          einleitung={t.einleitung}
+          vorschlaege={t.vorschlaege}
           modellAktiv={env.AI_MODE === 'live'}
+          deutscheDokumente={korpus.dokumente.map((dokument) => dokument.id)}
           seitenhinweis={
             <>
               <EigeneDateien dokumente={eigene} />
               <p className="border-t border-kante pt-5 text-tinte-leise">
-                Der Betrieb kostet Geld, darum gilt ein Kontingent von {env.FRAGEN_JE_SITZUNG}{' '}
-                Fragen je Besuch.
+                {t.kontingent(env.FRAGEN_JE_SITZUNG)}
               </p>
             </>
           }

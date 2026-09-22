@@ -1,8 +1,10 @@
 'use client';
 
 import { useActionState } from 'react';
+import { useTexte } from '@/lib/i18n/client';
 import { PROJEKT_GRENZEN } from '@/lib/projekte/grenzen';
 import { projektNeu, type ProjektAntwort } from './projekt-aktionen';
+import { DOKUMENTE } from './texte';
 
 /*
  * Ein neues Projekt: ein Feld, ein Knopf.
@@ -12,6 +14,7 @@ import { projektNeu, type ProjektAntwort } from './projekt-aktionen';
  * kommt er als `name` in der Antwort zurück und steht wieder im Feld.
  */
 export function ProjektNeu() {
+  const t = useTexte(DOKUMENTE).projekte;
   const [antwort, absenden, laeuft] = useActionState<ProjektAntwort, FormData>(
     projektNeu,
     undefined,
@@ -19,7 +22,7 @@ export function ProjektNeu() {
 
   return (
     <form action={absenden} className="flex flex-col gap-2 border-t border-kante pt-4">
-      <label htmlFor="projekt-name">Neues Projekt</label>
+      <label htmlFor="projekt-name">{t.neu}</label>
       <div className="flex gap-2">
         <input
           id="projekt-name"
@@ -35,7 +38,7 @@ export function ProjektNeu() {
           disabled={laeuft}
           className="min-h-11 shrink-0 rounded-[10px] bg-aktion-grund px-4 text-aktion-tinte disabled:opacity-55"
         >
-          Anlegen
+          {t.anlegen}
         </button>
       </div>
       {antwort?.fehler !== undefined ? (

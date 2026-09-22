@@ -10,6 +10,12 @@ import { passwortPruefenGleichlang } from '@/lib/auth/password';
 import { createSession, hashOrigin, SESSION_COOKIE } from '@/lib/auth/session';
 import { fehlversucheLoeschen, fehlversuchNotieren, loginErlaubt } from '@/lib/auth/rate-limit';
 import { clientHerkunft, herkunftStimmt } from '@/lib/auth/request';
+import { sprache } from '@/lib/i18n/server';
+import { ANMELDUNG } from './texte';
+
+async function fehlertexte() {
+  return ANMELDUNG[await sprache()].fehler;
+}
 
 const Eingabe = z.object({
   email: z.email().max(320),
@@ -19,17 +25,17 @@ const Eingabe = z.object({
 export type LoginErgebnis = { fehler: string } | undefined;
 
 export async function login(_: LoginErgebnis, formData: FormData): Promise<LoginErgebnis> {
-  if (!(await herkunftStimmt())) return { fehler: 'Anfrage abgelehnt.' };
+  if (!(await herkunftStimmt())) return { fehler: (await fehlertexte()).abgelehnt };
 
   const eingabe = Eingabe.safeParse({
     email: formData.get('email'),
     password: formData.get('password'),
   });
-  if (!eingabe.success) return { fehler: 'E-Mail oder Passwort stimmt nicht.' };
+  if (!eingabe.success) return { fehler: (await fehlertexte()).falsch };
 
   const originHash = hashOrigin(await clientHerkunft());
   if (!(await loginErlaubt(originHash))) {
-    return { fehler: 'Zu viele Versuche. Bitte in 15 Minuten erneut probieren.' };
+    return { fehler: (await fehlertexte()).zuViele };
   }
 
   const [konto] = await db
@@ -51,7 +57,7 @@ export async function login(_: LoginErgebnis, formData: FormData): Promise<Login
 
   if (!stimmt || konto === undefined) {
     await fehlversuchNotieren(originHash);
-    return { fehler: 'E-Mail oder Passwort stimmt nicht.' };
+    return { fehler: (await fehlertexte()).falsch };
   }
 
   await fehlversucheLoeschen(originHash);

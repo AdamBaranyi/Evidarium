@@ -1,10 +1,14 @@
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { Fuss } from './_teile/fuss';
+import { GEMEINSAM } from './_teile/texte';
 import { env } from '@/lib/config/env';
+import { SprachAnbieter } from '@/lib/i18n/client';
+import { sprache } from '@/lib/i18n/server';
+import { sprachTag, type Sprache } from '@/lib/i18n/sprachen';
 import './globals.css';
 
-const BESCHREIBUNG = 'Antworten aus deinen Dokumenten – mit Quellen, die du nachlesen kannst.';
+const OG_LOCALE: Record<Sprache, string> = { de: 'de_CH', fr: 'fr_CH', it: 'it_CH', en: 'en_GB' };
 
 /*
  * Angaben für geteilte Links. Ohne sie zeigte ein Link auf LinkedIn oder in
@@ -13,19 +17,23 @@ const BESCHREIBUNG = 'Antworten aus deinen Dokumenten – mit Quellen, die du na
  * Das Bild liegt als `opengraph-image.png` daneben und wird von Next selbst
  * verdrahtet.
  */
-export const metadata: Metadata = {
-  metadataBase: new URL(env.APP_ORIGIN),
-  title: 'Evidarium',
-  description: BESCHREIBUNG,
-  openGraph: {
+export async function generateMetadata(): Promise<Metadata> {
+  const s = await sprache();
+  const beschreibung = GEMEINSAM[s].beschreibung;
+  return {
+    metadataBase: new URL(env.APP_ORIGIN),
     title: 'Evidarium',
-    description: BESCHREIBUNG,
-    locale: 'de_CH',
-    type: 'website',
-    siteName: 'Evidarium',
-  },
-  twitter: { card: 'summary_large_image' },
-};
+    description: beschreibung,
+    openGraph: {
+      title: 'Evidarium',
+      description: beschreibung,
+      locale: OG_LOCALE[s],
+      type: 'website',
+      siteName: 'Evidarium',
+    },
+    twitter: { card: 'summary_large_image' },
+  };
+}
 
 /*
  * `async` und `headers()`: Das macht jede Seite dynamisch, und das ist die
@@ -35,8 +43,9 @@ export const metadata: Metadata = {
  */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   await headers();
+  const s = await sprache();
   return (
-    <html lang="de-CH">
+    <html lang={sprachTag(s)}>
       {/* Browser-Erweiterungen setzen Attribute am body, bevor React lädt. */}
       <body suppressHydrationWarning>
         {/*
@@ -45,12 +54,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
          * müssen. Unsichtbar, bis sie den Fokus hat. Befund S3.
          */}
         <a href="#inhalt" className="sprungmarke">
-          Zum Inhalt springen
+          {GEMEINSAM[s].sprungmarke}
         </a>
-        <div className="wurzel flex min-h-dvh flex-col">
-          <div className="wurzel-inhalt flex flex-1 flex-col">{children}</div>
-          <Fuss />
-        </div>
+        <SprachAnbieter sprache={s}>
+          <div className="wurzel flex min-h-dvh flex-col">
+            <div className="wurzel-inhalt flex flex-1 flex-col">{children}</div>
+            <Fuss />
+          </div>
+        </SprachAnbieter>
       </body>
     </html>
   );

@@ -1,6 +1,7 @@
+import type { CHAT } from './texte';
+import type { URTEIL } from './texte-urteil';
 import {
   herkunft,
-  KATEGORIETEXT,
   type Antwort,
   type Eintrag,
   type Lauf,
@@ -15,6 +16,9 @@ import {
 
 /** Wie viele frühere Wechsel als Gesprächskontext mitgehen. */
 const VERLAUF_TIEFE = 6;
+
+/** Die Texte, die diese Hilfen brauchen — in der Sprache der Oberfläche. */
+export type StromTexte = { chat: (typeof CHAT)['de']; urteil: (typeof URTEIL)['de'] };
 
 /** Eine fertige Zeile des Stroms, also alles ausser einer Phase. */
 export type Ergebnis = Exclude<StromZeile, { art: 'phase' }>;
@@ -79,6 +83,7 @@ export async function frageSenden(
   endpunkt: string,
   koerper: unknown,
   melden: Rueckmeldung,
+  ersatzMeldung: string,
 ): Promise<string | null> {
   const gesendet = Date.now();
   let schritte: Schritt[] = [];
@@ -91,7 +96,7 @@ export async function frageSenden(
 
   if (!antwort.ok || !antwort.body) {
     const daten = (await antwort.json().catch(() => null)) as { fehler?: string } | null;
-    return daten?.fehler ?? 'Anfrage nicht möglich.';
+    return daten?.fehler ?? ersatzMeldung;
   }
 
   await stromLesen(antwort.body, (zeile) => {
@@ -119,12 +124,11 @@ export function schrittAbschliessen(alt: Schritt[], jetzt: number): Schritt[] {
 }
 
 /** Ein Satz fürs Ohr: das Urteil und worauf es steht, nicht der ganze Text. */
-export function ansageFuer(zeile: Ergebnis): string {
+export function ansageFuer(zeile: Ergebnis, t: StromTexte): string {
   if (zeile.art === 'antwort') {
-    const quellen = zeile.stellen.length;
-    return `Antwort da: ${KATEGORIETEXT[zeile.kategorie]}, ${quellen === 1 ? 'eine Quelle' : `${quellen} Quellen`}.`;
+    return t.chat.ansage.antwort(t.urteil.urteil[zeile.kategorie], zeile.stellen.length);
   }
-  if (zeile.art === 'keine_treffer') return 'In den ausgewählten Dokumenten steht dazu nichts.';
+  if (zeile.art === 'keine_treffer') return t.chat.ansage.nichts;
   return zeile.nachricht;
 }
 
@@ -139,17 +143,13 @@ export function hinweis(
     : { id, art: 'hinweis', ton, nachricht };
 }
 
-export function alsEintrag(zeile: Ergebnis, lauf: Lauf): Eintrag {
+export function alsEintrag(zeile: Ergebnis, lauf: Lauf, t: StromTexte): Eintrag {
   if (zeile.art === 'antwort') {
     return { id: crypto.randomUUID(), art: 'antwort', antwort: zeile, lauf };
   }
   if (zeile.art === 'budget') return hinweis('budget', zeile.nachricht);
   if (zeile.art === 'keine_treffer') {
-    return hinweis(
-      'leer',
-      'In den ausgewählten Dokumenten steht dazu nichts. Das ist eine Antwort, kein Fehler.',
-      lauf,
-    );
+    return hinweis('leer', t.chat.antwort.nichtsGefundenText, lauf);
   }
   return hinweis('fehler', zeile.nachricht);
 }
@@ -180,16 +180,16 @@ export function alsVerlauf(
  * sie wäre die Kopie genau das, was das Produkt vermeiden will: eine
  * Behauptung ohne Nachweis.
  */
-export function alsText(antwort: Antwort): string {
+export function alsText(antwort: Antwort, t: StromTexte): string {
   const stellen = new Map(antwort.stellen.map((s) => [s.sourceId, s]));
-  const zeilen = [KATEGORIETEXT[antwort.kategorie], ''];
+  const zeilen = [t.urteil.urteil[antwort.kategorie], ''];
 
   for (const aussage of antwort.aussagen) {
     zeilen.push(aussage.text);
     for (const beleg of aussage.belege) {
       const stelle = stellen.get(beleg.sourceId);
       if (!stelle) continue;
-      const ort = herkunft(stelle);
+      const ort = herkunft(stelle, t.urteil.herkunft);
       zeilen.push(`  «${beleg.zitat}» (${stelle.filename}${ort ? `, ${ort}` : ''})`);
     }
     zeilen.push('');

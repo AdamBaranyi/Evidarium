@@ -4,11 +4,15 @@ import { redirect } from 'next/navigation';
 import { readSession, SESSION_COOKIE } from '@/lib/auth/session';
 import { dokumenteListen } from '@/lib/documents/abfragen';
 import { env } from '@/lib/config/env';
+import { sprache } from '@/lib/i18n/server';
 import { projekteListen } from '@/lib/projekte/projekte';
+import { ANWENDUNG } from '../texte';
 import { Chat } from './chat';
 import { ProjektWahl } from './projekt-wahl';
 
-export const metadata: Metadata = { title: 'Fragen – Evidarium' };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: ANWENDUNG[await sprache()].chat.metaTitel };
+}
 
 // Welche Dokumente fertig verarbeitet sind, ändert sich während der Sitzung.
 export const dynamic = 'force-dynamic';
@@ -28,6 +32,7 @@ export default async function ChatPage({
   const sitzung = await readSession((await cookies()).get(SESSION_COOKIE)?.value);
   if (!sitzung) redirect('/login');
 
+  const t = ANWENDUNG[await sprache()].chat;
   const [alle, projekte, { projekt: gewuenscht }] = await Promise.all([
     dokumenteListen(sitzung.userId),
     projekteListen(sitzung.userId),
@@ -49,7 +54,7 @@ export default async function ChatPage({
 
   return (
     <main id="inhalt" className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-5 sm:px-6">
-      <h1 className="sr-only">Fragen{aktiv ? ` in ${aktiv.name}` : ''}</h1>
+      <h1 className="sr-only">{t.ueberschrift(aktiv?.name)}</h1>
       <Chat
         key={aktiv?.id ?? 'alle'}
         dokumente={dokumente}
@@ -59,12 +64,8 @@ export default async function ChatPage({
             <ProjektWahl projekte={mitZahl} aktiv={aktiv?.id ?? null} gesamt={bereit.length} />
           ) : undefined
         }
-        titel={aktiv ? `Frag ${aktiv.name} etwas.` : 'Frag deine Dokumente etwas.'}
-        einleitung={
-          aktiv
-            ? 'Gesucht wird nur in den Dokumenten dieses Projekts. Jede Aussage trägt ein wörtliches Zitat, ein Klick öffnet die Stelle im Dokument.'
-            : 'Jede Aussage trägt ein wörtliches Zitat, ein Klick öffnet die Stelle im Dokument. In der Seitenspalte wählst du, was durchsucht wird.'
-        }
+        titel={t.titel(aktiv?.name)}
+        einleitung={aktiv ? t.einleitungProjekt : t.einleitung}
         modellAktiv={env.AI_MODE === 'live'}
       />
     </main>
