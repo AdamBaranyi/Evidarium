@@ -154,6 +154,16 @@ test('keine Schrift unter 16 px', async ({ page }) => {
   expect(zuKlein).toEqual([]);
 });
 
+test('passt am Schreibtisch auf einen Bildschirm, auch mit Antworten', async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 0) < 1024, 'Schmal fliesst die Seite');
+  await ersteAntwort(page);
+  const { seite, fenster } = await page.evaluate(() => ({
+    seite: document.documentElement.scrollHeight,
+    fenster: window.innerHeight,
+  }));
+  expect(seite).toBeLessThanOrEqual(fenster);
+});
+
 test('kein Querscrollen', async ({ page }) => {
   const ueberbreit = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,

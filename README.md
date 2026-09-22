@@ -65,6 +65,13 @@ gebaut und getestet, weil sie zur Kernfunktion gehört: Ein gelöschtes Dokument
 verschwindet aus Suche, Auswahl und aus allen Antworten, die es als Grundlage
 hatten.
 
+**Kein gespeicherter Gesprächsverlauf.** Evidarium speichert keine Fragen und
+keine Antworten; eine Unterhaltung besteht, solange die Seite offen ist. Ein
+Verlauf hiesse: Fragen auf dem Server, ein eigener Abschnitt in der
+Datenschutzerklärung und eine zweite Löschkaskade für Antworten, die aus einem
+gelöschten Dokument zitieren. Projekte gibt es trotzdem — als Gruppen von
+Dokumenten, die die Suche eingrenzen (E40).
+
 **Kein zentraler Identitätsdienst.** Für eine Demo wäre er Betriebsaufwand und
 ein zusätzlicher Ausfallpunkt: Steht er still, kommt niemand mehr hinein. Er
 kommt, sobald es echte Nutzer gibt — dann als zweiter Anmeldeweg neben der

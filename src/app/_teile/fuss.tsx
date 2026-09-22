@@ -10,7 +10,7 @@ import Link from 'next/link';
  */
 export function Fuss() {
   return (
-    <footer className="border-t border-kante bg-flaeche-tief">
+    <footer className="fuss border-t border-kante bg-flaeche-tief">
       <nav
         aria-label="Rechtliches und Quelltext"
         className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-x-7 gap-y-2 px-6 py-5"

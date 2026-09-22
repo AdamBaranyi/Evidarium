@@ -23,46 +23,65 @@ export default async function DokumentDetail({ params }: { params: Promise<{ id:
   const abschnitte = dokument.status === 'ready' ? await abschnitteHolen(sitzung.userId, id) : [];
   const fehler = fehlerText(dokument.errorCode);
 
+  /*
+   * Dieselbe Fensterform wie die Liste: Leiste mit Name und Rückweg, darunter
+   * rollt der Inhalt — am Schreibtisch innerhalb des Fensters, nie die Seite.
+   */
   return (
-    <main id="inhalt" className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-10">
-      <Link href="/app/documents" className="underline underline-offset-4">
-        Zurück zu den Dokumenten
-      </Link>
+    <main id="inhalt" className="mx-auto flex w-full max-w-6xl flex-col px-4 py-5 sm:px-6">
+      <section aria-labelledby="dokument-titel" className="fenster-voll panel overflow-hidden">
+        <div className="panel-leiste min-h-[3.25rem] items-center py-1">
+          <Link
+            href="/app/documents"
+            className="min-h-11 content-center underline underline-offset-4"
+          >
+            Dokumente
+          </Link>
+          <h1 id="dokument-titel" className="me-auto min-w-0 text-tinte">
+            {dokument.filename}
+          </h1>
+        </div>
 
-      <header className="flex flex-col gap-2">
-        <h1 className="text-xl leading-[var(--line-title)]">{dokument.filename}</h1>
-        <p className="text-tinte-leise">
-          {artText(dokument.kind)}, {groesseText(dokument.sizeBytes)}. {statusText(dokument.status)}
-          {dokument.pageCount !== null && `, ${dokument.pageCount} Seiten`}
-          {dokument.charCount !== null && `, ${dokument.charCount} Zeichen`}.
-        </p>
-        <p className="text-tinte-leise">
-          Gelesen mit Parser {dokument.parserVersion}, zerlegt mit {dokument.chunkerVersion}.
-        </p>
-      </header>
+        <div className="fenster-rollt flex flex-col gap-6 p-5">
+          <header className="flex flex-col gap-1">
+            <p className="text-tinte-leise">
+              {artText(dokument.kind)}, {groesseText(dokument.sizeBytes)}.{' '}
+              {statusText(dokument.status)}
+              {dokument.pageCount !== null && `, ${dokument.pageCount} Seiten`}
+              {dokument.charCount !== null && `, ${dokument.charCount} Zeichen`}.
+            </p>
+            <p className="text-tinte-leise">
+              Gelesen mit Parser {dokument.parserVersion}, zerlegt mit {dokument.chunkerVersion}.
+            </p>
+          </header>
 
-      {fehler !== null && (
-        <p role="alert" className="panel p-4">
-          {fehler}
-        </p>
-      )}
+          {fehler !== null && (
+            <p role="alert" className="rounded-[10px] border border-kante bg-flaeche-tief p-4">
+              {fehler}
+            </p>
+          )}
 
-      <LoeschenForm documentId={dokument.id} dateiname={dokument.filename} />
+          <LoeschenForm documentId={dokument.id} dateiname={dokument.filename} />
 
-      {dokument.status === 'ready' && (
-        <section className="flex flex-col gap-4">
-          <h2 className="text-lg leading-tight">Gelesener Text</h2>
-          {abschnitte.map((abschnitt) => (
-            /* Dokumentinhalt gehört auf ein Blatt, auch hier. */
-            <article key={abschnitt.ordinal} className="blatt max-w-[var(--mass-blatt)] px-5 py-4">
-              <p className="folio border-b border-blatt-kante pb-2">{herkunft(abschnitt)}</p>
-              <p className="mt-3 whitespace-pre-wrap">
-                {ohneDateinamensvorsatz(abschnitt.text, dokument.filename)}
-              </p>
-            </article>
-          ))}
-        </section>
-      )}
+          {dokument.status === 'ready' && (
+            <section className="flex flex-col gap-4">
+              <h2 className="text-lg leading-tight">Gelesener Text</h2>
+              {abschnitte.map((abschnitt) => (
+                /* Dokumentinhalt gehört auf ein Blatt, auch hier. */
+                <article
+                  key={abschnitt.ordinal}
+                  className="blatt max-w-[var(--mass-blatt)] px-5 py-4"
+                >
+                  <p className="folio border-b border-blatt-kante pb-2">{herkunft(abschnitt)}</p>
+                  <p className="mt-3 whitespace-pre-wrap">
+                    {ohneDateinamensvorsatz(abschnitt.text, dokument.filename)}
+                  </p>
+                </article>
+              ))}
+            </section>
+          )}
+        </div>
+      </section>
     </main>
   );
 }

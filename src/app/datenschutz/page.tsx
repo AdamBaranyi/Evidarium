@@ -80,6 +80,12 @@ export default function DatenschutzPage() {
         technisch nötiges Cookie. Fehlgeschlagene Anmeldungen werden je Herkunft gezählt, nur als
         Hashwert.
       </p>
+      <p>
+        Hochgeladene Dokumente und die Namen der Projekte, in die du sie ordnest, bleiben
+        gespeichert, bis du sie löschst.{' '}
+        <strong>Fragen und Antworten werden nicht gespeichert</strong>— eine Unterhaltung besteht
+        nur, solange die Seite offen ist.
+      </p>
 
       {live && (
         <>

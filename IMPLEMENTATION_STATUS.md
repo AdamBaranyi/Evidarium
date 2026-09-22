@@ -156,7 +156,7 @@ Rechner.
 | Nicht angemeldet kein Upload, auch per API                    | `e2e/zugriff.spec.ts`                                                                    |
 | Sitzung, Tag und Monat greifen unabhängig                     | `tests/budget.test.ts`, `tests/abnahme.test.ts`                                          |
 | Schlüssel taucht nirgends auf                                 | `tests/abnahme.test.ts`, gitleaks im täglichen Lauf                                      |
-| Hauptablauf bei 320, 768, 1440                                | 334 Playwright-Prüfungen in Chromium, Firefox, Safari und auf dem iPhone, auch in der CI |
+| Hauptablauf bei 320, 768, 1440                                | 358 Playwright-Prüfungen in Chromium, Firefox, Safari und auf dem iPhone, auch in der CI |
 | Keine Datei über 400 Zeilen, Format, Lint, Typen              | `bun run verify`, CI                                                                     |
 | Täglicher Sicherheitslauf grün oder begründete Ausnahme       | `.github/workflows/sicherheit-taeglich.yml`                                              |
 
@@ -177,6 +177,10 @@ Stand 22.09.2026, Entscheide E30 bis E33 und E38, E39:
 - **Urteilslicht** (E39): Der Hintergrund von Startseite, Demo und Anmeldung
   nimmt die Farbe des Urteils an. Bewegt nur auf der Startseite, mit dem
   Knopf «Anhalten».
+- **Projekte** (E40): Gruppen von Dokumenten, verwaltet unter «Dokumente»,
+  im Chat als Eingrenzung der Suche; kein gespeicherter Verlauf.
+- **Ein Bildschirm** (E41): Angemeldet und in der Demo rollt ab
+  Schreibtischbreite nie die Seite, nur der Inhalt eines Fensters.
 - Offen: Durchsicht mit Adam; danach drei Bildschirmfotos für die Fallstudie.
 
 ## Aufgefallen

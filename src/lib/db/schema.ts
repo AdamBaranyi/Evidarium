@@ -76,6 +76,32 @@ export const loginAttempts = pgTable(
  * hängt an einer Version — so bleibt die alte Fassung lesbar, während eine
  * neue entsteht, und ein Modellwechsel wirft nicht alles um.
  */
+/*
+ * **Projekte: Gruppen von Dokumenten, sonst nichts.** Kein Gesprächsverlauf,
+ * keine Anweisungen, keine eigenen Einstellungen — Adams Entscheid vom
+ * 22.09.2026, E40. Evidarium speichert keine Fragen; ein Projekt ändert das
+ * nicht.
+ *
+ * Der Name ist je Konto eindeutig, ohne Rücksicht auf Gross- und
+ * Kleinschreibung: «Atlas» und «atlas» nebeneinander wären zwei Einträge,
+ * die niemand auseinanderhalten kann.
+ */
+export const projects = pgTable(
+  'projects',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    check('projects_name_laenge', sql`char_length(${table.name}) BETWEEN 1 AND 60`),
+    uniqueIndex('projects_name_je_nutzer_idx').on(table.userId, sql`lower(${table.name})`),
+  ],
+);
+
 export const documents = pgTable(
   'documents',
   {
@@ -110,6 +136,18 @@ export const documents = pgTable(
      * und Tag. Verschwindet mit dem Dokument nach 24 Stunden.
      */
     herkunftHash: text('herkunft_hash'),
+    /*
+     * Höchstens ein Projekt je Dokument, wie ein Ordner. Wird das Projekt
+     * gelöscht, bleibt das Dokument und steht danach ohne Projekt da.
+     *
+     * Dass Dokument und Projekt demselben Konto gehören, prüft die
+     * Anwendung an genau einer Stelle (`lib/projekte`), mit Tests. Ein
+     * zusammengesetzter Fremdschlüssel könnte das in der Datenbank erzwingen,
+     * bräuchte aber `ON DELETE SET NULL (project_id)` — das kennt die
+     * eingesetzte Drizzle-Fassung nicht, und `SET NULL` auf beide Spalten
+     * scheiterte an `user_id NOT NULL`.
+     */
+    projectId: uuid('project_id').references(() => projects.id, { onDelete: 'set null' }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
@@ -128,6 +166,7 @@ export const documents = pgTable(
     index('documents_user_idx').on(table.userId, table.createdAt),
     index('documents_besucher_idx').on(table.besucherHash, table.ablaufAm),
     index('documents_herkunft_idx').on(table.herkunftHash, table.createdAt),
+    index('documents_projekt_idx').on(table.projectId),
   ],
 );
 

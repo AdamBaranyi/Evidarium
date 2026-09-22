@@ -38,6 +38,10 @@ export type ChatEigenschaften = {
   auswaehlbar?: boolean;
   /** Zusätzlicher Inhalt für die Seitenspalte, etwa eigene Dateien. */
   seitenhinweis?: React.ReactNode;
+  /** Was über den Dokumenten in der Seitenspalte steht, etwa die Projekte. */
+  seitenkopf?: React.ReactNode | undefined;
+  /** Der Name des Bereichs, auf den die Suche eingegrenzt ist — ein Projekt. */
+  bereich?: string | undefined;
   /** Überschrift und Einleitung im leeren Chat. */
   titel: string;
   einleitung: string;
@@ -50,6 +54,8 @@ export function Chat({
   endpunkt = '/api/chat',
   auswaehlbar = true,
   seitenhinweis,
+  seitenkopf,
+  bereich,
   titel,
   einleitung,
   vorschlaege = [],
@@ -146,7 +152,8 @@ export function Chat({
     document.getElementById(EINGABE_ID)?.focus();
   }
 
-  if (dokumente.length === 0) {
+  // Ganz ohne Dokumente und ohne Projekte gibt es nichts, wozwischen man wählen könnte.
+  if (dokumente.length === 0 && !seitenkopf) {
     return (
       <p className="max-w-[var(--mass)] panel p-4">
         Hier ist noch nichts zu durchsuchen.{' '}
@@ -200,61 +207,82 @@ export function Chat({
 
       <div className="chat-rumpf">
         <aside id="chat-seite" className={`chat-spalte ${seiteOffen ? 'flex' : 'hidden'} lg:flex`}>
-          <DokumentWahl
-            dokumente={dokumente}
-            gewaehlt={gewaehlt}
-            setzen={setGewaehlt}
-            auswaehlbar={auswaehlbar}
-            belegt={belegt}
-            farbe={farbe}
-          />
+          {seitenkopf}
+          {dokumente.length > 0 && (
+            <DokumentWahl
+              dokumente={dokumente}
+              gewaehlt={gewaehlt}
+              setzen={setGewaehlt}
+              auswaehlbar={auswaehlbar}
+              belegt={belegt}
+              farbe={farbe}
+            />
+          )}
           {seitenhinweis}
         </aside>
 
-        <div className="chat-haupt">
-          <div ref={verlauf} className="chat-verlauf">
-            <div
-              className={`chat-spur flex flex-col gap-10 ${eintraege.length === 0 ? 'ist-leer' : ''}`}
-            >
-              {eintraege.length === 0 ? (
-                <LeererZustand
-                  titel={titel}
-                  einleitung={einleitung}
-                  vorschlaege={vorschlaege}
-                  fragen={(frage) => void stellen(frage)}
-                  modellAktiv={modellAktiv}
-                />
-              ) : (
-                /* Die Antworten tragen h3; ohne diese h2 fehlte eine Stufe. Befund S2. */
-                <h2 className="sr-only">Unterhaltung</h2>
-              )}
-              <p role="status" className="sr-only">
-                {ansage}
-              </p>
-              <Verlauf eintraege={eintraege} oeffnen={setPanel} />
-              <Schrittanzeige schritte={schritte} laeuft={laeuft} />
+        {dokumente.length === 0 ? (
+          /* Ein Projekt ohne fertige Dokumente: Die Seitenspalte bleibt, damit man weiterkommt. */
+          <div className="chat-haupt">
+            <div className="chat-verlauf">
+              <div className="chat-spur ist-leer flex flex-col gap-3">
+                <h2 className="text-xl leading-[var(--line-title)]">{titel}</h2>
+                <p className="max-w-[var(--mass)] text-tinte-leise">
+                  In {bereich ?? 'diesem Bereich'} liegt noch kein fertiges Dokument.{' '}
+                  <Link href="/app/documents" className="text-tinte underline underline-offset-4">
+                    Unter Dokumente
+                  </Link>{' '}
+                  lädst du welche hoch oder ordnest sie dem Projekt zu.
+                </p>
+              </div>
             </div>
           </div>
+        ) : (
+          <div className="chat-haupt">
+            <div ref={verlauf} className="chat-verlauf">
+              <div
+                className={`chat-spur flex flex-col gap-10 ${eintraege.length === 0 ? 'ist-leer' : ''}`}
+              >
+                {eintraege.length === 0 ? (
+                  <LeererZustand
+                    titel={titel}
+                    einleitung={einleitung}
+                    vorschlaege={vorschlaege}
+                    fragen={(frage) => void stellen(frage)}
+                    modellAktiv={modellAktiv}
+                  />
+                ) : (
+                  /* Die Antworten tragen h3; ohne diese h2 fehlte eine Stufe. Befund S2. */
+                  <h2 className="sr-only">Unterhaltung</h2>
+                )}
+                <p role="status" className="sr-only">
+                  {ansage}
+                </p>
+                <Verlauf eintraege={eintraege} oeffnen={setPanel} />
+                <Schrittanzeige schritte={schritte} laeuft={laeuft} />
+              </div>
+            </div>
 
-          <div className="chat-unten">
-            <div className="chat-spur">
-              <Eingabe
-                text={text}
-                setText={setText}
-                senden={() => void stellen(text)}
-                laeuft={laeuft}
-                gesperrt={gesperrt}
-                beschriftung={auswaehlbar ? 'Frage an die ausgewählten Dokumente' : 'Deine Frage'}
-                platzhalter="Frag etwas zu diesen Dokumenten"
-                umfang={
-                  gesperrt
-                    ? 'Kein Dokument ausgewählt'
-                    : `Sucht in ${anzahl === 1 ? 'einem Dokument' : `${anzahl} Dokumenten`}`
-                }
-              />
+            <div className="chat-unten">
+              <div className="chat-spur">
+                <Eingabe
+                  text={text}
+                  setText={setText}
+                  senden={() => void stellen(text)}
+                  laeuft={laeuft}
+                  gesperrt={gesperrt}
+                  beschriftung={auswaehlbar ? 'Frage an die ausgewählten Dokumente' : 'Deine Frage'}
+                  platzhalter="Frag etwas zu diesen Dokumenten"
+                  umfang={
+                    gesperrt
+                      ? 'Kein Dokument ausgewählt'
+                      : `Sucht in ${anzahl === 1 ? 'einem Dokument' : `${anzahl} Dokumenten`}${bereich ? ` aus ${bereich}` : ''}`
+                  }
+                />
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       <QuellenPanel inhalt={panel} schliessen={() => setPanel(null)} />

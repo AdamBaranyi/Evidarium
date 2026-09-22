@@ -1,0 +1,55 @@
+/*
+ * **Eine Seite, ein Bildschirm** — in der Anwendung und in der Demo, ab
+ * Schreibtischbreite.
+ *
+ * Adam am 22.09.2026: angemeldet musste er «immer runterscrollen», es soll
+ * passen, «dass ich nie scrollen muss». Kopfzeile, Arbeitsfläche und
+ * Fusszeile teilen sich jetzt die Höhe des Bildschirms. Was länger ist —
+ * der Verlauf, die Dokumentliste, die Aufrufe, der gelesene Text —, rollt in
+ * seinem Fenster, nie die Seite.
+ *
+ * Schmal fliesst die Seite weiter wie bisher: Auf dem Telefon kosteten eine
+ * feste Kopf- und Fusszeile zu viel der wenigen Höhe.
+ *
+ * Gilt für jede Seite mit `.seite-rahmen` (Anwendung und Demo); die übrigen
+ * Seiten bleiben gewöhnliche Dokumente.
+ */
+@media (min-width: 64rem) {
+  .wurzel:has(.seite-rahmen) {
+    height: 100dvh;
+  }
+
+  .wurzel:has(.seite-rahmen) > .wurzel-inhalt,
+  .seite-rahmen,
+  .seite-rahmen > main {
+    min-height: 0;
+  }
+
+  /* Die Fusszeile bleibt, aber schmal: Sie teilt sich den Bildschirm. */
+  .wurzel:has(.seite-rahmen) .fuss nav {
+    padding-block: 0.55rem;
+  }
+
+  /*
+   * Ein Fenster, das den Rest der Arbeitsfläche nimmt und selbst rollt —
+   * für Listen und Tabellen, die länger werden können als der Bildschirm.
+   */
+  .fenster-voll {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .fenster-voll > .fenster-rollt {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+  }
+
+  /* Eine Spalte im Raster, die für sich rollt. */
+  .rollt {
+    min-height: 0;
+    overflow-y: auto;
+  }
+}

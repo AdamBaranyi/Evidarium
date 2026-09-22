@@ -68,6 +68,58 @@ test('Dokumente: eigener Knopf statt Dateifeld des Browsers', async ({ page }) =
   await expect(page.locator('input[type="file"]')).toHaveCount(1);
 });
 
+test('Projekt anlegen, im Chat wählen, umbenennen und löschen', async ({ page }) => {
+  await page.goto('/app/documents');
+  const name = `Probe ${randomUUID().slice(0, 6)}`;
+  await page.getByLabel('Neues Projekt').fill(name);
+  await page.getByRole('button', { name: 'Anlegen' }).click();
+  await expect(page.getByRole('button', { name: `Bearbeiten: ${name}` })).toBeVisible();
+
+  // Derselbe Name in anderer Schreibweise: abgelehnt, und das Getippte bleibt stehen.
+  await page.getByLabel('Neues Projekt').fill(name.toUpperCase());
+  await page.getByRole('button', { name: 'Anlegen' }).click();
+  // Gefiltert: Next hat eine eigene, leere Region mit `role="alert"` für Seitenwechsel.
+  await expect(
+    page.getByRole('alert').filter({ hasText: 'Ein Projekt mit diesem Namen gibt es schon.' }),
+  ).toBeVisible();
+  await expect(page.getByLabel('Neues Projekt')).toHaveValue(name.toUpperCase());
+
+  // Im Chat steht das Projekt in der Seitenspalte; ohne Dokumente bleibt sie erreichbar.
+  await page.goto('/app/chat');
+  // Schmal liegt die Seitenspalte hinter einem Knopf.
+  const knopf = page.getByRole('button', { name: 'Dokumente', exact: true });
+  if (await knopf.isVisible()) await knopf.click();
+  await page.getByRole('link', { name: new RegExp(`^${name}`) }).click();
+  await expect(page).toHaveURL(/\?projekt=/);
+  // Der Wechsel lädt den Chat neu; schmal ist die Seitenspalte dann wieder zu.
+  if (await knopf.isVisible()) await knopf.click();
+  await expect(page.getByRole('link', { name: new RegExp(`^${name}`) })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+  await expect(page.getByText(`In ${name} liegt noch kein fertiges Dokument.`)).toBeVisible();
+
+  // Umbenennen und löschen.
+  await page.goto('/app/documents');
+  await page.getByRole('button', { name: `Bearbeiten: ${name}` }).click();
+  await page.getByLabel('Neuer Name').fill(`${name} neu`);
+  await page.getByRole('button', { name: 'Speichern' }).click();
+  await expect(page.getByRole('button', { name: `Bearbeiten: ${name} neu` })).toBeVisible();
+  // Die Bearbeitung bleibt offen und bestätigt; von dort geht es zum Löschen.
+  await expect(page.getByRole('status').filter({ hasText: 'Umbenannt.' })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Projekt löschen …' }).click();
+  await page.getByRole('button', { name: 'Projekt löschen', exact: true }).click();
+  await expect(page.getByRole('button', { name: `Bearbeiten: ${name} neu` })).toHaveCount(0);
+});
+
+test('eine fremde Projekt-ID fällt still auf alle Dokumente zurück', async ({ page }) => {
+  await page.goto(`/app/chat?projekt=${randomUUID()}`);
+  // Keine Fehlermeldung, die verriete, ob es die ID gibt.
+  await expect(page.getByText(/gibt es nicht/)).toHaveCount(0);
+  await expect(page.locator('main')).toBeVisible();
+});
+
 test.describe('ohne Bewegung', () => {
   test.use({ contextOptions: { reducedMotion: 'reduce' } });
 
@@ -93,6 +145,17 @@ test.describe('ohne Bewegung', () => {
 });
 
 for (const pfad of SEITEN) {
+  test(`passt am Schreibtisch auf einen Bildschirm: ${pfad}`, async ({ page }) => {
+    // Adam, 22.09.2026: angemeldet nie scrollen müssen. Schmal fliesst die Seite.
+    test.skip((page.viewportSize()?.width ?? 0) < 1024, 'Schmal fliesst die Seite');
+    await page.goto(pfad);
+    const { seite, fenster } = await page.evaluate(() => ({
+      seite: document.documentElement.scrollHeight,
+      fenster: window.innerHeight,
+    }));
+    expect(seite).toBeLessThanOrEqual(fenster);
+  });
+
   test(`kein Querscrollen und keine Schrift unter 16 px auf ${pfad}`, async ({ page }) => {
     await page.goto(pfad);
     const { ueberbreit, zuKlein } = await page.evaluate(() => {

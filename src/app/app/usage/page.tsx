@@ -73,7 +73,7 @@ export default async function VerbrauchPage() {
         </div>
       </section>
 
-      <section aria-labelledby="aufrufe-titel" className="panel overflow-hidden">
+      <section aria-labelledby="aufrufe-titel" className="fenster-voll panel overflow-hidden">
         <div className="panel-leiste min-h-[3.25rem] items-center py-1">
           <h2 id="aufrufe-titel" className="text-tinte">
             Letzte Aufrufe
@@ -97,7 +97,7 @@ export default async function VerbrauchPage() {
             aria-labelledby="aufrufe-titel"
             // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
             tabIndex={0}
-            className="overflow-x-auto"
+            className="fenster-rollt overflow-x-auto"
           >
             <table className="aufrufe">
               <thead>
@@ -131,13 +131,13 @@ export default async function VerbrauchPage() {
             </table>
           </div>
         )}
-      </section>
 
-      <p className="max-w-[var(--mass)] text-tinte-leise">
-        Alle Beträge sind Schätzungen. Der Anbieter rechnet nach eigenen Regeln ab;
-        zwischengespeicherte Eingaben kosten weniger. Jede Zeile ist nach dem Preisstand ihres
-        Aufrufs gerechnet.
-      </p>
+        <p className="border-t border-kante px-[1.1rem] py-3 text-tinte-leise">
+          Alle Beträge sind Schätzungen. Der Anbieter rechnet nach eigenen Regeln ab;
+          zwischengespeicherte Eingaben kosten weniger. Jede Zeile ist nach dem Preisstand ihres
+          Aufrufs gerechnet.
+        </p>
+      </section>
     </main>
   );
 }

@@ -47,8 +47,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <a href="#inhalt" className="sprungmarke">
           Zum Inhalt springen
         </a>
-        <div className="flex min-h-dvh flex-col">
-          <div className="flex flex-1 flex-col">{children}</div>
+        <div className="wurzel flex min-h-dvh flex-col">
+          <div className="wurzel-inhalt flex flex-1 flex-col">{children}</div>
           <Fuss />
         </div>
       </body>

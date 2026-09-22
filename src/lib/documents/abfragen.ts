@@ -21,6 +21,8 @@ export type DokumentZeile = {
   errorCode: string | null;
   pageCount: number | null;
   chunkCount: number | null;
+  /** Das Projekt, zu dem das Dokument gehört; `null` heisst: keinem. */
+  projectId: string | null;
 };
 
 export async function dokumenteListen(userId: string): Promise<DokumentZeile[]> {
@@ -35,6 +37,7 @@ export async function dokumenteListen(userId: string): Promise<DokumentZeile[]> 
       errorCode: documentVersions.errorCode,
       pageCount: documentVersions.pageCount,
       chunkCount: documentVersions.chunkCount,
+      projectId: documents.projectId,
     })
     .from(documents)
     .leftJoin(documentVersions, eq(documentVersions.documentId, documents.id))

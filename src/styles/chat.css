@@ -15,29 +15,10 @@
  */
 
 /*
- * Ab Schreibtischbreite füllt das Fenster den Bildschirm, und nur Verlauf
- * und Seitenspalte rollen. Darunter fliesst die Seite, und die Eingabe
- * klebt unten am Bildschirm.
- *
- * Die feste Höhe gilt nur für Seiten **mit** Chat (`:has`): Dokumente und
- * Verbrauch teilen denselben Rahmen und sollen normal fliessen.
+ * Ab Schreibtischbreite füllt das Fenster die Arbeitsfläche, und nur Verlauf
+ * und Seitenspalte rollen (der Rahmen dafür steht in rahmen.css). Darunter
+ * fliesst die Seite, und die Eingabe klebt unten am Bildschirm.
  */
-@media (min-width: 64rem) {
-  /*
-   * `flex: none` gehört dazu: Der Rahmen ist selbst ein Flex-Kind mit
-   * `flex-1`, und in einer Flex-Spalte schlägt `flex-basis` die Höhe — er
-   * wurde sonst so hoch wie sein Inhalt, 1309 statt 900 px.
-   */
-  .seite-rahmen:has(.chat) {
-    flex: none;
-    height: 100dvh;
-  }
-
-  .seite-rahmen:has(.chat) main {
-    min-height: 0;
-  }
-}
-
 .chat {
   display: flex;
   flex-direction: column;

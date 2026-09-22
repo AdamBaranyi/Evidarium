@@ -793,3 +793,61 @@ steht und nur heller wird. Jetzt: sanfte Sinuskurve (easeInOutSine),
 einer halben Sekunde 6 Prozent, nach 1,6 Sekunden die Hälfte. Die Blätter
 des Archivs folgen derselben Kurve. Bei reduzierter Bewegung entfällt die
 Weitung, das Überblenden bleibt.
+
+## E40 — Projekte: Gruppen von Dokumenten, ohne Verlauf
+
+_22.09.2026._ Adams Idee am angemeldeten Chat: In der Seitenleiste könnte man
+«Projekte machen, so Gruppen». Umgesetzt als das, was der Satz sagt — und
+nicht als das, was «Projekt» in anderen Chat-Anwendungen heisst.
+
+**Ein Projekt ist eine Gruppe von Dokumenten, sonst nichts.** Keine
+gespeicherten Unterhaltungen, keine eigenen Anweisungen. Adam hat die
+Empfehlung übernommen; der Grund: Evidarium speichert heute keine Fragen.
+Ein Verlauf hätte das geändert — Fragen und Antworten auf dem Server, ein
+neuer Abschnitt in der Datenschutzerklärung, und beim Löschen eines Dokuments
+müssten auch alle Antworten mit seinen Zitaten verschwinden (E28). Das wäre
+ein eigenes Vorhaben mit eigenem Risiko, kein Nebenprodukt einer Seitenleiste.
+Die Datenschutzerklärung sagt es jetzt ausdrücklich: Fragen und Antworten
+werden nicht gespeichert.
+
+- **Höchstens ein Projekt je Dokument**, wie ein Ordner. Mehrfachzuordnung
+  wäre flexibler und für die Handvoll Dokumente eines Kontos unnötig schwer
+  zu überblicken.
+- **Das Projekt steht in der Adresse** (`/app/chat?projekt=…`), nicht im
+  Zustand: Es übersteht das Neuladen, taugt als Lesezeichen, und ein Wechsel
+  beginnt eine neue Unterhaltung. Eine fremde oder unbekannte ID fällt still
+  auf «Alle Dokumente» zurück — eine Meldung verriete, ob es sie gibt.
+- **Verwaltet wird unter «Dokumente»**: links die Projekte, rechts alle
+  Dokumente mit einer Auswahl je Zeile. Die Liste filtert bewusst nicht; wer
+  ein Dokument verschiebt, sieht es danach an derselben Stelle, und der Fokus
+  bleibt, wo er war.
+- **Löschen eines Projekts löscht keine Dokumente.** Sie stehen danach ohne
+  Projekt da (`ON DELETE SET NULL`); die Warnung sagt das, bevor man klickt.
+
+**Die Grenze zwischen Konten liegt in der Anwendung**, an einer Stelle
+(`lib/projekte`), mit Tests für fremdes Projekt, fremdes Dokument und
+Besucherdateien der Demo. Ein zusammengesetzter Fremdschlüssel hätte sie in
+die Datenbank gelegt, bräuchte aber `ON DELETE SET NULL (project_id)`, das
+die eingesetzte Drizzle-Fassung nicht kennt; `SET NULL` auf beide Spalten
+scheiterte an `user_id NOT NULL`.
+
+Ein Fehler beim Bauen, bevor er ausgeliefert war: Die Formulare banden die
+Grenzwerte aus dem Modul mit dem Datenbankzugriff ein — der Datenbanktreiber
+wäre im Bündel für den Browser gelandet. Grenzen und Typen stehen jetzt in
+einer eigenen Datei ohne Datenbank.
+
+## E41 — Angemeldet ein Bildschirm
+
+_22.09.2026._ Adams Befund: Angemeldet musste er «immer runterscrollen»; es
+soll passen, «dass ich nie scrollen muss».
+
+Ab Schreibtischbreite teilen sich Kopfzeile, Arbeitsfläche und eine schmale
+Fusszeile die Höhe des Bildschirms — in der Anwendung und in der Demo. Was
+länger ist als der Platz, rollt **in seinem Fenster**: der Verlauf, die
+Dokumentliste, die Tabelle der Aufrufe (mit stehenden Spaltenköpfen), der
+gelesene Text eines Dokuments. Die Seite selbst rollt nie; ein Browsertest
+misst das auf jeder Seite bei 1440 Pixeln.
+
+Schmal bleibt es beim Fliessen: Auf dem Telefon kosteten eine feste Kopf- und
+Fusszeile zu viel der wenigen Höhe. Die öffentlichen Textseiten — Impressum,
+Datenschutz, Barrierefreiheit — sind Dokumente und dürfen rollen.
