@@ -1,6 +1,7 @@
 'use client';
 
-import { PHASENTEXT, type Schritt } from './typen';
+import { useId, useState } from 'react';
+import { PHASENTEXT, type Lauf, type Schritt } from './typen';
 
 /*
  * **Keine erfundene Fortschrittsanzeige.**
@@ -14,12 +15,16 @@ import { PHASENTEXT, type Schritt } from './typen';
  */
 export function Schrittanzeige({ schritte, laeuft }: { schritte: Schritt[]; laeuft: boolean }) {
   if (schritte.length === 0) return null;
-
   return (
-    <ol
-      aria-live="polite"
-      className="flex max-w-[var(--mass)] flex-col gap-1 border-l border-kante-stark py-1 pl-4"
-    >
+    <div aria-live="polite">
+      <SchrittListe schritte={schritte} laeuft={laeuft} />
+    </div>
+  );
+}
+
+function SchrittListe({ schritte, laeuft }: { schritte: Schritt[]; laeuft: boolean }) {
+  return (
+    <ol className="flex max-w-[26rem] flex-col gap-1 border-l border-kante-stark py-1 pl-4">
       {schritte.map((schritt) => {
         const offen = schritt.dauerMs === null && laeuft;
         return (
@@ -29,11 +34,41 @@ export function Schrittanzeige({ schritte, laeuft }: { schritte: Schritt[]; laeu
               {offen && ' …'}
             </span>
             {schritt.dauerMs !== null && (
-              <span className="text-tinte-leise">{(schritt.dauerMs / 1000).toFixed(1)} s</span>
+              <span className="text-tinte-leise">{sekunden(schritt.dauerMs)}</span>
             )}
           </li>
         );
       })}
     </ol>
   );
+}
+
+/**
+ * Nach der Antwort klappt die Anzeige zu einer Zeile zusammen. Die Schritte
+ * bleiben einen Klick entfernt: Wer wissen will, wofür er gewartet hat, soll
+ * es nachsehen können, ohne dass es jede Antwort verlängert.
+ */
+export function SchrittZusammenfassung({ lauf }: { lauf: Lauf }) {
+  const [offen, setOffen] = useState(false);
+  const liste = useId();
+
+  return (
+    <>
+      <button
+        type="button"
+        aria-expanded={offen}
+        aria-controls={liste}
+        onClick={() => setOffen(!offen)}
+      >
+        Geprüft in {sekunden(lauf.wartezeitMs)}
+      </button>
+      <div id={liste} hidden={!offen} className="basis-full pb-2">
+        <SchrittListe schritte={lauf.schritte} laeuft={false} />
+      </div>
+    </>
+  );
+}
+
+function sekunden(ms: number): string {
+  return `${(ms / 1000).toFixed(1)} s`;
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { LoginForm } from './form';
 import { Kopf } from '../_teile/kopf';
+import { Licht } from '../_teile/licht';
 
 export const metadata: Metadata = { title: 'Anmelden – Evidarium' };
 
@@ -11,11 +12,13 @@ export const metadata: Metadata = { title: 'Anmelden – Evidarium' };
  * Seiten; vorher hatte sie keine.
  *
  * **Ohne Bewegung.** Eine Seite, die man oft sieht, darf nicht jedes Mal
- * etwas aufführen.
+ * etwas aufführen. Farbe ja: Das Beispielblatt ist ein belegtes Zitat, und
+ * das Licht der Seite steht in dessen Farbe — still.
  */
 export default function LoginPage() {
   return (
     <div className="flex flex-1 flex-col">
+      <Licht />
       <Kopf />
 
       <main
@@ -27,7 +30,11 @@ export default function LoginPage() {
           <LoginForm />
         </div>
 
-        <aside aria-label="Beispiel einer Fundstelle" className="flex flex-col gap-3">
+        <aside
+          aria-label="Beispiel einer Fundstelle"
+          data-urteil="belegt"
+          className="flex flex-col gap-3"
+        >
           <div className="blatt flex flex-col gap-3 p-5">
             <span className="flex items-baseline justify-between gap-4 border-b border-blatt-kante pb-2">
               <span className="text-blatt-leise">Supportprozess.pdf</span>

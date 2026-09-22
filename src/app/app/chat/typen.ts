@@ -5,10 +5,28 @@ export type StromZeile = { art: 'phase'; phase: Phase } | FrageErgebnis;
 
 export type Antwort = Extract<FrageErgebnis, { art: 'antwort' }>;
 
+/*
+ * Eine Antwort trägt ihre eigenen Schritte mit: Nach dem Durchlauf klappt
+ * die Anzeige zu einer Zeile zusammen, bleibt aber bei der Antwort, zu der
+ * sie gehört.
+ */
 export type Eintrag =
   | { id: string; art: 'frage'; text: string }
-  | { id: string; art: 'antwort'; antwort: Antwort }
-  | { id: string; art: 'hinweis'; ton: 'budget' | 'fehler' | 'leer'; nachricht: string };
+  | { id: string; art: 'antwort'; antwort: Antwort; lauf: Lauf }
+  | {
+      id: string;
+      art: 'hinweis';
+      ton: 'budget' | 'fehler' | 'leer';
+      nachricht: string;
+      lauf?: Lauf;
+    };
+
+/**
+ * Ein abgeschlossener Durchlauf: die Schritte und die ganze Wartezeit, vom
+ * Absenden bis zum Ergebnis. Die Summe der Schritte wäre kürzer — vor dem
+ * ersten Schritt liegt schon der Weg zum Server.
+ */
+export type Lauf = { schritte: Schritt[]; wartezeitMs: number };
 
 export type Dokument = { id: string; filename: string };
 
@@ -33,6 +51,14 @@ export const KATEGORIETEXT: Record<Antwort['kategorie'], string> = {
   teilweise_belegt: 'Teilweise belegt',
   keine_grundlage: 'Keine Grundlage in den Dokumenten',
   widerspruch: 'Widerspruch zwischen Quellen',
+};
+
+/** Kurzform für die Legende im leeren Chat. */
+export const KATEGORIEKURZ: Record<Antwort['kategorie'], string> = {
+  belegt: 'Belegt',
+  teilweise_belegt: 'Teilweise belegt',
+  keine_grundlage: 'Keine Grundlage',
+  widerspruch: 'Widerspruch',
 };
 
 /** Was die Kategorie bedeutet — einmal ausgeschrieben, nicht nur als Etikett. */

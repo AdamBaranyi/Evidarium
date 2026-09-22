@@ -1,0 +1,294 @@
+/*
+ * **Der Chat.**
+ *
+ * Bis zum 22.09.2026 stand hier ein Arbeitsplatz mit Formular: Beschriftung,
+ * Textfeld, Knopf. Adams Befund: «einfach ein Textfeld, nicht das heutige
+ * Chat-Interface». Zutreffend — die Belege waren gut, der Weg zur Frage war
+ * ein Formular von 2010.
+ *
+ * Übernommen wurde das Gerüst, das man heute von jedem Chat kennt, weil es
+ * sich bewährt hat: ein Eingabefeld unten, das mitwächst; die eigene Frage
+ * als Blase rechts; die Antwort links, ohne Blase; nur der Verlauf rollt.
+ * Nicht übernommen wurde das Material: Die Antwort bleibt Tinte auf der
+ * Fläche, der Beleg bleibt Papier. Radien nach Rolle — Fenster 10 px,
+ * Eingabe 14 px, Blase 18 px, Blatt 2 px —, nicht ein Radius für alles.
+ */
+
+/*
+ * Ab Schreibtischbreite füllt das Fenster den Bildschirm, und nur Verlauf
+ * und Seitenspalte rollen. Darunter fliesst die Seite, und die Eingabe
+ * klebt unten am Bildschirm.
+ *
+ * Die feste Höhe gilt nur für Seiten **mit** Chat (`:has`): Dokumente und
+ * Verbrauch teilen denselben Rahmen und sollen normal fliessen.
+ */
+@media (min-width: 64rem) {
+  /*
+   * `flex: none` gehört dazu: Der Rahmen ist selbst ein Flex-Kind mit
+   * `flex-1`, und in einer Flex-Spalte schlägt `flex-basis` die Höhe — er
+   * wurde sonst so hoch wie sein Inhalt, 1309 statt 900 px.
+   */
+  .seite-rahmen:has(.chat) {
+    flex: none;
+    height: 100dvh;
+  }
+
+  .seite-rahmen:has(.chat) main {
+    min-height: 0;
+  }
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 8rem);
+}
+
+.chat-rumpf {
+  display: grid;
+  flex: 1;
+  min-height: 0;
+}
+
+.chat-spalte {
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0;
+  padding: 1.1rem 1rem 1.25rem;
+  background: var(--flaeche);
+  border-bottom: 1px solid var(--kante);
+}
+
+.chat-haupt {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.chat-verlauf {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1.5rem 1.1rem 1rem;
+}
+
+/* Eine Spalte, mittig: Die Zeilenlänge bleibt lesbar, egal wie breit. */
+.chat-spur {
+  flex: none;
+  width: 100%;
+  max-width: 46rem;
+  margin-inline: auto;
+}
+
+/*
+ * Der leere Chat steht in der Mitte der Fläche, nicht oben an der Kante mit
+ * leerem Raum darunter. `margin-block: auto` statt `justify-content`: Ist
+ * der Inhalt höher als die Fläche, bleibt sein Anfang erreichbar.
+ */
+.chat-spur.ist-leer {
+  margin-block: auto;
+}
+
+@media (min-width: 64rem) {
+  .chat {
+    flex: 1;
+    min-height: 0;
+  }
+
+  /*
+   * `minmax(0, 1fr)` als Zeile: Ohne sie wächst die Rasterzeile mit dem
+   * Inhalt, das Fenster wird höher als der Bildschirm, und der Verlauf kann
+   * nie selbst rollen. Gefunden am 22.09.2026 — die zweite Antwort lag
+   * unsichtbar unter dem Eingabefeld.
+   */
+  .chat-rumpf {
+    grid-template-columns: 17.5rem minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .chat-spalte {
+    overflow-y: auto;
+    border-bottom: 0;
+    border-right: 1px solid var(--kante);
+  }
+
+  .chat-verlauf {
+    overflow-y: auto;
+    padding: 1.75rem 2rem 1.5rem;
+    scrollbar-gutter: stable;
+  }
+}
+
+/*
+ * **Die Eingabe.** Sie klebt unten; darüber läuft der Verlauf aus, statt
+ * hart abzuschneiden.
+ */
+.chat-unten {
+  position: sticky;
+  bottom: 0;
+  padding: 0 1rem 1rem;
+  background: var(--flaeche-hoch);
+  border-radius: 0 0 10px 10px;
+}
+
+.chat-unten::before {
+  content: '';
+  position: absolute;
+  inset: -1.5rem 0 100% 0;
+  background: linear-gradient(to top, var(--flaeche-hoch), transparent);
+  pointer-events: none;
+}
+
+.eingabe {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.8rem 0.6rem 0.6rem 1rem;
+  background: var(--flaeche-tief);
+  border: 1px solid var(--rand-bedienung);
+  border-radius: 14px;
+  transition: border-color var(--dauer-kurz) var(--ease-out);
+}
+
+/*
+ * Der Fokus liegt sichtbar auf dem **ganzen** Feld, nicht auf dem Textbereich
+ * darin: Der Ring um den Textbereich allein sähe aus wie ein Fehler im Feld.
+ *
+ * In leiser Tinte, nicht in voller: Das Feld hat fast immer den Fokus, und
+ * ein greller Ring wäre dann das Lauteste auf dem Bildschirm. Gegen Panel
+ * und Feld steht er trotzdem über 3:1 (WCAG 1.4.11).
+ */
+.eingabe:has(textarea:focus-visible) {
+  outline: 2px solid var(--tinte-leise);
+  outline-offset: 2px;
+}
+
+.eingabe textarea {
+  width: 100%;
+  min-height: 1.5em;
+  max-height: 12rem;
+  padding: 0.1rem 0.4rem 0 0;
+  border: 0;
+  background: transparent;
+  color: var(--tinte);
+  font: inherit;
+  font-size: var(--text-body);
+  line-height: var(--line-body);
+  resize: none;
+  overflow-y: auto;
+}
+
+.eingabe textarea:focus-visible {
+  outline: none;
+}
+
+.eingabe textarea::placeholder {
+  color: var(--tinte-leise);
+  opacity: 1;
+}
+
+.eingabe-leiste {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--tinte-leise);
+}
+
+/* Der Umfang nimmt den Platz; Hinweis und Knopf stehen rechts beisammen. */
+.eingabe-umfang {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Der Tastaturhinweis nur, wo es eine Tastatur mit Zeiger gibt. */
+.eingabe-tastatur {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .eingabe-tastatur {
+    display: inline;
+  }
+}
+
+.senden {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  background: var(--aktion-grund);
+  color: var(--aktion-tinte);
+  transition:
+    opacity var(--dauer-kurz) var(--ease-out),
+    transform var(--dauer-kurz) var(--ease-out);
+}
+
+/* Ein Knopf, der gedrückt wird, gibt nach — kurz, nicht federnd. */
+.senden:not(:disabled):active {
+  transform: scale(0.95);
+}
+
+.senden:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/*
+ * **Die eigene Frage** — die einzige Blase. Die Antwort bekommt keine: Sie
+ * ist kein Gesprächsbeitrag, sondern ein Befund mit Belegen.
+ */
+.frage-blase {
+  width: fit-content;
+  max-width: min(34rem, 88%);
+  margin-inline-start: auto;
+  padding: 0.6rem 1.05rem;
+  background: var(--flaeche-blase);
+  border: 1px solid var(--kante);
+  border-radius: 18px 18px 6px 18px;
+  font-size: var(--text-lead);
+  line-height: 1.4;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Der Punkt des Urteils — Farbe neben dem Wort, nie an seiner Stelle. */
+.urteil-punkt {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  flex: none;
+  border-radius: 50%;
+}
+
+.urteil-marke {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* Unter der Antwort: wie lange geprüft wurde, und Kopieren. */
+.antwort-fuss {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 1.25rem;
+  color: var(--tinte-leise);
+}
+
+.antwort-fuss button {
+  min-height: 2.75rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--kante-stark);
+  transition: color var(--dauer-kurz) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .antwort-fuss button:hover {
+    color: var(--tinte);
+  }
+}

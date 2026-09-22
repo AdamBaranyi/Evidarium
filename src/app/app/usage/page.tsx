@@ -35,70 +35,109 @@ export default async function VerbrauchPage() {
     fragenInSitzung(sitzungsKennung(cookie)),
   ]);
 
+  /*
+   * Zwei Fenster wie überall in der Anwendung: oben die drei Deckel
+   * nebeneinander, darunter die Aufrufe als echte Tabelle — Zeitpunkt,
+   * Modell, Token und Kosten sind Spalten, keine Sätze.
+   */
   return (
-    <main id="inhalt" className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-10">
-      <h1 className="text-xl leading-[var(--line-title)]">Verbrauch</h1>
-
-      <p className="text-tinte-leise">
-        Alle Beträge sind Schätzungen nach der hinterlegten Preisliste vom {PREISSTAND} in{' '}
-        {WAEHRUNG}. Der Anbieter rechnet nach eigenen Regeln ab; zwischengespeicherte Eingaben
-        kosten weniger.
-      </p>
-
-      <section className="flex max-w-[var(--mass-blatt)] flex-col gap-5 panel p-5">
-        <h2 className="text-lg leading-tight">Deckel</h2>
-        <Balken
-          name="Heute"
-          wert={stand.tagUsd}
-          grenze={stand.tagGrenzeUsd}
-          text={`${stand.tagUsd.toFixed(4)} von ${stand.tagGrenzeUsd.toFixed(2)} USD`}
-        />
-        <Balken
-          name="Diesen Monat"
-          wert={stand.monatUsd}
-          grenze={stand.monatGrenzeUsd}
-          text={`${stand.monatUsd.toFixed(4)} von ${stand.monatGrenzeUsd.toFixed(2)} USD`}
-        />
-        <Balken
-          name="Diese Anmeldung"
-          wert={gestellt}
-          grenze={env.FRAGEN_JE_SITZUNG}
-          text={`${gestellt} von ${env.FRAGEN_JE_SITZUNG} Fragen`}
-        />
+    <main id="inhalt" className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-5 sm:px-6">
+      <section aria-labelledby="verbrauch-titel" className="panel overflow-hidden">
+        <div className="panel-leiste min-h-[3.25rem] items-center py-1">
+          <h1 id="verbrauch-titel" className="text-tinte">
+            Verbrauch
+          </h1>
+          <span className="me-auto">
+            Schätzung in {WAEHRUNG}, Preisliste vom {PREISSTAND}
+          </span>
+        </div>
+        <div className="grid gap-6 p-5 md:grid-cols-3">
+          <Balken
+            name="Heute"
+            wert={stand.tagUsd}
+            grenze={stand.tagGrenzeUsd}
+            text={`${stand.tagUsd.toFixed(4)} von ${stand.tagGrenzeUsd.toFixed(2)} USD`}
+          />
+          <Balken
+            name="Diesen Monat"
+            wert={stand.monatUsd}
+            grenze={stand.monatGrenzeUsd}
+            text={`${stand.monatUsd.toFixed(4)} von ${stand.monatGrenzeUsd.toFixed(2)} USD`}
+          />
+          <Balken
+            name="Diese Anmeldung"
+            wert={gestellt}
+            grenze={env.FRAGEN_JE_SITZUNG}
+            text={`${gestellt} von ${env.FRAGEN_JE_SITZUNG} Fragen`}
+          />
+        </div>
       </section>
 
-      <section className="flex flex-col gap-3">
-        <h2 className="text-lg leading-tight">Letzte Aufrufe</h2>
+      <section aria-labelledby="aufrufe-titel" className="panel overflow-hidden">
+        <div className="panel-leiste min-h-[3.25rem] items-center py-1">
+          <h2 id="aufrufe-titel" className="text-tinte">
+            Letzte Aufrufe
+          </h2>
+          <span className="me-auto">{protokoll.length}</span>
+        </div>
 
         {protokoll.length === 0 ? (
-          <p className="text-tinte-leise">
+          <p className="p-5 text-tinte-leise">
             Noch kein Aufruf. Im Demo-Modus entsteht kein Eintrag – es wird kein Modell gefragt.
           </p>
         ) : (
-          <ul className="flex max-w-[var(--mass-blatt)] flex-col gap-3">
-            {protokoll.map((zeile) => (
-              <li
-                key={zeile.id}
-                className="flex flex-col gap-1 border-b border-kante pb-3 last:border-b-0"
-              >
-                <p className="flex flex-wrap justify-between gap-x-6">
-                  <span>{zeile.createdAt.toLocaleString('de-CH')}</span>
-                  <span className="text-tinte-leise">{zeile.kostenUsd.toFixed(6)} USD</span>
-                </p>
-                <p className="text-tinte-leise">
-                  {zeile.modell}, {STATUSTEXT[zeile.status] ?? zeile.status}.{' '}
-                  {zeile.eingabeTokens === null
-                    ? 'Keine Messwerte.'
-                    : `${zeile.eingabeTokens.toLocaleString('de-CH')} Token gelesen, ${(
-                        zeile.ausgabeTokens ?? 0
-                      ).toLocaleString('de-CH')} geschrieben.`}{' '}
-                  Preisstand {zeile.preisstand}.
-                </p>
-              </li>
-            ))}
-          </ul>
+          /*
+           * Schmal rollt die Tabelle seitlich. Ein rollbarer Bereich muss mit
+           * der Tastatur erreichbar sein (WCAG 2.1.1, axe
+           * `scrollable-region-focusable`) — darum `tabIndex` an einer Region,
+           * was die Lint-Regel sonst zu Recht verbietet.
+           */
+          <div
+            role="region"
+            aria-labelledby="aufrufe-titel"
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+            tabIndex={0}
+            className="overflow-x-auto"
+          >
+            <table className="aufrufe">
+              <thead>
+                <tr>
+                  <th scope="col">Zeitpunkt</th>
+                  <th scope="col">Modell</th>
+                  <th scope="col">Stand</th>
+                  <th scope="col" className="zahl">
+                    Gelesen
+                  </th>
+                  <th scope="col" className="zahl">
+                    Geschrieben
+                  </th>
+                  <th scope="col" className="zahl">
+                    Kosten
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {protokoll.map((zeile) => (
+                  <tr key={zeile.id}>
+                    <td>{zeile.createdAt.toLocaleString('de-CH')}</td>
+                    <td>{zeile.modell}</td>
+                    <td>{STATUSTEXT[zeile.status] ?? zeile.status}</td>
+                    <td className="zahl">{zeile.eingabeTokens?.toLocaleString('de-CH') ?? '–'}</td>
+                    <td className="zahl">{zeile.ausgabeTokens?.toLocaleString('de-CH') ?? '–'}</td>
+                    <td className="zahl">{zeile.kostenUsd.toFixed(6)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
+
+      <p className="max-w-[var(--mass)] text-tinte-leise">
+        Alle Beträge sind Schätzungen. Der Anbieter rechnet nach eigenen Regeln ab;
+        zwischengespeicherte Eingaben kosten weniger. Jede Zeile ist nach dem Preisstand ihres
+        Aufrufs gerechnet.
+      </p>
     </main>
   );
 }

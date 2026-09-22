@@ -77,6 +77,8 @@
   --flaeche: #23211e;
   --flaeche-tief: #1b1916;
   --flaeche-hoch: #2b2823;
+  /* Die eigene Frage im Chat: eine Stufe heller als das Panel, auf dem sie steht. */
+  --flaeche-blase: #38342d;
   --tinte: #ece8e1;
   --tinte-leise: #aaa49a;
   --kante: #3a362f;
@@ -134,6 +136,7 @@
     --flaeche: #d7d2c7;
     --flaeche-tief: #cbc5b8;
     --flaeche-hoch: #e0dbd1;
+    --flaeche-blase: #eeebe4;
     --tinte: #23211e;
     --tinte-leise: #57524a;
     --kante: #b8b2a4;

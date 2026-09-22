@@ -1,0 +1,184 @@
+/*
+ * **Das Urteilslicht.**
+ *
+ * Adam wünschte sich am 22.09.2026 einen bewegten Hintergrund mit
+ * Farbverläufen. Die naheliegende Fassung — ein farbiger Schein, der hinter
+ * dem Produktfenster wabert — ist der «Linear-Glow», den `avoid-ai-design`
+ * als kopierten Effekt führt: Atmosphäre ohne Grund.
+ *
+ * Hier hat das Licht einen Grund. Es gibt eine warme Lampe, die immer
+ * brennt, und farbiges Licht, das nur kommt, wenn **ein Urteil dasteht** —
+ * in dessen Farbe. Grün bei «belegt». Beim Widerspruch zwei Lichter von zwei
+ * Seiten, rot und bernstein: zwei Quellen, die sich nicht einigen. Bei
+ * «keine Grundlage» kein Farblicht, die Lampe wird schwächer. Damit bleibt
+ * die Regel aus E32 stehen: Farbe gibt es nur für das Urteil.
+ *
+ * Wer das Urteil liefert, ist gleich: Jedes Element mit `data-urteil` auf
+ * der Seite — die Vorführung auf der Startseite, der Chat in der Demo.
+ *
+ * Bewegung nur auf der Startseite (`.licht-bewegt`), sehr langsam, und sie
+ * steht mit der Vorführung still: Deren Knopf «Anhalten» gilt auch für das
+ * Licht (WCAG 2.2.2). Anderswo wechselt das Licht nur, wenn jemand etwas
+ * getan hat — eine Frage gestellt.
+ */
+
+.licht {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+
+  --licht-staerke: 34%;
+  --licht-lampe: rgb(255 236 204 / 0.12);
+}
+
+@media (prefers-color-scheme: light) {
+  .licht {
+    /* Auf hellem Tisch trägt Farbe schneller; weniger davon. */
+    --licht-staerke: 20%;
+    --licht-lampe: rgb(255 255 255 / 0.55);
+  }
+}
+
+.licht span {
+  position: absolute;
+  width: 84vmax;
+  height: 84vmax;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 1400ms var(--ease-out);
+}
+
+.licht .licht-lampe {
+  top: -52vmax;
+  left: -34vmax;
+  opacity: 1;
+  background: radial-gradient(closest-side, var(--licht-lampe), transparent);
+}
+
+.licht-belegt {
+  bottom: -46vmax;
+  left: -16vmax;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklab, var(--urteil-belegt) var(--licht-staerke), transparent),
+    transparent
+  );
+}
+
+.licht-teilweise {
+  bottom: -48vmax;
+  right: -22vmax;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklab, var(--urteil-teilweise) var(--licht-staerke), transparent),
+    transparent
+  );
+}
+
+.licht-widerspruch-a {
+  top: 14vh;
+  left: -46vmax;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklab, var(--urteil-widerspruch) var(--licht-staerke), transparent),
+    transparent
+  );
+}
+
+.licht-widerspruch-b {
+  top: -4vh;
+  right: -46vmax;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklab, var(--urteil-teilweise) var(--licht-staerke), transparent),
+    transparent
+  );
+}
+
+/* Welches Licht angeht, entscheidet das Urteil auf der Seite. */
+body:has([data-urteil='belegt']) .licht-belegt,
+body:has([data-urteil='teilweise_belegt']) .licht-teilweise,
+body:has([data-urteil='widerspruch']) .licht-widerspruch-a,
+body:has([data-urteil='widerspruch']) .licht-widerspruch-b {
+  opacity: 1;
+}
+
+body:has([data-urteil='keine_grundlage']) .licht .licht-lampe {
+  opacity: 0.45;
+}
+
+/*
+ * Feines Korn gegen Streifen: Weiche Verläufe auf dunklem Grund zerfallen
+ * sonst in sichtbare Stufen. Als Bild aus `data:`, das die CSP erlaubt.
+ */
+.licht::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='k'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23k)'/%3E%3C/svg%3E");
+}
+
+/*
+ * **Bewegung, nur auf der Startseite.** Jedes Licht driftet auf eigener
+ * Bahn und in eigener Dauer — 38 bis 53 Sekunden, Primzahlen nahe, damit
+ * sich das Bild nie erkennbar wiederholt. Wenige Prozent Weg: Man sieht es
+ * nicht arbeiten, man merkt nur, dass der Raum nicht steht.
+ */
+.licht-bewegt .licht-lampe {
+  animation: licht-lampe 43s var(--ease-in-out) infinite alternate;
+}
+
+.licht-bewegt .licht-belegt,
+.licht-bewegt .licht-teilweise {
+  animation: licht-drift-a 38s var(--ease-in-out) infinite alternate;
+}
+
+.licht-bewegt .licht-widerspruch-a {
+  animation: licht-drift-b 47s var(--ease-in-out) infinite alternate;
+}
+
+.licht-bewegt .licht-widerspruch-b {
+  animation: licht-drift-a 53s var(--ease-in-out) infinite alternate-reverse;
+}
+
+@keyframes licht-lampe {
+  to {
+    translate: 7vmax 5vmax;
+    scale: 1.08;
+  }
+}
+
+@keyframes licht-drift-a {
+  to {
+    translate: 9vmax -6vmax;
+    scale: 1.12;
+  }
+}
+
+@keyframes licht-drift-b {
+  to {
+    translate: 6vmax 8vmax;
+    scale: 0.94;
+  }
+}
+
+/* Angehalten heisst: auch das Licht steht. */
+body:has(.vorfuehrung.steht) .licht span {
+  animation-play-state: paused;
+}
+
+/*
+ * Ohne Bewegung heisst ohne Bewegung. Der Selektor muss mindestens so
+ * spezifisch sein wie die Regeln oben — die erste Fassung (`.licht span`)
+ * verlor gegen `.licht-bewegt .licht-lampe`, und das Licht trieb trotz
+ * «Bewegung reduzieren» weiter. Gefunden vom axe-Test, der unendliche
+ * Animationen nicht beenden kann.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .licht.licht-bewegt span {
+    animation: none;
+  }
+}

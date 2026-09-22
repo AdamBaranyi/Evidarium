@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { demoBereit } from '@/lib/demo/korpus';
 import { Vorfuehrung } from './start/vorfuehrung';
 import { Kopf } from './_teile/kopf';
+import { Licht } from './_teile/licht';
 
 // Ob die Demo bereitsteht, entscheidet sich am Korpus in der Datenbank.
 export const dynamic = 'force-dynamic';
@@ -20,6 +21,7 @@ export default async function StartPage() {
 
   return (
     <div className="flex flex-1 flex-col overflow-x-clip">
+      <Licht bewegt />
       <Kopf>
         <Link href="/login" className="ms-auto underline underline-offset-4">
           Anmelden

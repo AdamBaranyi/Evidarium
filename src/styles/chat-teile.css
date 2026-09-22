@@ -1,0 +1,155 @@
+/*
+ * Teile des Chats ausserhalb des Verlaufs: die Einstiegsfragen und die
+ * Legende im leeren Chat, der Knopf für eigene Dateien in der Seitenspalte.
+ * Eigene Datei, damit `chat.css` unter 400 Zeilen bleibt.
+ */
+
+/*
+ * **Die Einstiegsfragen**: eine Liste mit Linien, keine Kachelreihe. Es
+ * sind vier Prüffälle aus der Evaluation, und rechts steht, was an jedem
+ * besonders ist.
+ */
+.vorschlaege {
+  border-top: 1px solid var(--kante);
+}
+
+/*
+ * Frage links, Besonderheit rechts in fester Spalte — so steht jede Zeile
+ * gleich, egal wie lang die Frage ist. Schmal untereinander.
+ */
+.vorschlag {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.15rem 1.5rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.9rem 0.5rem;
+  border-bottom: 1px solid var(--kante);
+  text-align: left;
+  transition: background-color var(--dauer-kurz) var(--ease-out);
+}
+
+.vorschlag-frage {
+  font-size: var(--text-lead);
+  line-height: 1.35;
+}
+
+.vorschlag-fall {
+  color: var(--tinte-leise);
+}
+
+@media (min-width: 40rem) {
+  .vorschlag {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 14rem);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .vorschlag:hover {
+    background: var(--flaeche-blase);
+  }
+}
+
+.vorschlag:active {
+  background: var(--flaeche-blase);
+}
+
+/* Die Legende der vier Urteile, im leeren Chat. */
+.legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.4rem;
+  color: var(--tinte-leise);
+}
+
+.legende li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/*
+ * **Eigene Dateien**: Das Dateifeld selbst ist unsichtbar, aber da — die
+ * Tastatur erreicht es, und die Beschriftung daneben ist der Knopf. Der
+ * eingebaute Knopf spricht die Sprache des Browsers («Choose File») und
+ * nicht die der Seite.
+ */
+.datei-knopf {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border: 1px dashed var(--rand-bedienung);
+  border-radius: 10px;
+  cursor: pointer;
+  transition:
+    background-color var(--dauer-kurz) var(--ease-out),
+    border-color var(--dauer-kurz) var(--ease-out);
+}
+
+.datei-feld:focus-visible + .datei-knopf {
+  outline: 2px solid var(--tinte);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .datei-knopf:hover {
+    background: var(--flaeche-hoch);
+    border-color: var(--tinte-leise);
+  }
+}
+
+.datei-feld:disabled + .datei-knopf {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+/*
+ * **Die Dokumentliste**: Zeilen mit Linien in einem Fenster statt einer
+ * Kartenreihe. Rechts der Stand, damit man ihn beim Überfliegen findet.
+ */
+.dokument-zeile {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.25rem 1.5rem;
+  padding: 0.9rem 1.1rem;
+  border-top: 1px solid var(--kante);
+}
+
+.dokument-liste > .dokument-zeile:first-child {
+  border-top: 0;
+}
+
+@media (min-width: 40rem) {
+  .dokument-zeile {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+  }
+}
+
+/* **Die Aufrufe** auf der Verbrauchsseite: eine echte Tabelle, Zahlen rechts. */
+.aufrufe {
+  width: 100%;
+  min-width: 44rem;
+  border-collapse: collapse;
+}
+
+.aufrufe th,
+.aufrufe td {
+  padding: 0.65rem 1.1rem;
+  border-top: 1px solid var(--kante);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.aufrufe th {
+  border-top: 0;
+  color: var(--tinte-leise);
+  font-weight: normal;
+}
+
+.aufrufe .zahl {
+  text-align: right;
+}

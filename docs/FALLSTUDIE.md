@@ -286,8 +286,9 @@ Rate-Limit in der Datenbank. Drei Schwachstellen der Stufe «hoch» wurden
 behoben statt ausgenommen; eine vierte war befristet ausgenommen, mit Datum
 und Begründung, weil ihr Fix an der eigenen Wartezeit scheiterte.
 
-**Zahlen:** 103 automatische Tests, 39 Browserprüfungen auf 320, 768 und 1440
-Pixeln, 35 nummerierte und begründete Entscheidungen. Keine Datei über 400
+**Zahlen:** 118 automatische Tests, 334 Browserprüfungen in Chromium, Firefox
+und Safari, auf 320, 768 und 1440 Pixeln und einem iPhone, 39 nummerierte und
+begründete Entscheidungen. Keine Datei über 400
 Zeilen, keine Schrift unter 16 Pixeln — beides wird in der CI erzwungen.
 
 Die Abnahmeliste steht im Repository mit dem, **wodurch** jeder Punkt

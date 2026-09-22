@@ -123,3 +123,21 @@ Messung auf vps1) — sie gehören zum Betrieb und kommen mit dem Deployment.
 - Herkunftsprüfung, Sitzung serverseitig, Argon2id, Rate-Limit; ein defekter Hash (Demo-Konto) gibt sauber «falsch» zurück statt eines Fehlers
 - Budget mit Reservierung, drei Deckel, Parallelitätstest
 - Belegprüfung, Evaluation, Injektionstests
+
+## Nachtrag 22.09.2026 — drei Engines, angemeldeter Bereich
+
+Die Browsertests laufen jetzt auch in Firefox, in Safari (WebKit) und auf
+einem iPhone, dazu erstmals im angemeldeten Bereich (Fragen, Dokumente,
+Verbrauch). Drei Befunde, alle behoben und durch Tests festgehalten:
+
+| Befund                                                                                                                                                                                        | Behoben durch                                                                       |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Safari lud den Produktionsbuild auf `http://localhost` ohne CSS und Skripte: `upgrade-insecure-requests` schreibt dort auch localhost um                                                      | Direktive nur bei `https`-Herkunft (E37)                                            |
+| Das Hintergrundlicht bewegte sich trotz «Bewegung reduzieren»: Die Regel dafür war weniger spezifisch als die Animationsregel                                                                 | spezifischerer Selektor, Test «Vorführung lässt sich anhalten» prüft auch das Licht |
+| «Bewegung reduzieren» gab mit `transition-duration: 0.01ms` jedem Element einen Übergang auf jede Eigenschaft; nach einem Wechsel des Farbschemas stand kurz dunkle Schrift auf dunklem Grund | `0s` statt `0.01ms`, axe-Prüfung mit Antwort in beiden Schemata, wiederholt         |
+
+Zwei Befunde lagen in der Testumgebung selbst, nicht in der Anwendung: Der
+Prüfserver lief auf Port 3200 mit `APP_ORIGIN` auf 3100 — die Herkunftsprüfung
+lehnte Fragen darum ab, und zwei Zugriffstests bestanden nur deshalb, weil
+sie 3100 fest eingetragen hatten. Beides zieht die Adresse jetzt aus dem
+Prüfserver.

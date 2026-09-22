@@ -143,43 +143,41 @@ Nicht «erledigt», sondern **wodurch nachprüfbar**. Punkte, die nur einmal von
 Hand vorgeführt wurden, stehen auch so da: Das galt an einem Tag, auf einem
 Rechner.
 
-| Punkt aus Abschnitt 14 des Masterprompts                      | Belegt durch                                                          |
-| ------------------------------------------------------------- | --------------------------------------------------------------------- |
-| Ganzer Weg bis zum anklickbaren Beleg, im Live-Modus          | einmal vorgeführt 17.09., Protokoll `docs/EVALUATION.md`              |
-| Zweiter Benutzer sieht nichts vom ersten, auch per API        | `tests/suche.test.ts`, `tests/abnahme.test.ts`, `e2e/zugriff.spec.ts` |
-| Wiederholte Jobs erzeugen keine doppelten Abschnitte          | `tests/abnahme.test.ts`                                               |
-| Löschen entfernt auch Ableitungen                             | `tests/loeschen.test.ts`                                              |
-| Zitate verweisen auf echte Seiten, keine erfundenen Metadaten | `tests/belegpruefung.test.ts`, Evaluation                             |
-| Prompt Injection löst nichts aus                              | Evaluation, zwei Versuche (markiert und unmarkiert)                   |
-| Kein Providerfehler aktiviert den Demo-Adapter                | `tests/abnahme.test.ts`, Code ohne Rückfallpfad                       |
-| Paralleles Senden überzieht das Budget nicht                  | `tests/budget.test.ts`                                                |
-| Nicht angemeldet kein Upload, auch per API                    | `e2e/zugriff.spec.ts`                                                 |
-| Sitzung, Tag und Monat greifen unabhängig                     | `tests/budget.test.ts`, `tests/abnahme.test.ts`                       |
-| Schlüssel taucht nirgends auf                                 | `tests/abnahme.test.ts`, gitleaks im täglichen Lauf                   |
-| Hauptablauf bei 320, 768, 1440                                | 39 Playwright-Prüfungen, auch in der CI                               |
-| Keine Datei über 400 Zeilen, Format, Lint, Typen              | `bun run verify`, CI                                                  |
-| Täglicher Sicherheitslauf grün oder begründete Ausnahme       | `.github/workflows/sicherheit-taeglich.yml`                           |
+| Punkt aus Abschnitt 14 des Masterprompts                      | Belegt durch                                                                             |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Ganzer Weg bis zum anklickbaren Beleg, im Live-Modus          | einmal vorgeführt 17.09., Protokoll `docs/EVALUATION.md`                                 |
+| Zweiter Benutzer sieht nichts vom ersten, auch per API        | `tests/suche.test.ts`, `tests/abnahme.test.ts`, `e2e/zugriff.spec.ts`                    |
+| Wiederholte Jobs erzeugen keine doppelten Abschnitte          | `tests/abnahme.test.ts`                                                                  |
+| Löschen entfernt auch Ableitungen                             | `tests/loeschen.test.ts`                                                                 |
+| Zitate verweisen auf echte Seiten, keine erfundenen Metadaten | `tests/belegpruefung.test.ts`, Evaluation                                                |
+| Prompt Injection löst nichts aus                              | Evaluation, zwei Versuche (markiert und unmarkiert)                                      |
+| Kein Providerfehler aktiviert den Demo-Adapter                | `tests/abnahme.test.ts`, Code ohne Rückfallpfad                                          |
+| Paralleles Senden überzieht das Budget nicht                  | `tests/budget.test.ts`                                                                   |
+| Nicht angemeldet kein Upload, auch per API                    | `e2e/zugriff.spec.ts`                                                                    |
+| Sitzung, Tag und Monat greifen unabhängig                     | `tests/budget.test.ts`, `tests/abnahme.test.ts`                                          |
+| Schlüssel taucht nirgends auf                                 | `tests/abnahme.test.ts`, gitleaks im täglichen Lauf                                      |
+| Hauptablauf bei 320, 768, 1440                                | 334 Playwright-Prüfungen in Chromium, Firefox, Safari und auf dem iPhone, auch in der CI |
+| Keine Datei über 400 Zeilen, Format, Lint, Typen              | `bun run verify`, CI                                                                     |
+| Täglicher Sicherheitslauf grün oder begründete Ausnahme       | `.github/workflows/sicherheit-taeglich.yml`                                              |
 
 **Offen:** Messung von Antwort- und Retrievalzeit auf vps1. Die Zahlen in
 `docs/BETRIEB.md` stammen vom Entwicklungsrechner und sagen darüber nichts.
 
-## Nach Tag 5 — Visuelle Identität
+## Gestaltung
 
-Entscheid vom 17.09.2026: **Das Design ist Rohbau und bleibt es bis nach
-Tag 5.** Erst Evaluation, Injektionstest, Demo, Fallstudie und Deployment;
-danach ein eigener Durchgang für eigene Farbe, eigene Schrift, eigenes Raster.
+Stand 22.09.2026, Entscheide E30 bis E33 und E38, E39:
 
-Was dabei gilt und was nicht:
-
-- Die **Regel** steht schon: Farbe ist dem Beleg vorbehalten, Knöpfe tragen
-  Tinte. Der **Wert** `--beleg: #0a6b5d` ist ein Platzhalter.
-- **Kein KI-Standard**: kein Verlauf-Violett, keine Glaskarten, keine
-  generischen Icon-Reihen. Ein Prüflauf gegen diese Merkmale gehört dazu.
-- Die **Anmeldeseite soll leben** und nicht nur ein Formular sein. Sparsam und
-  selbst gebaut, inhaltlich begründet statt dekorativ.
-- Kein Gewand von einem anderen Portfolio-Projekt übernehmen. Zwei Apps im
-  selben Kleid sehen nach Vorlage aus.
-- Die 16-px-Untergrenze und die drei Prüfbreiten gelten unverändert weiter.
+- **Das Blatt:** matte Arbeitsfläche, Belege als Papier — das einzige helle
+  Material. Archivo für die Anwendung, Source Serif 4 für das Dokument.
+- **Farbe nur für das Urteil:** belegt, teilweise, keine Grundlage,
+  Widerspruch. Neben jeder Farbe steht das Wort.
+- **Chat wie ein heutiger Chat** (E38): Eingabefeld unten, eigene Frage als
+  Blase, Antwort ohne Blase, nur der Verlauf rollt, Einstiegsfragen aus der
+  Evaluation im leeren Chat.
+- **Urteilslicht** (E39): Der Hintergrund von Startseite, Demo und Anmeldung
+  nimmt die Farbe des Urteils an. Bewegt nur auf der Startseite, mit dem
+  Knopf «Anhalten».
+- Offen: Durchsicht mit Adam; danach drei Bildschirmfotos für die Fallstudie.
 
 ## Aufgefallen
 

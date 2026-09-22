@@ -685,3 +685,100 @@ Die Rechtsseiten beschreiben, was der Code tut, und ziehen Fristen aus
 denselben Konstanten. Der Abschnitt über Anthropic erscheint nur im
 Live-Modus: Eine Erklärung, die eine Übermittlung beschreibt, die gar nicht
 stattfindet, wäre ebenso falsch wie eine, die sie verschweigt.
+
+## E37 — Drei Engines statt einer
+
+_22.09.2026._ Die Browsertests liefen bis hier nur in Chromium. Seit heute
+laufen sie zusätzlich in Firefox, in Safari (WebKit) am Schreibtisch und als
+iPhone mit Touch, lokal wie in der CI.
+
+Firefox bestand alles auf Anhieb. **WebKit fiel in 49 von 117 Prüfungen
+durch — fast alle aus einem einzigen Grund:** Die CSP enthielt im
+Produktionsbuild `upgrade-insecure-requests`. Chrome und Firefox nehmen
+`http://localhost` davon aus, Safari nicht: Es schrieb jede Anfrage auf
+https um, und die Seite stand ohne CSS und ohne Skripte da. Auf dem Server
+mit https hätte das nie jemand bemerkt — beim lokalen Prüfen in Safari
+schon. Die Direktive steht jetzt nur, wenn `APP_ORIGIN` mit https beginnt.
+
+Zwei Anpassungen an den Tests selbst, keine an der Anwendung: Safari
+erreicht Links mit der Tabulatortaste erst mit Wahl-Tab (oder nach einer
+Einstellung), und im mobilen WebKit gibt es kein Mausrad.
+
+## E38 — Der Chat sieht aus wie ein Chat
+
+_22.09.2026._ Adams Befund am angemeldeten Chat: rechts «ziemlich leer», und
+das Eingabefeld «einfach ein Textfeld, nicht das heutige Chat-Interface».
+Zutreffend. Die Antworten mit ihren Belegblättern waren gut; der Weg dorthin
+war ein Formular: Beschriftung, Textfeld, Knopf darunter.
+
+Übernommen wurde das Gerüst, das man heute von jedem Chat kennt, weil es sich
+bewährt hat:
+
+- **Ein Eingabefeld unten**, das mitwächst, mit rundem Senden-Knopf. Enter
+  sendet, Umschalt+Enter macht eine neue Zeile — am Telefon nicht, dort ist
+  Enter der einzige Weg zum Zeilenumbruch.
+- **Die eigene Frage als Blase rechts**, die Antwort links ohne Blase. Die
+  Antwort ist kein Gesprächsbeitrag, sondern ein Befund mit Belegen.
+- **Nur der Verlauf rollt**; Kopfzeile, Seitenspalte und Eingabe bleiben
+  stehen. Schmal fliesst die Seite, und die Eingabe klebt unten.
+- **Die Schritte klappen nach der Antwort** zu «Geprüft in 3.4 s» zusammen
+  und bleiben einen Klick entfernt. Gemessen wird jetzt ab dem Absenden —
+  davor liegt schon der Weg zum Server, und gewartet wird auch dann.
+- **Kopieren** nimmt die Belege mit. Eine Aussage aus Evidarium ohne ihre
+  Quelle wäre genau das, was das Produkt vermeiden will.
+
+**Der leere Chat erklärt, was man tun kann.** In der Demo stehen vier
+Einstiegsfragen, je ein Prüffall aus der Evaluation: belegt, Widerspruch,
+keine Grundlage, untergeschobene Anweisung. Rechts daneben steht, **was an
+dem Fall besonders ist** — nicht, welches Urteil herauskommt. Das Urteil
+hängt am Modell, und ohne Schlüssel antwortet der Demo-Adapter immer mit
+«teilweise belegt». Eine Vorhersage wäre dann falsch; die Beschreibung des
+Falls stimmt in beiden Betriebsarten. Darunter die vier Urteile als Legende —
+die einzige Stelle, an der alle vier Farben nebeneinander stehen.
+
+**Nicht übernommen:** der Anhängen-Knopf im Eingabefeld. In einem Chat hängt
+eine Datei an einer Nachricht; hier wird sie Teil der Sammlung, die
+durchsucht wird. Sie gehört darum in die Seitenspalte, zu den Dokumenten.
+Dort ersetzt ein eigener Knopf das Dateifeld des Browsers, das auf einer
+deutschen Seite «Choose File» sagte.
+
+**Weggefallen:** der farbige Balken links an der Antwort. Ein farbiger
+Randstreifen gilt laut `avoid-ai-design` als eines der verlässlichsten
+Zeichen generierter Oberflächen — und er sagte nichts, was der Punkt vor dem
+Urteil nicht auch sagt. Dasselbe in der Vorführung.
+
+**Zwei Fehler beim Bauen, beide erst beim Hinsehen gefunden:** Die
+Rasterzeile wuchs mit dem Inhalt, weil ihr `minmax(0, 1fr)` fehlte; und der
+Seitenrahmen blieb 1309 statt 900 px hoch, weil in einer Flex-Spalte
+`flex-basis` die Höhe schlägt. Beide Male lag die zweite Antwort unsichtbar
+unter dem Eingabefeld.
+
+## E39 — Das Urteilslicht
+
+_22.09.2026._ Adam wünschte sich einen bewegten Hintergrund mit
+Farbverläufen, anders als der Nebel bei Tallyroom. Die naheliegende Fassung —
+ein farbiger Schein, der hinter dem Produktfenster wabert — führt
+`avoid-ai-design` als kopierten «Linear-Glow»: Atmosphäre ohne Grund.
+
+Hier hat das Licht einen Grund. Eine warme Lampe brennt immer; **farbiges
+Licht kommt nur, wenn ein Urteil dasteht**, und in dessen Farbe. Grün bei
+«belegt». Beim Widerspruch zwei Lichter von zwei Seiten, rot und bernstein —
+zwei Quellen, die sich nicht einigen. Bei «keine Grundlage» kein Farblicht,
+die Lampe wird schwächer. Die Regel aus E32 bleibt damit stehen: Farbe gibt es
+nur für das Urteil.
+
+Die Quelle des Urteils ist gleich, wo immer sie steht: jedes Element mit
+`data-urteil`. Auf der Startseite folgt das Licht der Vorführung, in der Demo
+der letzten Antwort, auf der Anmeldung dem Beispielblatt. Verbunden über
+`body:has([data-urteil=…])`, ohne Zustand und ohne Skript.
+
+**Bewegung nur auf der Startseite**, sehr langsam (38 bis 53 Sekunden je
+Bahn), und sie steht mit der Vorführung still: Deren Knopf «Anhalten» gilt
+auch für das Licht (WCAG 2.2.2). Die Anmeldung bleibt ruhig, wie in E30
+festgelegt — Farbe ja, Aufführung nein. In der Anwendung selbst gibt es kein
+Urteilslicht; eine Arbeitsfläche soll nicht auf jede Antwort reagieren.
+
+Umgesetzt in CSS: radiale Verläufe aus `color-mix` mit den Urteilsfarben,
+Übergänge über die Deckkraft, feines Korn gegen Streifen auf dunklem Grund.
+Kein WebGL wie bei Tallyroom — zwei Portfolio-Anwendungen mit demselben
+Effekt sähen nach Vorlage aus.

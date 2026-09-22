@@ -33,6 +33,11 @@ export const FEHLER_TEXT: Record<string, string> = {
   unerwartet: 'Beim Verarbeiten ist ein unerwarteter Fehler aufgetreten.',
 };
 
+/** Noch in der Verarbeitung — die Seite lädt dann selbst nach. */
+export function inArbeit(status: string | null): boolean {
+  return status !== null && status !== 'ready' && status !== 'failed';
+}
+
 export function statusText(status: string | null): string {
   if (status === null) return 'Unbekannt';
   return STATUS_TEXT[status] ?? status;

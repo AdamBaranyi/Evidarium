@@ -8,7 +8,7 @@ import { Kopf } from '../_teile/kopf';
  */
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="seite-rahmen flex flex-1 flex-col">
       <Kopf ziel="/app/chat">
         <nav aria-label="Hauptnavigation" className="flex flex-wrap items-baseline gap-x-7 gap-y-2">
           <Link href="/app/chat" className="underline underline-offset-4">

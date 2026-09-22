@@ -72,7 +72,15 @@ export function Vorfuehrung() {
   const geht = !steht && t >= TAKT.verblassen;
 
   return (
-    <div ref={bereich} className={`vorfuehrung ${geht ? 'geht' : ''} ${steht ? 'steht' : ''}`}>
+    <div
+      ref={bereich}
+      /*
+       * Das Urteil, sobald es dasteht — das Licht der Seite nimmt seine Farbe
+       * an (licht.css). Beim Ausblenden geht es mit.
+       */
+      data-urteil={da(TAKT.urteil) && !geht ? fall.kategorie : undefined}
+      className={`vorfuehrung ${geht ? 'geht' : ''} ${steht ? 'steht' : ''}`}
+    >
       {/*
        * Das Archiv lebt, aber nicht für sich: Jedes angedeutete Blatt steht
        * für ein Dokument im Korpus, und die Blätter, die zur laufenden
@@ -145,11 +153,11 @@ export function Vorfuehrung() {
             </ol>
 
             <div className={`vorfuehrung-urteil ${da(TAKT.urteil) ? 'ist-da' : ''}`}>
-              <span aria-hidden className="vorfuehrung-balken" style={{ background: fall.farbe }} />
-              <div>
-                <p className="text-tinte-leise">{fall.urteil}</p>
-                <p className="vorfuehrung-aussage-text">{fall.aussage}</p>
-              </div>
+              <p className="urteil-marke text-tinte-leise">
+                <span aria-hidden className="urteil-punkt" style={{ background: fall.farbe }} />
+                {fall.urteil}
+              </p>
+              <p className="vorfuehrung-aussage-text">{fall.aussage}</p>
             </div>
           </div>
         </div>

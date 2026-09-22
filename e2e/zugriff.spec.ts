@@ -9,11 +9,18 @@ import { expect, test } from '@playwright/test';
  * selbst gesetzten Köpfen.
  */
 
-const HERKUNFT = 'http://localhost:3100';
+/*
+ * Die eigene Herkunft ist die Adresse, unter der der Prüfserver läuft — nicht
+ * eine feste Zahl. Mit 3100 fest verdrahtet bestanden diese Tests nur, weil
+ * `APP_ORIGIN` beim Prüfen auf 3200 fälschlich noch 3100 sagte.
+ */
+function eigeneHerkunft(baseURL: string | undefined): string {
+  return new URL(baseURL ?? 'http://localhost:3100').origin;
+}
 
-test('ohne Anmeldung kein Upload', async ({ request }) => {
+test('ohne Anmeldung kein Upload', async ({ request, baseURL }) => {
   const antwort = await request.post('/api/documents', {
-    headers: { origin: HERKUNFT },
+    headers: { origin: eigeneHerkunft(baseURL) },
     multipart: {
       datei: {
         name: 'schmuggel.md',
@@ -25,9 +32,9 @@ test('ohne Anmeldung kein Upload', async ({ request }) => {
   expect(antwort.status()).toBe(401);
 });
 
-test('ohne Anmeldung keine Frage an fremde Dokumente', async ({ request }) => {
+test('ohne Anmeldung keine Frage an fremde Dokumente', async ({ request, baseURL }) => {
   const antwort = await request.post('/api/chat', {
-    headers: { origin: HERKUNFT, 'content-type': 'application/json' },
+    headers: { origin: eigeneHerkunft(baseURL), 'content-type': 'application/json' },
     data: {
       frage: 'Wer hilft beim Onboarding?',
       documentIds: ['00000000-0000-4000-8000-000000000000'],

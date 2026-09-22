@@ -25,6 +25,8 @@ export type Szene = {
   /** Dauer des Modellaufrufs, wie gemessen. */
   modellDauer: string;
   urteil: string;
+  /** Die Kategorie, wie die Anwendung sie liefert. Das Licht im Hintergrund folgt ihr. */
+  kategorie: 'belegt' | 'widerspruch';
   farbe: string;
   aussage: string;
   blaetter: Blatt[];
@@ -36,6 +38,7 @@ export const SZENEN: Szene[] = [
     benutzt: ['Teamhandbuch.pdf'],
     modellDauer: '2.4 s',
     urteil: 'Belegt',
+    kategorie: 'belegt',
     farbe: 'var(--urteil-belegt)',
     aussage: 'Beim Onboarding hilft Mara Keller.',
     blaetter: [
@@ -53,6 +56,7 @@ export const SZENEN: Szene[] = [
     benutzt: ['Backup_Richtlinie_A.pdf', 'Backup_Richtlinie_B.pdf'],
     modellDauer: '3.0 s',
     urteil: 'Widerspruch zwischen Quellen',
+    kategorie: 'widerspruch',
     farbe: 'var(--urteil-widerspruch)',
     aussage: 'Zwei Richtlinien sagen Verschiedenes. Aufgelöst wird das hier nicht.',
     blaetter: [

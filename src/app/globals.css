@@ -2,6 +2,9 @@
 @import '../styles/tokens.css';
 @import '../styles/schriften.css';
 @import '../styles/vorfuehrung.css';
+@import '../styles/chat.css';
+@import '../styles/chat-teile.css';
+@import '../styles/licht.css';
 
 /*
  * Tailwind-Stufen unter 16 px abschalten, statt sich auf Disziplin zu
@@ -23,6 +26,7 @@
   --color-flaeche: var(--flaeche);
   --color-flaeche-tief: var(--flaeche-tief);
   --color-flaeche-hoch: var(--flaeche-hoch);
+  --color-flaeche-blase: var(--flaeche-blase);
   --color-tinte: var(--tinte);
   --color-tinte-leise: var(--tinte-leise);
   --color-kante: var(--kante);
@@ -277,11 +281,22 @@ body::before {
     animation: none;
   }
 
+  /*
+   * `0s` für Übergänge, nicht `0.01ms`: `transition-property` ist von Haus
+   * aus `all`. Mit einer Dauer über null bekam jedes Element einen Übergang
+   * auf jede Eigenschaft — nach einem Wechsel des Farbschemas trugen neu
+   * eingefügte Elemente einen Bildschirmtakt lang die alte Farbe. Gefunden
+   * am 22.09.2026 von axe: dunkle Schrift auf dunklem Grund, nur manchmal.
+   *
+   * Animationen laufen einmal und kurz, damit sie ihren Endzustand erreichen;
+   * endlose laufen nicht endlos.
+   */
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0s !important;
     scroll-behavior: auto !important;
   }
 }

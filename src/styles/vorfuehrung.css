@@ -295,16 +295,11 @@
   gap: 1.5rem;
 }
 
-/* Urteil und Aussage gehören zusammen: Farbbalken, Wort, Satz. */
+/* Urteil und Aussage gehören zusammen: Punkt und Wort, darunter der Satz. */
 .vorfuehrung-urteil {
   display: flex;
-  gap: 0.75rem;
-}
-
-.vorfuehrung-balken {
-  width: 3px;
-  flex: none;
-  background: var(--urteil-belegt);
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .vorfuehrung-aussage-text {

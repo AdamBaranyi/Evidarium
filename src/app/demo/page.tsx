@@ -6,8 +6,10 @@ import { Chat } from '@/app/app/chat/chat';
 import { demoKorpus } from '@/lib/demo/korpus';
 import { eigeneDokumente } from '@/lib/demo/besucher-dokumente';
 import { besucherKennung, DEMO_COOKIE } from '@/lib/demo/besucher';
+import { DEMO_VORSCHLAEGE } from '@/lib/demo/vorschlaege';
 import { EigeneDateien } from './eigene-dateien';
 import { Kopf } from '../_teile/kopf';
+import { Licht } from '../_teile/licht';
 import { env } from '@/lib/config/env';
 
 export const metadata: Metadata = { title: 'Demo – Evidarium' };
@@ -35,33 +37,28 @@ export default async function DemoPage() {
   ];
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="seite-rahmen flex flex-1 flex-col">
+      <Licht />
       <Kopf unterzeile="Demo">
         <Link href="/login" className="ms-auto underline underline-offset-4">
           Anmelden
         </Link>
       </Kopf>
 
-      <main id="inhalt" className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10">
-        <div className="flex flex-col gap-3">
-          <h1 className="max-w-[20ch] text-xl leading-[var(--line-title)]">
-            Frag diese Dokumente etwas.
-          </h1>
-          <p className="max-w-[var(--mass)] text-tinte-leise">
-            Jede Aussage trägt ein wörtliches Zitat, ein Klick öffnet die Stelle im Dokument. Zwei
-            der Dokumente widersprechen sich absichtlich, und in einem steckt eine untergeschobene
-            Anweisung — beides darfst du ausprobieren. Du kannst auch eigene Dateien mitbringen.
-          </p>
-        </div>
-
+      <main id="inhalt" className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-5 sm:px-6">
+        <h1 className="sr-only">Demo mit Beispieldokumenten</h1>
         <Chat
           dokumente={auswahl}
           endpunkt="/api/demo/chat"
           auswaehlbar={false}
+          titel="Frag diese Dokumente etwas."
+          einleitung="Sechs Dokumente der erfundenen Firma Nordstern Digital, dazu deine eigenen, wenn du magst. Jede Aussage trägt ein wörtliches Zitat, ein Klick öffnet die Stelle im Dokument."
+          vorschlaege={DEMO_VORSCHLAEGE}
+          modellAktiv={env.AI_MODE === 'live'}
           seitenhinweis={
             <>
               <EigeneDateien dokumente={eigene} />
-              <p className="panel p-4 text-tinte-leise">
+              <p className="border-t border-kante pt-5 text-tinte-leise">
                 Der Betrieb kostet Geld, darum gilt ein Kontingent von {env.FRAGEN_JE_SITZUNG}{' '}
                 Fragen je Besuch.
               </p>

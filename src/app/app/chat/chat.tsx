@@ -1,20 +1,22 @@
 'use client';
 
 import Link from 'next/link';
-import { useRef, useState } from 'react';
-import { AntwortKarte } from './antwort-karte';
-import { QuellenPanel, type PanelInhalt } from './quellen-panel';
+import { useEffect, useRef, useState } from 'react';
+import { useWenigerBewegung } from '@/lib/ui/bewegung';
 import { DokumentWahl } from './dokument-wahl';
+import { Eingabe, EINGABE_ID } from './eingabe';
+import { LeererZustand, type Vorschlag } from './leerer-zustand';
+import { QuellenPanel, type PanelInhalt } from './quellen-panel';
 import { Schrittanzeige } from './schrittanzeige';
+import { alsEintrag, alsVerlauf, ansageFuer, frageSenden, hinweis } from './strom';
 import {
   belegteDokumente,
-  KATEGORIETEXT,
   KATEGORIEWERT,
   type Dokument,
   type Eintrag,
   type Schritt,
-  type StromZeile,
 } from './typen';
+import { Verlauf } from './verlauf';
 
 /*
  * Die Oberfläche hält bewusst wenig Zustand: Fragen und Antworten stehen
@@ -23,9 +25,6 @@ import {
  * Was hier **nicht** passiert: eine Antwort anzeigen, während sie entsteht.
  * Der Text erscheint erst, wenn die Belegprüfung ihn freigegeben hat.
  */
-
-/** Wie viele frühere Wechsel als Gesprächskontext mitgehen. */
-const VERLAUF_TIEFE = 6;
 
 export type ChatEigenschaften = {
   dokumente: Dokument[];
@@ -37,8 +36,13 @@ export type ChatEigenschaften = {
    * weder IDs noch Gesprächsverlauf.
    */
   auswaehlbar?: boolean;
-  /** Zusätzlicher Hinweis für die Seitenspalte, etwa das Kontingent. */
+  /** Zusätzlicher Inhalt für die Seitenspalte, etwa eigene Dateien. */
   seitenhinweis?: React.ReactNode;
+  /** Überschrift und Einleitung im leeren Chat. */
+  titel: string;
+  einleitung: string;
+  vorschlaege?: Vorschlag[];
+  modellAktiv: boolean;
 };
 
 export function Chat({
@@ -46,76 +50,100 @@ export function Chat({
   endpunkt = '/api/chat',
   auswaehlbar = true,
   seitenhinweis,
+  titel,
+  einleitung,
+  vorschlaege = [],
+  modellAktiv,
 }: ChatEigenschaften) {
   const [gewaehlt, setGewaehlt] = useState<string[]>(() => dokumente.map((d) => d.id));
   const [eintraege, setEintraege] = useState<Eintrag[]>([]);
   const [schritte, setSchritte] = useState<Schritt[]>([]);
   const [laeuft, setLaeuft] = useState(false);
   const [panel, setPanel] = useState<PanelInhalt | null>(null);
+  const [text, setText] = useState('');
+  const [seiteOffen, setSeiteOffen] = useState(false);
   /*
    * Was Screenreadern angesagt wird, wenn das Ergebnis da ist. Die Schritte
    * wurden schon angesagt, die fertige Antwort bisher nicht — wer nicht
    * sieht, hörte «Belege werden geprüft» und danach nichts mehr. Befund S1.
    */
   const [ansage, setAnsage] = useState('');
-  const feld = useRef<HTMLTextAreaElement>(null);
+  const verlauf = useRef<HTMLDivElement>(null);
+  const ruhig = useWenigerBewegung();
 
-  async function fragen(formular: FormData) {
-    // `FormData.get` liefert auch `File` — ein Feldname, den jemand von
-    // aussen anders belegt, soll hier nicht als «[object Object]» landen.
-    const eingabe = formular.get('frage');
-    const frage = typeof eingabe === 'string' ? eingabe.trim() : '';
-    if (frage === '' || laeuft) return;
-    if (auswaehlbar && gewaehlt.length === 0) return;
+  const gesperrt = auswaehlbar && gewaehlt.length === 0;
+
+  /*
+   * Die letzte Frage rollt nach oben in den Blick — einmal beim Senden und
+   * noch einmal, wenn die Antwort da ist: Erst dann gibt es darunter genug
+   * Inhalt, um die Frage ganz nach oben zu schieben, und die Antwort steht
+   * direkt darunter statt hinter dem Eingabefeld.
+   *
+   * Am Schreibtisch rollt nur der Verlauf — `scrollIntoView` zöge die ganze
+   * Seite mit, und die Kopfzeile verschwände. Schmal rollt die Seite selbst.
+   */
+  useEffect(() => {
+    const kasten = verlauf.current;
+    if (eintraege.length === 0 || !kasten) return;
+    const alle = kasten.querySelectorAll<HTMLElement>('[data-art="frage"]');
+    const frage = alle[alle.length - 1];
+    if (!frage) return;
+    const behavior = ruhig ? 'auto' : 'smooth';
+    if (getComputedStyle(kasten).overflowY === 'auto') {
+      kasten.scrollTo({ top: frage.offsetTop - 24, behavior });
+    } else {
+      frage.scrollIntoView({ block: 'start', behavior });
+    }
+  }, [eintraege.length, ruhig]);
+
+  async function stellen(eingabe: string) {
+    const frage = eingabe.trim();
+    if (frage === '' || laeuft || gesperrt) return;
 
     const eigene: Eintrag = { id: crypto.randomUUID(), art: 'frage', text: frage };
     const bisher = [...eintraege, eigene];
     setEintraege(bisher);
     setSchritte([]);
     setLaeuft(true);
-    if (feld.current) feld.current.value = '';
+    setText('');
+    fokusZurEingabe();
 
     try {
-      const antwort = await fetch(endpunkt, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(
-          auswaehlbar
-            ? { frage, documentIds: gewaehlt, verlauf: alsVerlauf(eintraege) }
-            : { frage },
-        ),
-      });
-
-      if (!antwort.ok || !antwort.body) {
-        const daten = (await antwort.json().catch(() => null)) as { fehler?: string } | null;
-        setEintraege([...bisher, hinweis('fehler', daten?.fehler ?? 'Anfrage nicht möglich.')]);
-        return;
-      }
-
-      await stromLesen(antwort.body, (zeile) => {
-        /*
-         * Die Uhr wird **vor** dem Aufruf abgelesen, nicht im Updater.
-         *
-         * Ein Updater muss rein sein: React ruft ihn erneut auf, wenn eine
-         * weitere Aktualisierung ansteht oder im Entwicklungsmodus doppelt
-         * gerendert wird. Ein `Date.now()` darin liefert beim zweiten Lauf
-         * eine neuere Zeit — gemessen am 17.09.2026 standen darum alle
-         * Schritte bei 0.0 s, obwohl der Modellaufruf Sekunden brauchte.
-         */
-        const jetzt = Date.now();
-        if (zeile.art === 'phase') {
-          setSchritte((alt) => schrittAnfuegen(alt, zeile.phase, jetzt));
-          return;
-        }
-        setSchritte((alt) => schrittAbschliessen(alt, jetzt));
-        setEintraege([...bisher, alsEintrag(zeile)]);
-        setAnsage(ansageFuer(zeile));
-      });
+      const fehler = await frageSenden(
+        endpunkt,
+        auswaehlbar ? { frage, documentIds: gewaehlt, verlauf: alsVerlauf(eintraege) } : { frage },
+        {
+          schritt: setSchritte,
+          ergebnis: (zeile, lauf) => {
+            setSchritte([]);
+            setEintraege([...bisher, alsEintrag(zeile, lauf)]);
+            setAnsage(ansageFuer(zeile));
+          },
+        },
+      );
+      if (fehler !== null) setEintraege([...bisher, hinweis('fehler', fehler)]);
     } catch {
       setEintraege([...bisher, hinweis('fehler', 'Die Verbindung wurde unterbrochen.')]);
     } finally {
+      setSchritte([]);
       setLaeuft(false);
     }
+  }
+
+  function neuBeginnen() {
+    setEintraege([]);
+    setSchritte([]);
+    setAnsage('');
+    fokusZurEingabe();
+  }
+
+  /*
+   * Nach dem Senden, einem Vorschlag oder «Neu beginnen» steht der Fokus im
+   * Eingabefeld. Sonst läge er auf einem Knopf, der gerade verschwunden ist
+   * — und damit nirgends.
+   */
+  function fokusZurEingabe() {
+    document.getElementById(EINGABE_ID)?.focus();
   }
 
   if (dokumente.length === 0) {
@@ -138,94 +166,93 @@ export function Chat({
   const letzte = [...eintraege].reverse().find((e) => e.art === 'antwort');
   const belegt = letzte ? belegteDokumente(letzte.antwort) : undefined;
   const farbe = letzte ? KATEGORIEWERT[letzte.antwort.kategorie] : undefined;
+  const anzahl = auswaehlbar ? gewaehlt.length : dokumente.length;
 
   return (
-    <div className="flex flex-col gap-4">
-      {/*
-       * Ein Fenster, wie auf der Startseite: Seitenspalte links, Arbeit
-       * rechts. Dasselbe Material, damit der Übergang vom Schaufenster in
-       * die Anwendung keiner ist.
-       */}
-      <div className="panel overflow-hidden">
-        <div className="panel-leiste">
-          <span className="font-blatt text-tinte">Evidarium</span>
-          <span>
-            {letzte
-              ? `${letzte.antwort.stellen.length === 1 ? '1 Quelle' : `${letzte.antwort.stellen.length} Quellen`} geprüft`
-              : `${dokumente.length === 1 ? '1 Dokument' : `${dokumente.length} Dokumente`} bereit`}
-          </span>
-        </div>
+    <div className="chat panel" data-urteil={letzte?.antwort.kategorie}>
+      {/* Gleich hoch mit und ohne Knopf: Die Leiste springt nicht, wenn «Neu beginnen» kommt. */}
+      <div className="panel-leiste min-h-[3.25rem] items-center py-1">
+        <span className="font-blatt text-tinte">Evidarium</span>
+        <span className="ms-auto">
+          {letzte
+            ? `${letzte.antwort.stellen.length === 1 ? '1 Quelle' : `${letzte.antwort.stellen.length} Quellen`} geprüft`
+            : `${dokumente.length === 1 ? '1 Dokument' : `${dokumente.length} Dokumente`} bereit`}
+        </span>
+        {eintraege.length > 0 && !laeuft && (
+          <button
+            type="button"
+            onClick={neuBeginnen}
+            className="min-h-11 underline underline-offset-4"
+          >
+            Neu beginnen
+          </button>
+        )}
+        <button
+          type="button"
+          aria-expanded={seiteOffen}
+          aria-controls="chat-seite"
+          onClick={() => setSeiteOffen(!seiteOffen)}
+          className="min-h-11 underline underline-offset-4 lg:hidden"
+        >
+          Dokumente
+        </button>
+      </div>
 
-        <div className="grid lg:grid-cols-[18rem_minmax(0,1fr)]">
-          <aside className="flex min-w-0 flex-col gap-4 border-b border-kante bg-flaeche p-4 lg:border-r lg:border-b-0">
-            <DokumentWahl
-              dokumente={dokumente}
-              gewaehlt={gewaehlt}
-              setzen={setGewaehlt}
-              auswaehlbar={auswaehlbar}
-              belegt={belegt}
-              farbe={farbe}
-            />
-            {seitenhinweis}
-          </aside>
+      <div className="chat-rumpf">
+        <aside id="chat-seite" className={`chat-spalte ${seiteOffen ? 'flex' : 'hidden'} lg:flex`}>
+          <DokumentWahl
+            dokumente={dokumente}
+            gewaehlt={gewaehlt}
+            setzen={setGewaehlt}
+            auswaehlbar={auswaehlbar}
+            belegt={belegt}
+            farbe={farbe}
+          />
+          {seitenhinweis}
+        </aside>
 
-          <div className="flex min-w-0 flex-col gap-8 p-5">
-            {/* Die Antworten tragen h3; ohne diese h2 fehlte eine Stufe. Befund S2. */}
-            <h2 className="sr-only">Unterhaltung</h2>
-            <p role="status" className="sr-only">
-              {ansage}
-            </p>
-            <ol className="flex flex-col gap-10">
-              {eintraege.map((eintrag) => (
-                <li key={eintrag.id}>
-                  {eintrag.art === 'frage' && (
-                    /* Die Frage steht als Frage da, ohne Sprechblase — es ist
-                       ein Arbeitsplatz, kein Chat. */
-                    <p className="max-w-[var(--mass)] text-xl leading-tight">{eintrag.text}</p>
-                  )}
-                  {eintrag.art === 'antwort' && (
-                    <AntwortKarte antwort={eintrag.antwort} oeffnen={setPanel} />
-                  )}
-                  {eintrag.art === 'hinweis' && (
-                    <p
-                      role={eintrag.ton === 'fehler' ? 'alert' : undefined}
-                      className="max-w-[var(--mass)] border border-kante bg-flaeche-tief p-4"
-                    >
-                      {eintrag.nachricht}
-                    </p>
-                  )}
-                </li>
-              ))}
-            </ol>
-
-            <Schrittanzeige schritte={schritte} laeuft={laeuft} />
-
-            <form action={fragen} className="flex max-w-[var(--mass-blatt)] flex-col gap-3">
-              <label className="flex min-w-0 flex-col gap-2">
-                <span>{auswaehlbar ? 'Frage an die ausgewählten Dokumente' : 'Deine Frage'}</span>
-                <textarea
-                  ref={feld}
-                  name="frage"
-                  rows={3}
-                  required
-                  maxLength={2000}
-                  /*
-                   * `w-full`, sonst bestimmt die Voreinstellung `cols` die
-                   * Breite: Das Feld schrumpft dann nicht unter rund 350 px
-                   * und schiebt bei 320 px die ganze Seite in die Breite.
-                   */
-                  className="w-full border border-rand-bedienung bg-flaeche-tief p-3 text-base"
+        <div className="chat-haupt">
+          <div ref={verlauf} className="chat-verlauf">
+            <div
+              className={`chat-spur flex flex-col gap-10 ${eintraege.length === 0 ? 'ist-leer' : ''}`}
+            >
+              {eintraege.length === 0 ? (
+                <LeererZustand
+                  titel={titel}
+                  einleitung={einleitung}
+                  vorschlaege={vorschlaege}
+                  fragen={(frage) => void stellen(frage)}
+                  modellAktiv={modellAktiv}
                 />
-              </label>
+              ) : (
+                /* Die Antworten tragen h3; ohne diese h2 fehlte eine Stufe. Befund S2. */
+                <h2 className="sr-only">Unterhaltung</h2>
+              )}
+              <p role="status" className="sr-only">
+                {ansage}
+              </p>
+              <Verlauf eintraege={eintraege} oeffnen={setPanel} />
+              <Schrittanzeige schritte={schritte} laeuft={laeuft} />
+            </div>
+          </div>
 
-              <button
-                type="submit"
-                disabled={laeuft || (auswaehlbar && gewaehlt.length === 0)}
-                className="min-h-11 self-start bg-aktion-grund px-5 py-2 text-aktion-tinte transition-opacity duration-[var(--dauer-kurz)] disabled:opacity-55"
-              >
-                {laeuft ? 'Wird beantwortet …' : 'Frage stellen'}
-              </button>
-            </form>
+          <div className="chat-unten">
+            <div className="chat-spur">
+              <Eingabe
+                text={text}
+                setText={setText}
+                senden={() => void stellen(text)}
+                laeuft={laeuft}
+                gesperrt={gesperrt}
+                beschriftung={auswaehlbar ? 'Frage an die ausgewählten Dokumente' : 'Deine Frage'}
+                platzhalter="Frag etwas zu diesen Dokumenten"
+                umfang={
+                  gesperrt
+                    ? 'Kein Dokument ausgewählt'
+                    : `Sucht in ${anzahl === 1 ? 'einem Dokument' : `${anzahl} Dokumenten`}`
+                }
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -233,94 +260,4 @@ export function Chat({
       <QuellenPanel inhalt={panel} schliessen={() => setPanel(null)} />
     </div>
   );
-}
-
-/**
- * Liest den NDJSON-Strom zeilenweise.
- *
- * Ein Netzwerkpaket endet nicht zwingend am Zeilenende — der Rest muss
- * stehen bleiben, bis er vollständig ist. Ohne diesen Puffer geht genau die
- * Zeile verloren, die unglücklich geteilt wurde.
- */
-async function stromLesen(
-  körper: ReadableStream<Uint8Array>,
-  je: (zeile: StromZeile) => void,
-): Promise<void> {
-  const leser = körper.getReader();
-  const dekodierer = new TextDecoder();
-  let rest = '';
-
-  for (;;) {
-    const { done, value } = await leser.read();
-    if (done) break;
-    rest += dekodierer.decode(value, { stream: true });
-
-    const zeilen = rest.split('\n');
-    rest = zeilen.pop() ?? '';
-    for (const zeile of zeilen) {
-      if (zeile.trim() === '') continue;
-      je(JSON.parse(zeile) as StromZeile);
-    }
-  }
-
-  /*
-   * Was ohne abschliessenden Zeilenumbruch endet, wäre sonst verloren. Das
-   * ist kein Randfall: Eine Antwort, die als schlichtes JSON kommt — etwa
-   * eine erreichte Budgetgrenze — hat gar keinen Umbruch.
-   */
-  if (rest.trim() !== '') je(JSON.parse(rest) as StromZeile);
-}
-
-function schrittAnfuegen(alt: Schritt[], phase: Schritt['phase'], jetzt: number): Schritt[] {
-  return [...schrittAbschliessen(alt, jetzt), { phase, dauerMs: null, seit: jetzt }];
-}
-
-/** Der laufende Schritt bekommt seine gemessene Dauer. */
-function schrittAbschliessen(alt: Schritt[], jetzt: number): Schritt[] {
-  return alt.map((schritt) =>
-    schritt.dauerMs === null ? { ...schritt, dauerMs: jetzt - schritt.seit } : schritt,
-  );
-}
-
-/** Ein Satz fürs Ohr: das Urteil und worauf es steht, nicht der ganze Text. */
-function ansageFuer(zeile: Exclude<StromZeile, { art: 'phase' }>): string {
-  if (zeile.art === 'antwort') {
-    const quellen = zeile.stellen.length;
-    return `Antwort da: ${KATEGORIETEXT[zeile.kategorie]}, ${quellen === 1 ? 'eine Quelle' : `${quellen} Quellen`}.`;
-  }
-  if (zeile.art === 'keine_treffer') return 'In den ausgewählten Dokumenten steht dazu nichts.';
-  return zeile.nachricht;
-}
-
-function hinweis(ton: 'budget' | 'fehler' | 'leer', nachricht: string): Eintrag {
-  return { id: crypto.randomUUID(), art: 'hinweis', ton, nachricht };
-}
-
-function alsEintrag(zeile: Exclude<StromZeile, { art: 'phase' }>): Eintrag {
-  if (zeile.art === 'antwort') return { id: crypto.randomUUID(), art: 'antwort', antwort: zeile };
-  if (zeile.art === 'budget') return hinweis('budget', zeile.nachricht);
-  if (zeile.art === 'keine_treffer') {
-    return hinweis(
-      'leer',
-      'In den ausgewählten Dokumenten steht dazu nichts. Das ist eine Antwort, kein Fehler.',
-    );
-  }
-  return hinweis('fehler', zeile.nachricht);
-}
-
-/** Die letzten Wechsel als Gesprächskontext, gekürzt. */
-function alsVerlauf(eintraege: Eintrag[]): { rolle: 'nutzer' | 'assistent'; text: string }[] {
-  return eintraege
-    .slice(-VERLAUF_TIEFE)
-    .map((eintrag) => {
-      if (eintrag.art === 'frage') return { rolle: 'nutzer' as const, text: eintrag.text };
-      if (eintrag.art === 'antwort') {
-        return {
-          rolle: 'assistent' as const,
-          text: eintrag.antwort.aussagen.map((a) => a.text).join(' '),
-        };
-      }
-      return null;
-    })
-    .filter((wechsel) => wechsel !== null);
 }

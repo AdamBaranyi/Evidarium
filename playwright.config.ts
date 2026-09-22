@@ -1,4 +1,12 @@
+import { existsSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
+
+/*
+ * Lokal stehen die Zugangsdaten in `.env`; die Tests für den angemeldeten
+ * Bereich legen damit ihre Sitzung an. Gesetzte Variablen gewinnen, die CI
+ * setzt ihre eigenen.
+ */
+if (existsSync('.env')) process.loadEnvFile('.env');
 
 /*
  * Drei Prüfbreiten: 320 (kleinstes Telefon, harte Vorgabe), 768 (Tablet),
@@ -64,6 +72,12 @@ export default defineConfig({
       ? `bunx next start --port ${PORT}`
       : `bun run build && bunx next start --port ${PORT}`,
     url: `http://localhost:${PORT}`,
+    /*
+     * Die Herkunftsprüfung vergleicht mit `APP_ORIGIN`. Läuft der Prüfserver
+     * auf einem anderen Port als in `.env`, lehnte sie sonst jede Frage der
+     * Demo ab — zu Recht.
+     */
+    env: { APP_ORIGIN: `http://localhost:${PORT}` },
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
   },

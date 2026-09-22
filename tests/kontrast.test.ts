@@ -46,11 +46,32 @@ describe('Kontraste der Bedienelemente', () => {
 
     it(`Fliesstext leise hält 4,5:1, ${schema}`, async () => {
       const t = (await tokens())[schema];
-      for (const flaeche of ['flaeche', 'flaeche-hoch']) {
+      // Blase: Einstiegsfrage unter dem Zeiger. Tief: Platzhalter und Umfang im Eingabefeld.
+      for (const flaeche of ['flaeche', 'flaeche-hoch', 'flaeche-blase', 'flaeche-tief']) {
         expect(kontrast(t.get('tinte-leise') ?? '', t.get(flaeche) ?? '')).toBeGreaterThanOrEqual(
           4.5,
         );
       }
+    });
+  }
+
+  for (const schema of ['dunkel', 'hell'] as const) {
+    it(`der Fokusring ums Eingabefeld hält 3:1, ${schema}`, async () => {
+      // E38: leise Tinte statt voller, weil das Feld fast immer den Fokus hat.
+      const t = (await tokens())[schema];
+      for (const flaeche of ['flaeche-hoch', 'flaeche-tief']) {
+        expect(
+          kontrast(t.get('tinte-leise') ?? '', t.get(flaeche) ?? ''),
+          `${flaeche}`,
+        ).toBeGreaterThanOrEqual(3);
+      }
+    });
+
+    it(`die eigene Frage in der Blase hält 4,5:1, ${schema}`, async () => {
+      const t = (await tokens())[schema];
+      expect(kontrast(t.get('tinte') ?? '', t.get('flaeche-blase') ?? '')).toBeGreaterThanOrEqual(
+        4.5,
+      );
     });
   }
 

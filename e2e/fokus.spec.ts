@@ -89,4 +89,11 @@ test('die Vorführung lässt sich anhalten', async ({ page }) => {
     .first()
     .evaluate((el) => getComputedStyle(el).animationPlayState);
   expect(hintergrund).toBe('paused');
+
+  // Auch das Licht hinter der Seite steht (E39).
+  const licht = await page
+    .locator('.licht span')
+    .first()
+    .evaluate((el) => getComputedStyle(el).animationPlayState);
+  expect(licht).toBe('paused');
 });

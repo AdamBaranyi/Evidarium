@@ -1,8 +1,17 @@
 'use client';
 
+import { useState } from 'react';
 import { kostenSchaetzen } from '@/lib/budget/preise';
 import type { PanelInhalt } from './quellen-panel';
-import { KATEGORIEERKLAERUNG, KATEGORIEFARBE, KATEGORIETEXT, type Antwort } from './typen';
+import { SchrittZusammenfassung } from './schrittanzeige';
+import { alsText } from './strom';
+import {
+  KATEGORIEERKLAERUNG,
+  KATEGORIETEXT,
+  KATEGORIEWERT,
+  type Antwort,
+  type Lauf,
+} from './typen';
 
 /*
  * Eine geprüfte Antwort.
@@ -13,14 +22,22 @@ import { KATEGORIEERKLAERUNG, KATEGORIEFARBE, KATEGORIETEXT, type Antwort } from
  * Schriften; man muss nicht erklären, was wovon stammt.
  *
  * Kein Etikett über der Antwort, keine Plakette mit der Kategorie. Die
- * Kategorie steht als Satz da, weil sie ein Urteil ist und kein Merkmal.
+ * Kategorie steht als Wort da, weil sie ein Urteil ist und kein Merkmal;
+ * der Punkt davor trägt ihre Farbe.
+ *
+ * Bis zum 22.09.2026 stand dort ein farbiger Balken am linken Rand. Ein
+ * farbiger Randstreifen ist laut `avoid-ai-design` eines der verlässlichsten
+ * Zeichen generierter Oberflächen — und er sagte nichts, was der Punkt nicht
+ * auch sagt.
  */
 
 export function AntwortKarte({
   antwort,
+  lauf,
   oeffnen,
 }: {
   antwort: Antwort;
+  lauf: Lauf;
   oeffnen: (inhalt: PanelInhalt) => void;
 }) {
   const stellen = new Map(antwort.stellen.map((s) => [s.sourceId, s]));
@@ -34,19 +51,19 @@ export function AntwortKarte({
 
   return (
     <article className="flex flex-col gap-5">
-      <header className="flex gap-3">
-        {/* Der Farbbalken ist die Zugabe, das Wort daneben die Aussage. */}
-        <span
-          aria-hidden
-          className={`mt-1 w-[3px] shrink-0 ${KATEGORIEFARBE[antwort.kategorie]}`}
-        />
-        <div className="flex flex-col gap-1">
-          <h3 className="text-lg leading-tight">{KATEGORIETEXT[antwort.kategorie]}</h3>
-          <p className="max-w-[var(--mass)] text-tinte-leise">
-            {KATEGORIEERKLAERUNG[antwort.kategorie]}
-            {antwort.demo && ' Diese Antwort stammt aus dem Demo-Adapter, es lief kein Modell.'}
-          </p>
-        </div>
+      <header className="flex flex-col gap-1">
+        <h3 className="urteil-marke text-lg leading-tight">
+          <span
+            aria-hidden
+            className="urteil-punkt"
+            style={{ background: KATEGORIEWERT[antwort.kategorie] }}
+          />
+          {KATEGORIETEXT[antwort.kategorie]}
+        </h3>
+        <p className="max-w-[var(--mass)] text-tinte-leise">
+          {KATEGORIEERKLAERUNG[antwort.kategorie]}
+          {antwort.demo && ' Diese Antwort stammt aus dem Demo-Adapter, es lief kein Modell.'}
+        </p>
       </header>
 
       {antwort.aussagen.map((aussage, i) => (
@@ -81,8 +98,37 @@ export function AntwortKarte({
         </div>
       ))}
 
+      <footer className="antwort-fuss">
+        <SchrittZusammenfassung lauf={lauf} />
+        <Kopieren antwort={antwort} />
+      </footer>
+
       {antwort.verbrauch !== null && <Verbrauch verbrauch={antwort.verbrauch} />}
     </article>
+  );
+}
+
+/**
+ * Kopiert die Antwort **mit** ihren Belegen. Die Bestätigung steht im Knopf
+ * selbst und wird angesagt; nach zwei Sekunden heisst er wieder «Kopieren».
+ */
+function Kopieren({ antwort }: { antwort: Antwort }) {
+  const [kopiert, setKopiert] = useState(false);
+
+  async function kopieren() {
+    try {
+      await navigator.clipboard.writeText(alsText(antwort));
+      setKopiert(true);
+      setTimeout(() => setKopiert(false), 2000);
+    } catch {
+      // Ohne Freigabe der Zwischenablage bleibt der Knopf, wie er ist.
+    }
+  }
+
+  return (
+    <button type="button" onClick={() => void kopieren()} aria-live="polite">
+      {kopiert ? 'Kopiert, mit Belegen' : 'Kopieren'}
+    </button>
   );
 }
 
@@ -143,7 +189,7 @@ function Verbrauch({ verbrauch }: { verbrauch: NonNullable<Antwort['verbrauch']>
   );
 
   return (
-    <p className="max-w-[var(--mass)] border-t border-kante pt-3 text-tinte-leise">
+    <p className="max-w-[var(--mass)] text-tinte-leise">
       {verbrauch.modell} hat {verbrauch.eingabeTokens.toLocaleString('de-CH')} Token gelesen und{' '}
       {verbrauch.ausgabeTokens.toLocaleString('de-CH')} geschrieben
       {kosten !== null && `, geschätzt ${kosten.toFixed(4)} USD`}.
