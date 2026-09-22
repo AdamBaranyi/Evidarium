@@ -9,9 +9,9 @@ import { demoOeffnen } from './demo-oeffnen';
  * die Demo hängt an einem fremden Geldbeutel, und wer IDs schicken darf,
  * probiert fremde — und dass der Chat so funktioniert, wie er aussieht.
  *
- * Ist die Demo nicht eingeschaltet oder nicht befüllt, wird der Test
- * übersprungen und **nicht** als bestanden gemeldet. In der CI ist das der
- * Normalfall: Ein Korpus dort bräuchte das Embedding-Modell.
+ * Die CI lädt den Demo-Korpus und prüft die Demo mit (seit 22.09.2026).
+ * Ist sie nicht eingeschaltet, überspringt sich der Test; ist sie
+ * eingeschaltet und fehlt trotzdem, schlägt er fehl (`demo-oeffnen.ts`).
  */
 
 // Eigene Adresse je Test, und in der CI kein stilles Überspringen: `demo-oeffnen.ts`.
