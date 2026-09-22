@@ -23,11 +23,19 @@ export function ndjsonAntwort(
   sprache: Sprache = 'de',
   demo = false,
 ): Response {
+  /*
+   * Bricht der Browser ab — Seite verlassen, Tab geschlossen —, ist der Strom
+   * zu. Jede weitere Zeile würfe dann «Controller is already closed», und
+   * das Log meldete einen unerwarteten Fehler, wo nur jemand weitergeklickt
+   * hat. Ab dem Abbruch wird still nichts mehr geschrieben.
+   */
+  let abgebrochen = false;
   const strom = new ReadableStream<Uint8Array>({
     async start(steuerung) {
       const kodierer = new TextEncoder();
-      const zeile = (wert: unknown) =>
-        steuerung.enqueue(kodierer.encode(`${JSON.stringify(wert)}\n`));
+      const zeile = (wert: unknown) => {
+        if (!abgebrochen) steuerung.enqueue(kodierer.encode(`${JSON.stringify(wert)}\n`));
+      };
 
       try {
         const ergebnis = await frageBeantworten({
@@ -37,6 +45,7 @@ export function ndjsonAntwort(
         });
         zeile(ergebnisUebersetzen(ergebnis, sprache, demo));
       } catch (fehler) {
+        if (abgebrochen) return;
         // Bis hierher sind alle bekannten Fälle abgefangen. Was hier ankommt,
         // gehört ins Log — und in die Antwort nur als schlichter Satz.
         console.error('[antwort] unerwarteter Fehler', fehler);
@@ -52,8 +61,11 @@ export function ndjsonAntwort(
           ),
         );
       } finally {
-        steuerung.close();
+        if (!abgebrochen) steuerung.close();
       }
+    },
+    cancel() {
+      abgebrochen = true;
     },
   });
 
