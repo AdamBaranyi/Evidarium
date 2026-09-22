@@ -101,17 +101,18 @@ jobs:
           STORAGE_PATH: ./storage-ci
         run: bun run build
 
-      # Die drei Prüfbreiten im echten Browser: 320, 768, 1440. Ohne diesen
-      # Schritt liefe der Nachweis nur auf dem Entwicklungsrechner — und
-      # «geprüft auf drei Breiten» wäre eine Behauptung.
+      # Die drei Prüfbreiten im echten Browser: 320, 768, 1440 in Chromium,
+      # dazu Firefox, Safari (WebKit) und ein iPhone. Ohne diesen Schritt
+      # liefe der Nachweis nur auf dem Entwicklungsrechner — und «geprüft in
+      # allen Engines» wäre eine Behauptung.
       #
       # Der Demo-Korpus fehlt hier: Ihn zu laden bräuchte das Embedding-Modell.
       # Die Demo-Tests überspringen sich darum selbst und melden das als
       # «skipped», nicht als bestanden.
       - name: Browser für E2E
-        run: bunx playwright install --with-deps chromium
+        run: bunx playwright install --with-deps chromium firefox webkit
 
-      - name: E2E auf drei Prüfbreiten
+      - name: E2E in drei Breiten und drei Engines
         env:
           DATABASE_URL: postgres://evidarium_owner:ci@127.0.0.1:5432/evidarium_test
           APP_ORIGIN: http://localhost:3100

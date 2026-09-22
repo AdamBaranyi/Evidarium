@@ -22,9 +22,19 @@ function kontrast(a: string, b: string): number {
   return ((hell ?? 0) + 0.05) / ((dunkel ?? 0) + 0.05);
 }
 
-test('die Sprungmarke ist das Erste und führt zum Inhalt', async ({ page }) => {
+test('die Sprungmarke ist das Erste und führt zum Inhalt', async ({
+  page,
+  browserName,
+  isMobile,
+}) => {
+  test.skip(isMobile, 'Am Telefon führt kein Tabulator durch die Seite');
   await page.goto('/');
-  await page.keyboard.press('Tab');
+  /*
+   * Safari springt mit Tab nur zwischen Formularfeldern; Links erreicht man
+   * mit Wahl-Tab oder nach der Einstellung «Mit Tab-Taste alle Objekte
+   * auswählen». Geprüft wird die Reihenfolge, nicht die Voreinstellung.
+   */
+  await page.keyboard.press(browserName === 'webkit' ? 'Alt+Tab' : 'Tab');
 
   const erstes = page.locator(':focus');
   await expect(erstes).toHaveText('Zum Inhalt springen');

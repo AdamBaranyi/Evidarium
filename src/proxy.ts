@@ -21,6 +21,14 @@ import { SESSION_COOKIE } from '@/lib/auth/session';
  *    gilt, entscheidet die Seite selbst.
  */
 
+/*
+ * `upgrade-insecure-requests` nur, wenn die Anwendung selbst über https läuft.
+ * Safari schreibt damit auch `http://localhost` auf https um — ein lokaler
+ * Produktionsbuild lud dort weder CSS noch Skripte, Chrome und Firefox nehmen
+ * localhost aus. Gefunden am 22.09.2026 mit den WebKit-Tests.
+ */
+const HTTPS = (process.env.APP_ORIGIN ?? '').startsWith('https://');
+
 function richtlinie(nonce: string): string {
   const entwicklung = process.env.NODE_ENV !== 'production';
   return [
@@ -37,7 +45,7 @@ function richtlinie(nonce: string): string {
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    ...(entwicklung ? [] : ['upgrade-insecure-requests']),
+    ...(entwicklung || !HTTPS ? [] : ['upgrade-insecure-requests']),
   ].join('; ');
 }
 

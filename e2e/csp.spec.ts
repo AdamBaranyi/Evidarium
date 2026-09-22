@@ -42,7 +42,8 @@ for (const pfad of SEITEN) {
 
     const antwort = await page.goto(pfad);
     await page.waitForLoadState('networkidle');
-    await page.mouse.wheel(0, 4000);
+    // Scrollen per Skript: Das Mausrad gibt es im mobilen WebKit nicht.
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForTimeout(300);
 
     const csp = antwort?.headers()['content-security-policy'] ?? '';

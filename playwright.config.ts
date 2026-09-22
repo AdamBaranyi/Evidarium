@@ -4,6 +4,11 @@ import { defineConfig, devices } from '@playwright/test';
  * Drei Prüfbreiten: 320 (kleinstes Telefon, harte Vorgabe), 768 (Tablet),
  * 1440 (Schreibtisch). Browser-Emulation ist kein Beweis für ein bestimmtes
  * Gerät — geprüft wird das Layout, nicht das Telefon.
+ *
+ * Dazu die zwei anderen Engines: Firefox (Gecko) und Safari (WebKit), beide
+ * am Schreibtisch, WebKit zusätzlich als iPhone mit Touch. Die Breiten laufen
+ * nur in Chromium — ein Layoutfehler bei 320 px ist selten eine Frage der
+ * Engine, ein fehlendes CSS-Merkmal dagegen schon.
  */
 /*
  * Port über `PW_PORT` wählbar: So läuft ein Produktionsbuild zum Prüfen neben
@@ -38,6 +43,18 @@ export default defineConfig({
     {
       name: 'breit-1440',
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
+    },
+    {
+      name: 'firefox-1440',
+      use: { ...devices['Desktop Firefox'], viewport: { width: 1440, height: 900 } },
+    },
+    {
+      name: 'safari-1440',
+      use: { ...devices['Desktop Safari'], viewport: { width: 1440, height: 900 } },
+    },
+    {
+      name: 'iphone',
+      use: { ...devices['iPhone 15'] },
     },
   ],
   webServer: {
