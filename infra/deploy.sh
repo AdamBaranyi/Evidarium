@@ -123,6 +123,26 @@ melde "Migrationen einspielen"
 melde "Anwendung starten"
 "${COMPOSE[@]}" up -d --remove-orphans
 
+# Erst fertig, wenn beide gesund sind (Healthchecks in compose.prod.yml). Der
+# Worker braucht beim ersten Start länger: Er lädt das Modell herunter.
+melde "Warten, bis Web und Worker gesund sind"
+warte_gesund() {
+  local dienst="$1" versuche="$2" zustand="unbekannt"
+  for _ in $(seq 1 "$versuche"); do
+    zustand="$(docker inspect -f '{{.State.Health.Status}}' "$("${COMPOSE[@]}" ps -q "$dienst")" 2>/dev/null || echo unbekannt)"
+    if [ "$zustand" = healthy ]; then
+      echo "$dienst: gesund"
+      return 0
+    fi
+    sleep 5
+  done
+  echo "Abbruch: $dienst ist nicht gesund (Zustand: $zustand). Die letzten Zeilen:" >&2
+  "${COMPOSE[@]}" logs --tail 40 "$dienst" >&2
+  return 1
+}
+warte_gesund web 36
+warte_gesund worker 120
+
 melde "Stand"
 "${COMPOSE[@]}" ps
 echo

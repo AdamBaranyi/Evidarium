@@ -1,0 +1,12 @@
+# Jede Nacht um 03:15, mit bis zu zehn Minuten Streuung. `Persistent` holt
+# einen verpassten Lauf nach, wenn der Server zu der Zeit aus war.
+[Unit]
+Description=Evidarium: Sicherung jede Nacht
+
+[Timer]
+OnCalendar=*-*-* 03:15:00
+RandomizedDelaySec=10min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

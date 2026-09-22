@@ -1,0 +1,10 @@
+# Nächtliche Sicherung von Evidarium (infra/sichern.sh). Einrichtung in
+# docs/BETRIEB.md, Abschnitt «Sicherung und Wiederherstellung».
+[Unit]
+Description=Evidarium: Sicherung von Datenbank und Dateien
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/evidarium/infra/sichern.sh

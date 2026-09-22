@@ -50,6 +50,20 @@ services:
       - storage:/app/storage
     ports:
       - '127.0.0.1:3100:3100'
+    # Gesund heisst: Der Webprozess antwortet, und die Datenbank auch
+    # (src/app/api/gesundheit). Node 24 bringt fetch mit; curl fehlt im Abbild.
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3100/api/gesundheit').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
   worker:
     image: evidarium:${EVIDARIUM_VERSION:-lokal}
@@ -76,6 +90,21 @@ services:
     volumes:
       - storage:/app/storage
       - modelle:/app/.modelle
+    # Der interne Endpunkt antwortet erst, wenn das Modell geladen ist. Beim
+    # allerersten Start lädt der Worker es herunter (rund 470 MB) — darum die
+    # lange Anlaufzeit.
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3101/gesundheit').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 300s
     # Der PDF-Parser kann bei grossen Dateien gegen 1 GB laufen; das Modell
     # belegt rund 1,5 GB. Ohne Grenze nimmt ein Ausreisser den ganzen Server
     # mit.

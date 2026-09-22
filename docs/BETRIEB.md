@@ -107,7 +107,7 @@ Endpunkt. Im Live-Modus kostet ein voller Lauf rund 0,04 USD und zaehlt auf
 Tages- und Monatsdeckel. Das Sitzungskontingent gilt nicht — ein Prueflauf ist
 keine Besuchersitzung.
 
-```
+````
 
 Derselbe Befehl setzt das Passwort eines bestehenden Kontos neu.
 
@@ -149,15 +149,86 @@ Auf einem geteilten Server gehört zusätzlich ein Speicherlimit je Container.
 
 ## Sicherung und Wiederherstellung
 
-Noch nicht eingerichtet — kommt mit dem Deployment an Tag 5. Zu beachten:
+Zwei Arten von Sicherungen liegen unter `/var/backups/evidarium`:
 
-- **Der Objektspeicher gehört nicht zum Datenbank-Backup.** Ein Rückspielen
-  der Datenbank ohne die Dateien hinterlässt Dokumente ohne Inhalt, ein
-  Rückspielen der Dateien ohne die Datenbank verwaiste Bytes. Beides gehört
-  zusammen zurückgespielt.
-- **Vektoren lassen sich neu erzeugen**, wenn sie verloren gehen: Der
-  Einlesevorgang läuft erneut. Das kostet Rechenzeit auf dem eigenen Server,
-  aber kein Geld — anders als bei Embeddings über eine Schnittstelle.
-- Die Datenbank vor jeder Migration sichern, das Zurückspielen regelmässig
-  proben.
+- **Vor jeder Migration** (`infra/deploy.sh`): die Datenbank als SQL,
+  `evidarium-<Zeit>-vor-<Commit>.sql.gz`. Sie bleibt liegen, bis jemand von
+  Hand aufräumt.
+- **Jede Nacht um 03:15** (`infra/sichern.sh` über einen systemd-Timer):
+  die Datenbank im eigenen Format von `pg_dump` und die hochgeladenen
+  Dateien als Archiv, beide mit demselben Zeitstempel unter `nacht/`.
+  Datenbank und Dateien gehören zusammen: Eine Datenbank ohne ihre Dateien
+  hinterlässt Dokumente ohne Inhalt, Dateien ohne Datenbank verwaiste Bytes.
+  Aufbewahrt werden 14 Tage; ältere nächtliche Sicherungen entfernt das
+  Skript selbst.
+
+Einrichten, einmal, als root:
+
+```bash
+sudo cp /opt/evidarium/infra/systemd/evidarium-sicherung.service /etc/systemd/system/
+sudo cp /opt/evidarium/infra/systemd/evidarium-sicherung.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now evidarium-sicherung.timer
+sudo systemctl start evidarium-sicherung.service
+sudo systemctl list-timers evidarium-sicherung.timer
+````
+
+Der vorletzte Befehl macht die erste Sicherung sofort, der letzte zeigt den
+nächsten Lauf.
+
+**Zurückspielen proben, einmal im Monat.** Die laufende Datenbank bleibt
+unberührt:
+
+```bash
+sudo /opt/evidarium/infra/sicherung-pruefen.sh
 ```
+
+Das Skript lädt die neueste nächtliche Sicherung in eine vorübergehende
+Datenbank, zählt Konten, Dokumente und Abschnitte, zählt die Dateien im
+Archiv und entfernt die Probedatenbank wieder. Lokal geprobt am 22.09.2026
+gegen die Testdatenbank, samt pgvector-Spalten.
+
+**Im Ernstfall** (Zeitstempel einsetzen). Auf vps1 noch nie durchgespielt;
+die monatliche Probe deckt den Datenbankteil ab:
+
+```bash
+cd /opt/evidarium
+C="docker compose -f infra/compose.prod.yml --env-file infra/.env.production"
+$C stop web worker
+$C exec -T db dropdb -U evidarium_owner evidarium
+$C exec -T db createdb -U evidarium_owner evidarium
+$C exec -T db pg_restore -U evidarium_owner -d evidarium --exit-on-error < /var/backups/evidarium/nacht/db-<Zeit>.dump
+$C run --rm --no-deps -T --entrypoint tar web -xzf - -C /app/storage < /var/backups/evidarium/nacht/dateien-<Zeit>.tar.gz
+$C up -d
+```
+
+Das Archiv überschreibt gleichnamige Dateien und lässt übrige liegen.
+
+**Vektoren lassen sich neu erzeugen**, falls sie verloren gehen: Der
+Einlesevorgang läuft erneut. Das kostet Rechenzeit auf dem eigenen Server,
+aber kein Geld, anders als Embeddings über eine Schnittstelle.
+
+**Noch offen: eine Kopie ausser Haus.** Alle Sicherungen liegen auf vps1.
+Fällt der Server aus, sind sie mit weg.
+
+## Gesundheit
+
+Web und Worker haben je einen Healthcheck in `infra/compose.prod.yml`:
+
+- **Web:** `GET /api/gesundheit` antwortet `{"ok":true}`, wenn der Prozess
+  läuft und die Datenbank antwortet, sonst 503. Öffentlich erreichbar,
+  darum ohne Einzelheiten.
+- **Worker:** `GET /gesundheit` auf dem internen Port 3101 antwortet erst,
+  wenn das Modell geladen ist. Beim ersten Start lädt der Worker es herunter;
+  die Anlaufzeit ist darum fünf Minuten.
+
+`deploy.sh` wartet nach dem Start, bis beide gesund sind, und bricht sonst
+mit den letzten Protokollzeilen ab. Den Zustand zeigt jederzeit:
+
+```bash
+docker compose -f /opt/evidarium/infra/compose.prod.yml --env-file /opt/evidarium/infra/.env.production ps
+```
+
+Docker startet einen ungesunden Container nicht von selbst neu; es startet
+ihn neu, wenn er abstürzt (`restart: unless-stopped`). Der Healthcheck ist
+der Nachweis nach dem Deployment und der erste Blick bei einer Störung.

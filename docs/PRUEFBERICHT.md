@@ -100,8 +100,13 @@ festgehalten**, damit er beim nächsten Umbau nicht still zurückkommt.
 | S10 | Eine Kopfzeile für alle Seiten                                                                                                                                                      | —                                     |
 | N1  | Anmeldeversuche und abgelaufene Sitzungen im geplanten Auftrag                                                                                                                      | —                                     |
 
-**Offen bleiben N2 bis N4** (nächtliche Sicherung, Gesundheitsendpunkt,
-Messung auf vps1) — sie gehören zum Betrieb und kommen mit dem Deployment.
+**N2 und N3 im Repository gelöst (22.09.2026):** nächtliche Sicherung von
+Datenbank und Dateien mit systemd-Timer, 14 Tage Aufbewahrung, dazu eine
+Probe des Zurückspielens in eine vorübergehende Datenbank (lokal geprobt);
+Gesundheitsendpunkt `/api/gesundheit`, Healthchecks für Web und Worker in
+`compose.prod.yml`, und `deploy.sh` wartet, bis beide gesund sind. Auf vps1
+einzurichten mit dem nächsten Deployment (`docs/BETRIEB.md`). **Offen bleibt
+N4**, die Messung auf vps1.
 
 **Zwei Dinge, die ich beim Beheben gelernt habe:**
 
