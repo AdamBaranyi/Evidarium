@@ -46,6 +46,11 @@ ENV NODE_ENV=production
 # Nicht als root. Das Node-Abbild bringt den Benutzer `node` mit.
 COPY --from=build --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/.next ./.next
+# Die eigenen Schriften. `next start` liefert alles unter `public` aus; ohne
+# diesen Ordner antwortet die Live-Seite auf jede Schrift mit 404 und fällt
+# still auf Systemschriften zurück (gefunden am 23.09.2026 nach dem ersten
+# Deployment, in der CI und lokal unsichtbar).
+COPY --from=build --chown=node:node /app/public ./public
 COPY --from=build --chown=node:node /app/src ./src
 COPY --from=build --chown=node:node /app/scripts ./scripts
 # Der Demo-Korpus wird auf dem Server geladen, nicht mitgeliefert im Volume.

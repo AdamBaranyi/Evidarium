@@ -108,6 +108,22 @@ jobs:
       - name: Produktionsabbild bauen
         run: docker build -f infra/Dockerfile -t evidarium:ci .
 
+      # Was im Abbild fehlt, fehlt in Produktion — und nur dort. Die Schriften
+      # lagen am 23.09.2026 nicht im Abbild; die Live-Seite fiel still auf
+      # Systemschriften zurück. Darum wird der Inhalt geprüft, nicht nur der Bau.
+      - name: Abbild enthält, was der Betrieb braucht
+        run: |
+          docker run --rm --entrypoint sh evidarium:ci -c '
+            set -e
+            test -f public/schriften/archivo-latin.woff2
+            test -f public/schriften/source-serif-4-latin.woff2
+            test -d .next
+            test -f scripts/demo-korpus-laden.ts
+            test -f scripts/konto-anlegen.ts
+            test -d eval/korpus
+            echo "Abbild vollstaendig"
+          '
+
       # Die Demo ist das, was Besucher zuerst sehen. Ihre Tests brauchen den
       # Demo-Korpus, der Korpus braucht den Worker, und der Worker braucht das
       # Embedding-Modell (rund 470 MB). Einmal geladen, kommt es danach aus
