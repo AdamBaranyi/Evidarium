@@ -16,7 +16,7 @@ export async function Fuss() {
     <footer className="fuss border-t border-kante bg-flaeche-tief">
       <nav
         aria-label={t.label}
-        className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-x-7 gap-y-2 px-6 py-5"
+        className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-center gap-x-7 gap-y-2 px-6 py-5"
       >
         <Link href="/impressum" className="underline underline-offset-4">
           {t.impressum}
