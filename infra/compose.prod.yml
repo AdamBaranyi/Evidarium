@@ -85,8 +85,12 @@ services:
       # veröffentlichte Ports nach aussen sichtbar.
       WORKER_INTERN_HOST: '0.0.0.0'
       WORKER_INTERN_PORT: '3101'
-      AI_MODE: ${AI_MODE:-demo}
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      # **Kein Schlüssel und kein AI_MODE hier.** Der Worker liest Dokumente
+      # ein und rechnet Vektoren lokal; ein Modell ruft nur der Webprozess auf
+      # (src/lib/antwort/anthropic-provider.ts). Was er nicht braucht, soll er
+      # nicht kennen: So steht der Schlüssel in einem laufenden Prozess statt
+      # in zweien. Ohne AI_MODE gilt die Vorgabe `demo`, und die
+      # Konfigurationsprüfung verlangt dann keinen Schlüssel.
     volumes:
       - storage:/app/storage
       - modelle:/app/.modelle

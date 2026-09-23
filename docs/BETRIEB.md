@@ -72,6 +72,15 @@ der Umgebung steht. Wer vorher `.env` eingelesen hat, faehrt still gegen die
 falsche Datenbank. `deploy.sh` entfernt die betroffenen Variablen darum
 selbst.
 
+## Monatlich
+
+- **Verbrauch und Guthaben prüfen.** Die Seite «Verbrauch» zeigt den Stand
+  von Tages- und Monatsdeckel und die letzten Aufrufe mit geschätzten Kosten.
+  Das Restguthaben steht nur in der Konsole von Anthropic; ist es leer,
+  antwortet Evidarium nicht mehr, sondern meldet einen Fehler — ein stiller
+  Rückfall auf den Demo-Modus wäre schlimmer als eine ehrliche Meldung.
+- **Sicherung zurückspielen proben:** `sudo /opt/evidarium/infra/sicherung-pruefen.sh`.
+
 ## Jaehrlich
 
 - **`security.txt` erneuern** vor dem 21.09.2027: Datum in
