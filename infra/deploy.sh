@@ -111,8 +111,13 @@ else
 fi
 
 # ------------------------------------------------------------------ Start ---
-melde "Datenbank starten"
-"${COMPOSE[@]}" up -d db
+# `--wait` statt blossem Start: `up -d` meldet fertig, sobald der Container
+# läuft — nicht, sobald PostgreSQL Verbindungen annimmt. Beim allerersten
+# Start richtet es erst die Datenbank ein, und die Migration lief in genau
+# dieses Fenster (ECONNREFUSED, gefunden am 23.09.2026 beim ersten
+# Deployment). Mit `--wait` zählt der Healthcheck aus compose.prod.yml.
+melde "Datenbank starten und auf sie warten"
+"${COMPOSE[@]}" up -d --wait --wait-timeout 180 db
 
 melde "Migrationen einspielen"
 # Die Eigentümer-URL steht in der Umgebungsdatei; `run -e NAME` reicht sie
