@@ -13,6 +13,12 @@ Die Oberfläche gibt es auf Deutsch, Französisch, Italienisch und Englisch.
 Geantwortet wird in der Sprache der Frage; die Zitate bleiben wörtlich in der
 Sprache ihres Dokuments.
 
+**Ausprobieren ohne Anmeldung.** Die öffentliche Demo zeigt den ganzen Ablauf
+an Beispieldokumenten, samt eigenen Dateien. Konten für den angemeldeten
+Bereich — eigene Dokumente behalten, in Projekte gruppieren, Verbrauch sehen —
+entstehen mit einem Befehl auf dem Server; wer Zugang möchte, fragt kurz an.
+Warum es keine Registrierung gibt, steht unter «Bewusst nicht gebaut».
+
 ## Start in unter zehn Minuten
 
 ```bash

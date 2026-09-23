@@ -214,6 +214,34 @@ volle Datenbank — das fängt man mit Zahlen ab —, sondern fremde Personendat
 auf fremdem Server. Ein Hinweis, den man erst nach dem Hochladen liest, ist
 keiner; ein Browsertest prüft darum die Reihenfolge auf der Seite.
 
+Angemeldet ist jeder Aufruf einzeln nachzulesen — Zeitpunkt, Modell, gelesene
+und geschriebene Token, geschätzte Kosten, dazu die drei Deckel:
+
+![Seite «Verbrauch»: Deckel für Tag, Monat und Anmeldung, darunter eine
+Tabelle der letzten Aufrufe mit Modell, Token und Kosten in
+Dollar.](bilder/verbrauch.png)
+
+## Ohne Anmeldung ausprobieren, angemeldet arbeiten
+
+Die Demo ist absichtlich offen: Wer ein Portfolio anschaut, hat zehn Sekunden
+Zeit und meldet sich nicht an. Sie zeigt den ganzen Kern — fragen, Urteil,
+Beleg öffnen, sogar eigene Dateien mitbringen.
+
+**Konten entstehen mit einem Befehl auf dem Server, nicht über ein
+Registrierungsformular.** Eine offene Registrierung hiesse fremde Dateien auf
+fremdem Server und fremde Kosten auf einem privaten Schlüssel; dagegen
+bräuchte es Mailbestätigung, Missbrauchserkennung und ein Löschkonzept — viel
+Arbeit für eine Handvoll Konten. Wer Zugang möchte, fragt; das dauert eine
+Minute.
+
+Im angemeldeten Bereich liegt, was in einer öffentlichen Demo nicht geht:
+eigene Dokumente behalten, sie in Projekte gruppieren und die Suche darauf
+eingrenzen.
+
+![Seite «Dokumente»: links die Projekte mit Anzahl, rechts sechs Dokumente
+mit Art, Grösse, Seiten, Abschnitten und einem Auswahlfeld für das
+Projekt.](bilder/dokumente.png)
+
 ## Die Gestaltung kommt aus dem Material
 
 Die Anwendung ist eine matte Arbeitsfläche. Alles, was aus einem Dokument
