@@ -164,6 +164,11 @@ Abschnitt erscheint nur im Live-Modus. Quellen, abgerufen am 22.09.2026:
 `anthropic.com/legal/data-processing-addendum`,
 `privacy.claude.com/en/articles/7996866`. Keine Rechtsberatung.
 
+**N4 erledigt (23.09.2026):** Auf vps1 gemessen, im Live-Modus über die
+Demo: Einbetten 0,0 s, Suche 0,1 s, Modellaufruf 2,2 s, Belegprüfung 0,0 s,
+ganze Antwort 2,3 bis 4,1 s. Zahlen in `docs/BETRIEB.md`. Damit ist aus dem
+Prüfbericht nichts mehr offen.
+
 **Screenreader (E44):** VoiceOver prüft in der CI Hauptüberschrift,
 Antwortansage, Urteil als Wort und Rundgang; alle drei Tests beim ersten
 Lauf grün. **Betrieb (E45):** N2 und N3 im Repository gelöst, siehe oben.

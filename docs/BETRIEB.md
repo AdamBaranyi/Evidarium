@@ -143,9 +143,23 @@ Derselbe Befehl setzt das Passwort eines bestehenden Kontos neu.
 Der Verbrauch pendelt sich nach dem Laden bei rund **1,25 GB RSS** ein; die
 1636 MB sind die Spitze beim Laden. Das Einbetten skaliert linear.
 
-**Diese Zahlen stammen nicht von der Zielmaschine.** vps1 ist ein KVM-Server
-mit anderer CPU und wird langsamer sein. Die Messung dort steht noch aus und
-gehört vor den ersten echten Betrieb — eine Schätzung ersetzt sie nicht.
+**Gemessen am 23.09.2026 auf vps1**, der Zielmaschine (KVM, 8 vCPU, 16 GB),
+im Live-Modus über die öffentliche Demo, von aussen im Browser. Die Zeiten der
+Schritte zeigt die Anwendung selbst an; die Gesamtzeit zählt ab dem Absenden.
+
+| Vorgang                                     | Zeit        |
+| ------------------------------------------- | ----------- |
+| Startseite laden (von aussen, mit TLS)      | 0,3 s       |
+| Frage einbetten                             | 0,0 s       |
+| Dokumente durchsuchen (Hybridsuche)         | 0,1 s       |
+| Modell formuliert die Antwort               | 2,2 s       |
+| Belege prüfen                               | 0,0 s       |
+| Ganze Antwort, fünf Fragen, vom Absenden an | 2,3 – 4,1 s |
+
+Die Wartezeit ist auch auf dem Server fast vollständig der Modellaufruf;
+Einbetten, Suche und Belegprüfung fallen daneben nicht ins Gewicht. Nicht
+gemessen ist das Einlesen grosser Dateien auf vps1 — der Demo-Korpus mit sechs
+kurzen Dokumenten sagt darüber nichts.
 
 Praktische Folge für die Auslegung: Ein PDF mit 100 Seiten ergibt je nach
 Textdichte 200 bis 400 Abschnitte, also rund 10 bis 20 Sekunden Einbettung auf

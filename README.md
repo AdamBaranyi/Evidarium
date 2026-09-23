@@ -5,6 +5,9 @@ anklickbaren Belegen erhalten.
 
 **Antworten aus deinen Dokumenten – mit Quellen, die du nachlesen kannst.**
 
+**Live:** [evidarium.adambaranyi.xyz](https://evidarium.adambaranyi.xyz) ·
+[Demo ohne Anmeldung ausprobieren](https://evidarium.adambaranyi.xyz/demo)
+
 Das Produkt verspricht Nachprüfbarkeit, nicht Unfehlbarkeit. Jede Aussage
 trägt eine Fundstelle, die sich im Originaldokument öffnen lässt; findet die
 Suche keine Grundlage, sagt die Anwendung das, statt etwas zu erfinden.

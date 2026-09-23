@@ -6,6 +6,9 @@ Ein Wissensassistent für eigene Dokumente: hochladen, fragen, Antworten mit
 anklickbaren Belegen erhalten. Gebaut in fünf Arbeitstagen, allein, von der
 leeren Ablage bis zur öffentlichen Demo.
 
+**Live ausprobieren:** [evidarium.adambaranyi.xyz/demo](https://evidarium.adambaranyi.xyz/demo)
+— ohne Anmeldung, mit Beispieldokumenten und echtem Sprachmodell.
+
 ![Startseite von Evidarium: dunkle Arbeitsfläche, darin ein Fenster mit einer
 Beispielantwort; der Hintergrund leuchtet in der Farbe des Urteils.](bilder/startseite.png)
 
