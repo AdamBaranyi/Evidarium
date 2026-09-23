@@ -105,7 +105,8 @@ Datenbank und Dateien mit systemd-Timer, 14 Tage Aufbewahrung, dazu eine
 Probe des Zurückspielens in eine vorübergehende Datenbank (lokal geprobt);
 Gesundheitsendpunkt `/api/gesundheit`, Healthchecks für Web und Worker in
 `compose.prod.yml`, und `deploy.sh` wartet, bis beide gesund sind. Auf vps1
-einzurichten mit dem nächsten Deployment (`docs/BETRIEB.md`). **Offen bleibt
+eingerichtet am 23.09.2026: Timer aktiv, erste Sicherung angelegt, Zurückspielen
+geprobt (1 Konto, 6 Dokumente, 22 Abschnitte, 6 Dateien). **Offen bleibt
 N4**, die Messung auf vps1.
 
 **Zwei Dinge, die ich beim Beheben gelernt habe:**

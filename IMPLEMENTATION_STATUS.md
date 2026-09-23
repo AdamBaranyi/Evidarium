@@ -104,23 +104,23 @@ für angemeldete Personen), drei Testbreiten, Fallstudie, Deployment auf vps1.
 
 ## Tag 5 — Evaluation, Demo, Deployment · **in Arbeit**
 
-| Punkt                                                    | Stand                         |
-| -------------------------------------------------------- | ----------------------------- |
-| Korpus «Nordstern Digital», reproduzierbar erzeugt       | fertig                        |
-| Zwölf versionierte Prüffälle                             | fertig                        |
-| Prüfer als reine Funktion, mit eigenen Tests             | fertig                        |
-| Prompt-Injection: markiert **und** unmarkiert            | fertig                        |
-| Protokoll `docs/EVALUATION.md` mit Antworten im Wortlaut | fertig                        |
-| Öffentliche Demo, Upload nur für angemeldete Personen    | fertig                        |
-| Drei Prüfbreiten als Test, auch in der CI                | fertig                        |
-| Löschkaskade für Dokumente, mit Oberfläche               | fertig                        |
-| Fallstudie `docs/FALLSTUDIE.md`                          | fertig                        |
-| Produktionsabbild, Compose, Deploy-Skript, Caddy         | fertig                        |
-| Eigene Dateien in der Demo, mit 24-Stunden-Loeschung     | fertig                        |
-| Deployment auf vps1 ausgefuehrt                          | fertig (23.09.2026)           |
-| Nächtliche Sicherung, Probe des Zurückspielens (N2)      | im Repo; Timer auf vps1 offen |
-| Gesundheitsendpunkt und Healthchecks (N3)                | fertig                        |
-| Screenreader-Tests mit VoiceOver (Guidepup) in der CI    | fertig                        |
+| Punkt                                                    | Stand                                     |
+| -------------------------------------------------------- | ----------------------------------------- |
+| Korpus «Nordstern Digital», reproduzierbar erzeugt       | fertig                                    |
+| Zwölf versionierte Prüffälle                             | fertig                                    |
+| Prüfer als reine Funktion, mit eigenen Tests             | fertig                                    |
+| Prompt-Injection: markiert **und** unmarkiert            | fertig                                    |
+| Protokoll `docs/EVALUATION.md` mit Antworten im Wortlaut | fertig                                    |
+| Öffentliche Demo, Upload nur für angemeldete Personen    | fertig                                    |
+| Drei Prüfbreiten als Test, auch in der CI                | fertig                                    |
+| Löschkaskade für Dokumente, mit Oberfläche               | fertig                                    |
+| Fallstudie `docs/FALLSTUDIE.md`                          | fertig                                    |
+| Produktionsabbild, Compose, Deploy-Skript, Caddy         | fertig                                    |
+| Eigene Dateien in der Demo, mit 24-Stunden-Loeschung     | fertig                                    |
+| Deployment auf vps1 ausgefuehrt                          | fertig (23.09.2026)                       |
+| Nächtliche Sicherung, Probe des Zurückspielens (N2)      | fertig, Timer auf vps1 aktiv (23.09.2026) |
+| Gesundheitsendpunkt und Healthchecks (N3)                | fertig                                    |
+| Screenreader-Tests mit VoiceOver (Guidepup) in der CI    | fertig                                    |
 
 **Nachweis vom 17.09.2026, Live-Modus:** 12 von 12 Fällen bestanden, 48,6 s,
 0,0357 USD. Beide Konfliktfälle nennen 30 **und** 90 Tage mit je eigener
