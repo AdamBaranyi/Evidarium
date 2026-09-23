@@ -63,9 +63,14 @@ docker compose -f infra/compose.prod.yml --env-file infra/.env.production \
   exec worker bun scripts/demo-korpus-laden.ts
 ```
 
-Caddy: `infra/caddy/evidarium.caddy` in die Konfiguration des gemeinsamen
-Caddy aufnehmen. `flush_interval -1` ist noetig, sonst puffert der Proxy den
-Antwortstrom und die Schrittanzeige kommt am Stueck.
+Caddy: Auf vps1 besitzt der Caddy aus dem Compose von Tallyroom die Ports 80
+und 443. Evidariums Webdienst haengt darum in dessen Netz (`proxy`, extern,
+Vorgabe `tallyroom-prod_default`) und ist dort als `evidarium-web` erreichbar;
+Datenbank und Worker bleiben im eigenen Netz. Der Adressblock steht in
+Tallyrooms `infra/Caddyfile`; `infra/caddy/evidarium.caddy` ist die Vorlage
+dafuer. `flush_interval -1` ist noetig, sonst puffert der Proxy den
+Antwortstrom und die Schrittanzeige kommt am Stueck. Zieht der Proxy einmal um,
+genuegt `PROXY_NETZ` in `infra/.env.production`.
 
 **Fallstrick:** `docker compose --env-file` ueberschreibt nichts, was schon in
 der Umgebung steht. Wer vorher `.env` eingelesen hat, faehrt still gegen die

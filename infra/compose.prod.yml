@@ -50,6 +50,13 @@ services:
       - storage:/app/storage
     ports:
       - '127.0.0.1:3100:3100'
+    # Der Proxy hängt im Compose eines anderen Projekts; unter diesem Namen
+    # erreicht er den Webdienst.
+    networks:
+      default: {}
+      proxy:
+        aliases:
+          - evidarium-web
     # Gesund heisst: Der Webprozess antwortet, und die Datenbank auch
     # (src/app/api/gesundheit). Node 24 bringt fetch mit; curl fehlt im Abbild.
     healthcheck:
@@ -118,3 +125,13 @@ volumes:
   db-data:
   storage:
   modelle:
+
+# Auf vps1 besitzt Caddy die Ports 80 und 443, und dieser Caddy läuft im
+# Compose von Tallyroom. Evidarium hängt darum **nur den Webdienst** in dessen
+# Netz ein; Datenbank und Worker bleiben unter sich. Der Name ist
+# überschreibbar, falls der Proxy einmal umzieht oder eigenständig wird.
+networks:
+  default:
+  proxy:
+    external: true
+    name: ${PROXY_NETZ:-tallyroom-prod_default}
