@@ -164,3 +164,19 @@ test('kein Querscrollen', async ({ page }) => {
   );
   expect(ueberbreit).toBe(false);
 });
+
+test('die Antwort blendet ein, und ohne Bewegung erscheint sie sofort', async ({ page }) => {
+  await ersteAntwort(page);
+  const antwort = page.locator('.antwort-ein').first();
+
+  const mitBewegung = await antwort.evaluate((el) => {
+    const stil = getComputedStyle(el);
+    return { name: stil.animationName, dauer: stil.animationDuration };
+  });
+  expect(mitBewegung.name).toBe('antwort-ein');
+  expect(parseFloat(mitBewegung.dauer)).toBeGreaterThan(0.2);
+
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const ohne = await antwort.evaluate((el) => getComputedStyle(el).animationDuration);
+  expect(parseFloat(ohne)).toBeLessThan(0.01);
+});

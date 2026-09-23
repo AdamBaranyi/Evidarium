@@ -45,8 +45,7 @@ export const CHAT = texte({
       kopieren: 'Kopieren',
       kopiert: 'Kopiert, mit Belegen',
       geprueft: (sekunden: string) => `Geprüft in ${sekunden}`,
-      verbrauch: (modell: string, ein: string, aus: string, kosten: string | null) =>
-        `${modell} hat ${ein} Token gelesen und ${aus} geschrieben${kosten ? `, geschätzt ${kosten} USD` : ''}.`,
+      verbrauch: (ein: string, aus: string) => `${ein} Token gelesen, ${aus} geschrieben.`,
     },
     ansage: {
       antwort: (urteil: string, n: number) =>
@@ -125,8 +124,7 @@ export const CHAT = texte({
       kopieren: 'Copier',
       kopiert: 'Copié, avec les citations',
       geprueft: (sekunden: string) => `Vérifié en ${sekunden}`,
-      verbrauch: (modell: string, ein: string, aus: string, kosten: string | null) =>
-        `${modell} a lu ${ein} jetons et en a écrit ${aus}${kosten ? `, environ ${kosten} USD` : ''}.`,
+      verbrauch: (ein: string, aus: string) => `${ein} jetons lus, ${aus} écrits.`,
     },
     ansage: {
       antwort: (urteil: string, n: number) =>
@@ -206,8 +204,7 @@ export const CHAT = texte({
       kopieren: 'Copia',
       kopiert: 'Copiato, con le citazioni',
       geprueft: (sekunden: string) => `Verificato in ${sekunden}`,
-      verbrauch: (modell: string, ein: string, aus: string, kosten: string | null) =>
-        `${modell} ha letto ${ein} token e ne ha scritti ${aus}${kosten ? `, circa ${kosten} USD` : ''}.`,
+      verbrauch: (ein: string, aus: string) => `${ein} token letti, ${aus} scritti.`,
     },
     ansage: {
       antwort: (urteil: string, n: number) =>
@@ -286,8 +283,7 @@ export const CHAT = texte({
       kopieren: 'Copy',
       kopiert: 'Copied, with citations',
       geprueft: (sekunden: string) => `Checked in ${sekunden}`,
-      verbrauch: (modell: string, ein: string, aus: string, kosten: string | null) =>
-        `${modell} read ${ein} tokens and wrote ${aus}${kosten ? `, estimated ${kosten} USD` : ''}.`,
+      verbrauch: (ein: string, aus: string) => `${ein} tokens read, ${aus} written.`,
     },
     ansage: {
       antwort: (urteil: string, n: number) =>

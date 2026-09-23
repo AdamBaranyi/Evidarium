@@ -273,3 +273,26 @@
     color: var(--tinte);
   }
 }
+
+/*
+ * Die fertige Antwort blendet ein, statt aufzuspringen.
+ *
+ * Zweck ist nicht Schmuck, sondern der Übergang: Die Schrittanzeige
+ * verschwindet, und an ihrer Stelle steht plötzlich ein ganzer Block Text.
+ * 320 ms, Deckkraft und ein kurzer Weg von unten, dieselbe Kurve wie beim
+ * Blatt — nur etwas länger, weil hier mehr auf einmal kommt. Die Belege
+ * darin haben ihre eigene, kürzere Einblendung.
+ *
+ * Wer weniger Bewegung wünscht, bekommt sie sofort: Die globale Regel in
+ * `globals.css` nimmt jeder Animation die Dauer.
+ */
+@keyframes antwort-ein {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.antwort-ein {
+  animation: antwort-ein 320ms var(--ease-out) both;
+}

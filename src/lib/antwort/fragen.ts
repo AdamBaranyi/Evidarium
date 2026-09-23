@@ -58,7 +58,8 @@ export type FrageErgebnis =
       /** Nur die tatsächlich zitierten Stellen — Grundlage des Quellen-Panels. */
       stellen: Fundstelle[];
       demo: boolean;
-      verbrauch: { modell: string; eingabeTokens: number; ausgabeTokens: number } | null;
+      /* Ohne Modellnamen: Er wird für die Abrechnung gebraucht, nicht im Browser. */
+      verbrauch: { eingabeTokens: number; ausgabeTokens: number } | null;
     }
   | { art: 'keine_treffer' }
   | { art: 'fehler'; code: string; nachricht: string };
@@ -204,7 +205,15 @@ export async function frageBeantworten(auftrag: FrageAuftrag): Promise<FrageErge
     aussagen: geprueft.aussagen,
     stellen: zitierteStellen(geprueft.aussagen, abschnitte),
     demo: provider.istDemo,
-    verbrauch: ergebnis.verbrauch,
+    /*
+     * Nur der Umfang, nicht das Modell und nicht die Kosten. Welches Modell
+     * antwortet und was es kostet, geht Besucher nichts an; gebucht und
+     * nachgelesen wird es auf der Verbrauchsseite (Adam, 23.09.2026).
+     */
+    verbrauch: ergebnis.verbrauch && {
+      eingabeTokens: ergebnis.verbrauch.eingabeTokens,
+      ausgabeTokens: ergebnis.verbrauch.ausgabeTokens,
+    },
   };
 }
 

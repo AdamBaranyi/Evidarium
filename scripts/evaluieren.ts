@@ -5,6 +5,7 @@ import { korpusLaden } from '../eval/laden';
 import { fallPruefen } from '../eval/pruefen';
 import { protokoll, type Zeile } from '../eval/protokoll';
 import { frageBeantworten } from '@/lib/antwort/fragen';
+import { env } from '@/lib/config/env';
 import { kostenSchaetzen } from '@/lib/budget/preise';
 import { queueStoppen } from '@/lib/jobs/queue';
 
@@ -44,8 +45,10 @@ async function fallLaufen(
   const dauerMs = Date.now() - start;
 
   const verbrauch = ergebnis.art === 'antwort' ? ergebnis.verbrauch : null;
+  // Das Modell steht nicht mehr in der Antwort (es geht den Browser nichts an);
+  // gerechnet wird darum mit dem eingestellten.
   const kostenUsd = verbrauch
-    ? (kostenSchaetzen(verbrauch.modell, verbrauch.eingabeTokens, verbrauch.ausgabeTokens) ?? 0)
+    ? (kostenSchaetzen(env.AI_CHAT_MODEL, verbrauch.eingabeTokens, verbrauch.ausgabeTokens) ?? 0)
     : 0;
 
   return { fall, ergebnis, pruefung: fallPruefen(fall, ergebnis), dauerMs, kostenUsd };

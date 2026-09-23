@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { kostenSchaetzen } from '@/lib/budget/preise';
 import { useSprache, useTexte } from '@/lib/i18n/client';
 import { sprachTag } from '@/lib/i18n/sprachen';
 import type { PanelInhalt } from './quellen-panel';
@@ -51,7 +50,7 @@ export function AntwortKarte({
   const gegenueber = antwort.kategorie === 'widerspruch';
 
   return (
-    <article className="flex flex-col gap-5">
+    <article className="antwort-ein flex flex-col gap-5">
       <header data-rundgang="urteil" className="flex flex-col gap-1">
         <h3 className="urteil-marke text-lg leading-tight">
           <span
@@ -184,28 +183,21 @@ function Belegblatt({
 }
 
 /**
- * Was diese eine Antwort gekostet hat.
+ * Wie viel Text diese eine Antwort gekostet hat — in Token, sonst nichts.
  *
- * Ausdrücklich als Schätzung bezeichnet: Der Anbieter rechnet nach eigenen
- * Regeln ab, zwischengespeicherte Eingaben kosten anders. Eine Zahl ohne
- * dieses Wort wäre eine Behauptung, die niemand einlösen kann.
+ * **Kein Modellname und kein Preis** (Adam, 23.09.2026): Welches Modell
+ * antwortet, ist Betriebssache und geht Besucher nichts an; eine Zahl in
+ * Dollar unter jeder Antwort erst recht nicht. Gebucht und nachgelesen wird
+ * beides auf der Verbrauchsseite, hinter der Anmeldung.
  */
 function Verbrauch({ verbrauch }: { verbrauch: NonNullable<Antwort['verbrauch']> }) {
   const t = useTexte(CHAT);
   const tag = sprachTag(useSprache());
-  const kosten = kostenSchaetzen(
-    verbrauch.modell,
-    verbrauch.eingabeTokens,
-    verbrauch.ausgabeTokens,
-  );
-
   return (
     <p className="max-w-[var(--mass)] text-tinte-leise">
       {t.antwort.verbrauch(
-        verbrauch.modell,
         verbrauch.eingabeTokens.toLocaleString(tag),
         verbrauch.ausgabeTokens.toLocaleString(tag),
-        kosten === null ? null : kosten.toFixed(4),
       )}
     </p>
   );
