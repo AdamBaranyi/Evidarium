@@ -101,6 +101,13 @@ jobs:
           STORAGE_PATH: ./storage-ci
         run: bun run build
 
+      # Das Produktionsabbild baut mit einem anderen Kontext als der Schritt
+      # davor: `.dockerignore` lässt Tests und Werkzeuge weg. Am 23.09.2026
+      # brach das erste Deployment genau daran, während die CI grün war —
+      # eine Konfiguration, die nur der Server prüft, ist ungeprüft.
+      - name: Produktionsabbild bauen
+        run: docker build -f infra/Dockerfile -t evidarium:ci .
+
       # Die Demo ist das, was Besucher zuerst sehen. Ihre Tests brauchen den
       # Demo-Korpus, der Korpus braucht den Worker, und der Worker braucht das
       # Embedding-Modell (rund 470 MB). Einmal geladen, kommt es danach aus

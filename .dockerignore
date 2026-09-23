@@ -10,7 +10,16 @@ storage-*
 .env
 .env.*
 !.env.example
+# Tests und Werkzeuge: Sie gehören nicht ins Abbild — und die Typprüfung
+# beim Bauen würde über Dateien stolpern, deren Nachbarn hier fehlen
+# (gefunden am 23.09.2026 beim ersten Deployment).
 e2e
+tests
+screenreader
+playwright.config.ts
+playwright.screenreader.config.ts
+vitest.config.ts
+scripts/bildschirmfotos.ts
 playwright-report
 test-results
 *.log
