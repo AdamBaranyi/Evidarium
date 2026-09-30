@@ -94,6 +94,30 @@ Ausnahme weg.
 
 ## Behobene Befunde
 
+### GHSA-qhr7-859c-m2p7, GHSA-6j4f-fj2g-mc7p, GHSA-q2hr-2g5m-vwhr — brace-expansion · **behoben 30.09.2026**
+
+Drei Meldungen vom 29.09.2026, zwei «hoch», eine «moderat»: Verschachtelte
+Klammern in einem Muster treiben `brace-expansion` in einen Stapelüberlauf oder
+in quadratische Rechenzeit — Denial of Service. Der tägliche Lauf schlug am
+30.09.2026 an.
+
+**Woher:** nur über Entwicklungswerkzeuge —
+`eslint → @eslint/config-array → minimatch 10 → brace-expansion 5.0.9` und
+`eslint-plugin-jsx-a11y → minimatch 3 → brace-expansion 1.1.18`. Die Muster
+stammen aus der eigenen Lint-Konfiguration, nie von Nutzern.
+
+**Behoben:** Kein Override nötig, die Bereiche `^5.0.8` und `^1.1.7` erlauben
+die Korrekturen bereits. Nur die beiden Einträge in `bun.lock` gehoben, auf
+5.0.12 und 1.1.21 — beide seit dem 14.09.2026 veröffentlicht, also älter als die
+Wartezeit. Danach `bun install --frozen-lockfile` ohne Änderung,
+`bun audit --audit-level=moderate` ohne Befund ausser der benannten Ausnahme,
+Lint läuft.
+
+**Lehre:** `bun update brace-expansion` hebt ein transitives Paket nicht an. Es
+macht daraus eine direkte Abhängigkeit und lässt die verschachtelte Kopie auf
+der alten Version. Bei transitiven Paketen den Eintrag im Lockfile heben, wenn
+der Bereich es erlaubt, sonst ein eng gefasstes Override.
+
 ### GHSA-vwc7-r8mq-g2x9 — adm-zip ≤ 0.6.0 · **behoben 18.09.2026**
 
 Über `@huggingface/transformers → onnxruntime-node → adm-zip`. Beim Entpacken
