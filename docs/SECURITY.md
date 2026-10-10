@@ -4,17 +4,38 @@ Ab dem ersten Commit, nicht nachträglich.
 
 ## Automatische Prüfungen
 
-| Wann                | Was                                                                           | Datei                                           |
-| ------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------- |
-| Täglich 06:17 UTC   | gitleaks über die ganze Historie, `bun audit` ab «moderat»                    | `.github/workflows/sicherheit-taeglich.yml`     |
-| Jeder Push und PR   | Format, Dateilänge, Schrift, Lint, Typen, Tests, Build, `bun audit` ab «hoch» | `.github/workflows/ci.yml`                      |
-| Wöchentlich montags | Dependabot, Minor und Patch als Sammel-PR, sieben Tage Wartezeit              | `.github/dependabot.yml`                        |
-| Wöchentlich montags | Erinnerung, **nur** wenn Update-PRs offen sind                                | `.github/workflows/erinnerung-woechentlich.yml` |
-| Monatlich am Ersten | Wartungscheckliste für das, was am Server passiert                            | `.github/workflows/erinnerung-monatlich.yml`    |
+| Wann                | Was                                                                                                                              | Datei                                           |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| Täglich 06:17 UTC   | gitleaks über die ganze Historie; `scripts/audit.sh moderate` meldet Befunde in einem Issue «Sicherheitsmeldungen», färbt nichts | `.github/workflows/sicherheit-taeglich.yml`     |
+| Jeder Push und PR   | Format, Dateilänge, Schrift, Lint, Typen, Tests, Build, `scripts/audit.sh high` (blockiert)                                      | `.github/workflows/ci.yml`                      |
+| Wöchentlich montags | Dependabot, Minor und Patch als Sammel-PR, sieben Tage Wartezeit                                                                 | `.github/dependabot.yml`                        |
+| Wöchentlich montags | Erinnerung, **nur** wenn Update-PRs offen sind                                                                                   | `.github/workflows/erinnerung-woechentlich.yml` |
+| Monatlich am Ersten | Wartungscheckliste für das, was am Server passiert, und die Ausnahmen                                                            | `.github/workflows/erinnerung-monatlich.yml`    |
 
-Die Meldung geht an Adam, nicht an ein Werkzeug: `assignees` in Dependabot,
-`--assignee` bei den Erinnerungs-Issues, GitHub-Benachrichtigung für
-fehlgeschlagene geplante Läufe.
+Die Meldung geht an Adam, nicht an ein Werkzeug: Das Issue
+«Sicherheitsmeldungen» ist ihm zugewiesen, dazu `assignees` in Dependabot und
+`--assignee` bei den Erinnerungs-Issues.
+
+## Umgang mit Befunden
+
+Regel seit dem 10.10.2026: Rot heisst handeln, alles andere ist eine Meldung.
+
+- **Täglicher Lauf:** rot nur bei einem Geheimnis (gitleaks) oder wenn der
+  Audit selbst scheitert. Befunde ab «moderate» stehen in der
+  Laufzusammenfassung und im Issue «Sicherheitsmeldungen» — angelegt beim
+  ersten Fund, ergänzt nur, wenn sich die Liste der Kennungen ändert,
+  geschlossen von selbst, sobald alles sauber ist. Eine Mail je Änderung,
+  keine je Tag, kein rotes Kreuz auf `main`.
+- **Push und Pull Request** blockieren ab «high». «moderate» und «low» erledigt
+  der nächste Update-PR.
+- **Beheben** in dieser Reihenfolge: Lockfile-Eintrag anheben, wenn der Bereich
+  der Abhängigen die Korrektur erlaubt; sonst ein `overrides` für genau das
+  Paket auf genau eine Fassung; danach prüfen, dass die Anwendung läuft. Ohne
+  Korrektur: Ausnahme, siehe unten.
+- **Wartezeit** von sieben Tagen bleibt (`bunfig.toml`, Dependabot). Eine
+  Ausnahme nur für eine Korrektur in einem erreichbaren Laufzeitpaket, mit
+  Datum in `minimumReleaseAgeExcludes`; Werkzeuge warten auf den regulären
+  Update-PR.
 
 ## Ausnahmen
 

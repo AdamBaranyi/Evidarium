@@ -9,10 +9,18 @@ name: Sicherheit täglich
 # keine Browser-Tests. Ein täglicher Lauf, der zwanzig Minuten braucht, wird
 # abgeschaltet; einer, der zwei Minuten braucht, bleibt.
 #
-# Wer die Meldung bekommt: Einen fehlgeschlagenen geplanten Lauf meldet GitHub
-# der Person, die diese Datei angelegt oder die cron-Zeile zuletzt geändert
-# hat, nicht allen Beteiligten. Wer benachrichtigt werden will, committet die
-# Änderung an der cron-Zeile also selbst.
+# Rot wird der Lauf nur bei einem Geheimnis (gitleaks), einem echten Notfall,
+# oder wenn der Audit selbst scheitert. Befunde in Abhängigkeiten färben ihn
+# nicht: Ein roter geplanter Lauf schickt jeden Tag eine Mail und hängt ein
+# rotes Kreuz an den letzten Commit auf main. Sie kommen stattdessen in die
+# Laufzusammenfassung und in ein einziges Issue «Sicherheitsmeldungen», das
+# sich nur meldet, wenn sich die Liste der Kennungen ändert. Geurteilt wird in
+# ci.yml auf Push und Pull Request, ab «high». Regel vom 10.10.2026, siehe
+# docs/SECURITY.md.
+#
+# Wer die Meldung bekommt: das Issue ist Adam zugewiesen. Einen gescheiterten
+# geplanten Lauf meldet GitHub der Person, die die cron-Zeile zuletzt geändert
+# hat.
 #
 # Öffentliche Repositories: GitHub schaltet geplante Workflows nach 60 Tagen
 # ohne Repository-Aktivität ab. Regelmässig gemergte Update-PRs halten den
@@ -25,9 +33,10 @@ on:
     - cron: '17 6 * * *'
   workflow_dispatch:
 
-# Der Lauf liest nur. Keine Schreibrechte, auch nicht auf Umwegen.
+# Lesen, dazu Issues schreiben für die eine Meldung. Sonst keine Rechte.
 permissions:
   contents: read
+  issues: write
 
 concurrency:
   group: sicherheit-taeglich
@@ -70,23 +79,30 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
-      # Strenger als ci.yml: der tägliche Lauf blockiert schon ab "moderat".
-      # Hier geht es nicht darum, einen Commit durchzulassen, sondern darum,
-      # eine neue Meldung überhaupt zu bemerken.
-      #
-      # Ausnahmen werden einzeln als GHSA-Nummer eingetragen, nie als ganze
-      # Stufe, und in docs/SECURITY.md begründet. Fällt ein Befund weg, fällt
-      # auch sein --ignore weg.
-      #
-      # GHSA-67mh-4wv8-2f99: esbuild ≤ 0.24.2 über drizzle-kit und vitest.
-      # In docs/SECURITY.md als nicht anwendbar bewertet, kein Update
-      # verfügbar. Ohne diese Ausnahme wäre der Lauf ab dem ersten Tag rot.
-      - name: Bekannte Schwachstellen, blockierend ab moderat
-        run: bun audit --audit-level=moderate --ignore GHSA-67mh-4wv8-2f99
+      # Befunde sammeln, nicht urteilen. Das Urteil fällt in ci.yml auf Push und
+      # Pull Request (ab high). Hier entsteht eine Meldung, keine Farbe. Stufe
+      # und Ausnahmen stehen in scripts/audit.sh. Der Exit-Code geht mit: Ohne
+      # ihn sähe ein gescheiterter Audit aus wie ein sauberer.
+      - name: Befunde sammeln, ab moderat
+        run: |
+          status=0
+          bash scripts/audit.sh moderate > audit.txt 2>&1 || status=$?
+          echo "$status" > audit-status.txt
+          {
+            echo '### bun audit, ab moderat, mit Ausnahmen'
+            echo '```'
+            sed 's/\x1b\[[0-9;]*m//g' audit.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      # Zur Ansicht in der Laufzusammenfassung, auch die ausgenommene Nummer
-      # und alles Niedrige. Der Exit-Code fällt hier bewusst weg; geurteilt
-      # wird im Schritt darüber.
+      - name: Meldung als Issue, nur bei Änderung
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: bash scripts/sicherheits-meldung.sh audit.txt "$(cat audit-status.txt)"
+
+      # Zur Ansicht in der Laufzusammenfassung, auch die ausgenommenen Nummern
+      # und alles Niedrige. Färbt den Lauf nie.
       - name: Alle Befunde zur Ansicht
         if: always()
         run: |
@@ -94,6 +110,6 @@ jobs:
             echo '### bun audit, alle Stufen'
             echo ''
             echo '```'
-            bun audit 2>&1 || true
+            bun audit 2>&1 | sed 's/\x1b\[[0-9;]*m//g' || true
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"

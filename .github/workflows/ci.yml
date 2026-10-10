@@ -175,7 +175,9 @@ jobs:
         if: failure()
         run: cat worker.log || true
 
-      # Abhängigkeiten blockieren ab "hoch". Der tägliche Lauf ist strenger
-      # (ab "moderat") — dort geht es ums Bemerken, hier ums Durchlassen.
+      # Abhängigkeiten blockieren ab "high", mit denselben Ausnahmen wie der
+      # tägliche Lauf (scripts/audit.sh). Der tägliche Lauf meldet schon ab
+      # "moderate", blockiert aber nichts — dort geht es ums Bemerken, hier
+      # ums Durchlassen.
       - name: Bekannte Schwachstellen
-        run: bun audit --audit-level=high
+        run: bash scripts/audit.sh high
