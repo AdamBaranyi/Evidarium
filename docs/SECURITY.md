@@ -94,6 +94,37 @@ Ausnahme weg.
 
 ## Behobene Befunde
 
+### Oktober-Welle: next, sharp, source-map-js · **behoben 10.10.2026**
+
+Neun Befunde, drei davon «hoch». Im Audit erschienen sie ab dem 05.10.2026:
+source-map-js (gemeldet am 18.09., von GitHub erst am 05.10. geprüft), sharp
+am 06.10., next am 07.10. Der tägliche Lauf war ab dem 06.10.2026 rot.
+
+| Nummer              | Paket und Befund                             | Stufe   | Art                           | Behoben mit           |
+| ------------------- | -------------------------------------------- | ------- | ----------------------------- | --------------------- |
+| GHSA-cjq9-62q9-8jv4 | next, SSRF in der Bildoptimierung            | hoch    | Laufzeit                      | `next` 16.3.8         |
+| GHSA-f87g-xv8r-7p7x | next, Metadaten-Bildrouten                   | moderat | Laufzeit                      | `next` 16.3.8         |
+| GHSA-mcj8-r9mp-w47p | next, Cache bei SSG und ISR                  | moderat | Laufzeit                      | `next` 16.3.8         |
+| GHSA-3w37-wq28-93x7 | next, Draft Mode im Cache                    | moderat | Laufzeit                      | `next` 16.3.8         |
+| GHSA-4jqv-mc3x-m676 | next, Cache bei SSG und ISR, selbst gehostet | moderat | Laufzeit                      | `next` 16.3.8         |
+| GHSA-39w2-rjm5-chcv | next, MCP-Endpunkt des Entwicklungsservers   | niedrig | Werkzeug                      | `next` 16.3.8         |
+| GHSA-wq5f-xc86-pv6w | sharp, librsvg in libvips                    | hoch    | Laufzeit (transformers, next) | `sharp` 0.35.5        |
+| GHSA-68fv-2mgg-jv7q | source-map-js, Denial of Service             | hoch    | Werkzeug (Build)              | `source-map-js` 1.2.2 |
+
+**Wie:** `next` direkt angehoben, `sharp` und `source-map-js` nur im Lockfile,
+weil alle Abhängigen die Korrektur erlauben (`^0.35.4`, `^1.2.1`). Der Override
+auf `sharp` 0.35.4 vom 17.09.2026 ist entfernt: Er schützte vor sharp < 0.35.0,
+das verlangt heute niemand mehr, und er hätte jedes weitere sharp-Update
+eingefroren.
+
+**Keine Wartezeit-Ausnahme nötig:** Die Fassungen waren schon älter als sieben
+Tage — `next` 16.3.8 vom 30.09., `sharp` 0.35.5 vom 27.09., `source-map-js`
+1.2.2 vom 30.09.2026.
+
+**Geprüft:** `bun audit` ohne Befund ausser der esbuild-Ausnahme, Build mit
+Next 16.3.8, sharp lädt (libvips 8.18.7), das Embedding-Modell bettet ein
+(384 Dimensionen, Ähnlichkeit derselben Testfrage wie am 30.09.2026).
+
 ### GHSA-qhr7-859c-m2p7, GHSA-6j4f-fj2g-mc7p, GHSA-q2hr-2g5m-vwhr — brace-expansion · **behoben 30.09.2026**
 
 Drei Meldungen vom 29.09.2026, zwei «hoch», eine «moderat»: Verschachtelte
@@ -136,7 +167,7 @@ Sekunden ab Veröffentlichung, nicht in Kalendertagen; der erste Versuch am
 Morgen scheiterte noch. Ein befristeter Eintrag gehört mit Uhrzeit versehen.
 
 Nicht ausgenommen, sondern behoben — über eng gefasste `overrides` in
-`package.json`:
+`package.json` (der für `sharp` ist seit dem 10.10.2026 entfernt, siehe oben):
 
 | Nummer              | Paket           | Weg                                 | Behoben mit     |
 | ------------------- | --------------- | ----------------------------------- | --------------- |
