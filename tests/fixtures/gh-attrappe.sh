@@ -25,8 +25,11 @@ antworten() {
 
 case "${1:-} ${2:-}" in
   "issue list")
-    printf 'issue list state=%s label=%s\n' "$(option --state "$@")" "$(option --label "$@")" >> "$d/aufrufe"
-    if [ -f "$d/nummer" ]; then
+    printf 'issue list state=%s label=%s search=%s\n' \
+      "$(option --state "$@")" "$(option --label "$@")" "$(option --search "$@")" >> "$d/aufrufe"
+    # Mit --label oder --search fragt gh den Suchindex. Der kennt ein eben
+    # angelegtes Issue noch nicht; die Attrappe spielt das nach.
+    if [ -f "$d/nummer" ] && [ -z "$(option --label "$@")$(option --search "$@")" ]; then
       jq -n --argjson n "$(cat "$d/nummer")" '[{number: $n, title: "Sicherheitsmeldungen"}]'
     else
       echo '[]'

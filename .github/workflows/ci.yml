@@ -121,6 +121,9 @@ jobs:
             test -f scripts/demo-korpus-laden.ts
             test -f scripts/konto-anlegen.ts
             test -d eval/korpus
+            # Der Worker lädt sharp über transformers. Die Binärdatei für
+            # Linux kommt erst im Abbild zusammen; geprüft wird sie nur hier.
+            node -e "console.log(\"sharp mit libvips\", require(\"sharp\").versions.vips)"
             echo "Abbild vollstaendig"
           '
 

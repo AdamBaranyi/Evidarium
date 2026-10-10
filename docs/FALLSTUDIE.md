@@ -334,9 +334,9 @@ Rate-Limit in der Datenbank. Drei Schwachstellen der Stufe «hoch» wurden
 behoben statt ausgenommen; eine vierte war befristet ausgenommen, mit Datum
 und Begründung, weil ihr Fix an der eigenen Wartezeit scheiterte.
 
-**Zahlen:** 150 automatische Tests, 478 Browserprüfungen in Chromium, Firefox
+**Zahlen:** 168 automatische Tests, 478 Browserprüfungen in Chromium, Firefox
 und Safari, auf 320, 768 und 1440 Pixeln und einem iPhone, in vier Sprachen,
-dazu Prüfungen mit dem echten Screenreader VoiceOver, 45 nummerierte und
+dazu Prüfungen mit dem echten Screenreader VoiceOver, 46 nummerierte und
 begründete Entscheidungen. Keine Datei über 400
 Zeilen, keine Schrift unter 16 Pixeln — beides wird in der CI erzwungen.
 

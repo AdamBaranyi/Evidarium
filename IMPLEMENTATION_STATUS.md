@@ -144,7 +144,7 @@ Befehle: `bun scripts/korpus-erzeugen.ts` erzeugt den Korpus,
 
 | Punkt                                                                 | Stand  |
 | --------------------------------------------------------------------- | ------ |
-| next 16.3.8, sharp 0.35.5, source-map-js 1.2.2 (neun Befunde, 3 hoch) | fertig |
+| next 16.3.8, sharp 0.35.5, source-map-js 1.2.2 (acht Befunde, 3 hoch) | fertig |
 | Override auf sharp entfernt, keine Wartezeit-Ausnahme nötig           | fertig |
 | `scripts/audit.sh`: Stufe und Ausnahmen an einer Stelle               | fertig |
 | Täglicher Lauf meldet als Issue «Sicherheitsmeldungen» statt rot      | fertig |

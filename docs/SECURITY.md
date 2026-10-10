@@ -4,13 +4,13 @@ Ab dem ersten Commit, nicht nachträglich.
 
 ## Automatische Prüfungen
 
-| Wann                | Was                                                                                                                              | Datei                                           |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| Täglich 06:17 UTC   | gitleaks über die ganze Historie; `scripts/audit.sh moderate` meldet Befunde in einem Issue «Sicherheitsmeldungen», färbt nichts | `.github/workflows/sicherheit-taeglich.yml`     |
-| Jeder Push und PR   | Format, Dateilänge, Schrift, Lint, Typen, Tests, Build, `scripts/audit.sh high` (blockiert)                                      | `.github/workflows/ci.yml`                      |
-| Wöchentlich montags | Dependabot, Minor und Patch als Sammel-PR, sieben Tage Wartezeit                                                                 | `.github/dependabot.yml`                        |
-| Wöchentlich montags | Erinnerung, **nur** wenn Update-PRs offen sind                                                                                   | `.github/workflows/erinnerung-woechentlich.yml` |
-| Monatlich am Ersten | Wartungscheckliste für das, was am Server passiert, und die Ausnahmen                                                            | `.github/workflows/erinnerung-monatlich.yml`    |
+| Wann                | Was                                                                                                                                                                      | Datei                                           |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- |
+| Täglich 06:17 UTC   | gitleaks über die ganze Historie; `scripts/audit.sh moderate` meldet Befunde in einem Issue «Sicherheitsmeldungen»; rot nur bei einem Geheimnis oder gescheitertem Audit | `.github/workflows/sicherheit-taeglich.yml`     |
+| Jeder Push und PR   | Format, Dateilänge, Schrift, Lint, Typen, Tests, Build, `scripts/audit.sh high` (blockiert)                                                                              | `.github/workflows/ci.yml`                      |
+| Wöchentlich montags | Dependabot, Minor und Patch als Sammel-PR, sieben Tage Wartezeit                                                                                                         | `.github/dependabot.yml`                        |
+| Wöchentlich montags | Erinnerung, **nur** wenn Update-PRs offen sind                                                                                                                           | `.github/workflows/erinnerung-woechentlich.yml` |
+| Monatlich am Ersten | Wartungscheckliste für das, was am Server passiert, und die Ausnahmen                                                                                                    | `.github/workflows/erinnerung-monatlich.yml`    |
 
 Die Meldung geht an Adam, nicht an ein Werkzeug: Das Issue
 «Sicherheitsmeldungen» ist ihm zugewiesen, dazu `assignees` in Dependabot und
@@ -116,7 +116,7 @@ gleich. Fällt ein Befund weg, fällt seine Ausnahme weg.
 
 ### Oktober-Welle: next, sharp, source-map-js · **behoben 10.10.2026**
 
-Neun Befunde, drei davon «hoch». Im Audit erschienen sie ab dem 05.10.2026:
+Acht Befunde, drei davon «hoch». Im Audit erschienen sie ab dem 05.10.2026:
 source-map-js (gemeldet am 18.09., von GitHub erst am 05.10. geprüft), sharp
 am 06.10., next am 07.10. Der tägliche Lauf war ab dem 06.10.2026 rot.
 

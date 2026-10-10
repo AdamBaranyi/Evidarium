@@ -1,4 +1,5 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { attrappenOrdner, aufrufe, ordnerEntfernen, skriptAusfuehren } from './attrappen';
 
@@ -28,8 +29,7 @@ describe('scripts/audit.sh', () => {
 
     expect(code).toBe(0);
     const [aufruf = ''] = aufrufe(ordner);
-    expect(aufruf).toMatch(/^audit --audit-level=moderate /);
-    expect(ausnahmen()).toContain('GHSA-67mh-4wv8-2f99');
+    expect(aufruf).toMatch(/^audit --audit-level=moderate( |$)/);
     for (const nummer of ausnahmen()) expect(aufruf).toContain(`--ignore ${nummer}`);
   });
 
@@ -37,7 +37,7 @@ describe('scripts/audit.sh', () => {
     ordner = attrappenOrdner({ bun: BUN });
     skriptAusfuehren('scripts/audit.sh', [], ordner);
 
-    expect(aufrufe(ordner)[0]).toMatch(/^audit --audit-level=high /);
+    expect(aufrufe(ordner)[0]).toMatch(/^audit --audit-level=high( |$)/);
   });
 
   it('lässt den Exit-Code von bun audit durch, damit die CI blockiert', () => {
@@ -47,14 +47,33 @@ describe('scripts/audit.sh', () => {
     expect(code).toBe(1);
   });
 
-  it('jede Ausnahme ist in docs/SECURITY.md begründet und befristet', () => {
-    const doku = readFileSync('docs/SECURITY.md', 'utf8').split(/^### /m);
+  it('läuft ohne Ausnahmen, auch mit bash 3.2 von macOS', () => {
+    ordner = attrappenOrdner({ bun: BUN });
+    const kopie = join(ordner, 'audit-ohne-ausnahmen.sh');
+    const skript = readFileSync('scripts/audit.sh', 'utf8');
+    writeFileSync(kopie, skript.replace(/ausnahmen=\(\n[\s\S]*?\n\)/, 'ausnahmen=()'));
 
-    expect(ausnahmen().length).toBeGreaterThan(0);
-    for (const nummer of ausnahmen()) {
-      const abschnitt = doku.find((teil) => teil.startsWith(nummer));
-      expect(abschnitt, `${nummer} fehlt in docs/SECURITY.md`).toBeDefined();
-      expect(abschnitt).toMatch(/Prüfen bis:\*\*\s*\d{2}\.\d{2}\.\d{4}/);
+    const { code, ausgabe } = skriptAusfuehren(kopie, [], ordner, {}, '/bin/bash');
+
+    expect(ausgabe).toBe('');
+    expect(code).toBe(0);
+    expect(aufrufe(ordner)).toEqual(['audit --audit-level=high']);
+  });
+
+  it('Skript und docs/SECURITY.md nennen dieselben Ausnahmen, jede befristet', () => {
+    const ignoreZeilen = readFileSync('scripts/audit.sh', 'utf8')
+      .split('\n')
+      .filter((zeile) => zeile.trim().startsWith('--ignore'));
+    expect(ausnahmen()).toHaveLength(ignoreZeilen.length);
+
+    const doku = readFileSync('docs/SECURITY.md', 'utf8');
+    const kapitel = doku.split(/^## /m).find((teil) => teil.startsWith('Ausnahmen\n')) ?? '';
+    const eintraege = kapitel.split(/^### /m).slice(1);
+    const dokumentiert = eintraege.map((eintrag) => eintrag.split(' ')[0]);
+
+    expect(dokumentiert.sort()).toEqual([...ausnahmen()].sort());
+    for (const eintrag of eintraege) {
+      expect(eintrag).toMatch(/Prüfen bis:\*\*\s*\d{2}\.\d{2}\.\d{4}/);
     }
   });
 });

@@ -30,8 +30,9 @@ export function skriptAusfuehren(
   argumente: string[],
   ordner: string,
   umgebung: Record<string, string> = {},
+  shell = 'bash',
 ): { code: number | null; ausgabe: string } {
-  const ergebnis = spawnSync('bash', [skript, ...argumente], {
+  const ergebnis = spawnSync(shell, [skript, ...argumente], {
     encoding: 'utf8',
     env: {
       ...process.env,

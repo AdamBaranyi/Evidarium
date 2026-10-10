@@ -22,9 +22,10 @@ inhalt=$(sed "s/${esc}\[[0-9;]*m//g" "$bericht")
 ids=$(printf '%s\n' "$inhalt" | grep -o -E 'GHSA-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}' | sort -u || true)
 stand=$(printf '%s' "$ids" | sha256sum | cut -c1-12)
 
-# Ohne --search: Der Suchindex hinkt nach, ein zweiter Lauf kurz nach dem
-# ersten fände das neue Issue nicht und legte ein zweites an.
-nummer=$(gh issue list --label "$label" --state open --json number,title \
+# Ohne --label und ohne --search: Beide schicken gh über den Suchindex, und der
+# hinkt nach — ein zweiter Lauf kurz nach dem ersten fände das neue Issue nicht
+# und legte ein zweites an. Ohne Filter liest gh die Issues direkt.
+nummer=$(gh issue list --state open --limit 200 --json number,title \
   --jq "[.[] | select(.title == \"$titel\")][0].number // empty")
 
 if [ -z "$ids" ]; then

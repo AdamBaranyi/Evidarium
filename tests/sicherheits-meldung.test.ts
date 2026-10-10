@@ -69,7 +69,7 @@ describe('scripts/sicherheits-meldung.sh', () => {
     const { code } = melden(BERICHT.next, '1');
 
     expect(code).toBe(0);
-    expect(aufrufe(ordner)[0]).toBe('issue list state=open label=sicherheit');
+    expect(aufrufe(ordner)[0]).toBe('issue list state=open label= search=');
     expect(schreibend()).toEqual([
       'label create sicherheit',
       'issue create title=Sicherheitsmeldungen label=sicherheit assignee=AdamBaranyi',
