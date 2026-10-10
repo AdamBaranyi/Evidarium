@@ -16,33 +16,32 @@ Die Meldung geht an Adam, nicht an ein Werkzeug: `assignees` in Dependabot,
 `--assignee` bei den Erinnerungs-Issues, GitHub-Benachrichtigung für
 fehlgeschlagene geplante Läufe.
 
-## Bewertete Befunde und Ausnahmen
+## Ausnahmen
 
-Ausnahmen werden **namentlich** als GHSA-Nummer eingetragen, nie als ganze
-Schweregrad-Stufe. Ein täglich roter Lauf verdeckt sonst die echte Meldung.
-Fällt ein Befund weg, fällt seine Ausnahme weg.
+Regel seit dem 10.10.2026: Eine Ausnahme gilt für genau eine GHSA-Nummer, nie
+für eine ganze Stufe. Sie steht mit ihrer Kennung in `scripts/audit.sh` — der
+einen Stelle, die CI und täglicher Lauf nutzen — und hier mit Paket, Stufe,
+Art, Grund, Datum und «prüfen bis», höchstens einen Monat voraus. Die
+monatliche Erinnerung prüft die Liste, ein Test hält Skript und diese Datei
+gleich. Fällt ein Befund weg, fällt seine Ausnahme weg.
 
 ### GHSA-67mh-4wv8-2f99 — esbuild ≤ 0.24.2
 
-_Bewertet 17.09.2026. Schweregrad moderat. Kein Update verfügbar._
-
-**Woher:** `drizzle-kit → esbuild` und `vitest → @vitest/mocker → vite → tsx → esbuild`.
-Beide sind Entwicklungswerkzeuge, keine Laufzeitabhängigkeiten.
-
-**Was der Befund besagt:** Der **Entwicklungsserver von esbuild** nimmt Anfragen
-beliebiger Webseiten an und gibt die Antwort preis.
-
-**Warum nicht anwendbar:** In diesem Projekt läuft kein esbuild-Entwicklungsserver.
-`drizzle-kit` nutzt esbuild nur, um beim Erzeugen von Migrationen die
-Schemadatei zu übersetzen; `vitest` übersetzt damit Testdateien. Beides sind
-kurzlebige Vorgänge ohne offenen Port. Der Entwicklungsserver der Anwendung
-ist Next mit Turbopack und hat mit esbuild nichts zu tun.
-
-**Folge:** namentlich ausgenommen in `.github/workflows/sicherheit-taeglich.yml`.
-Ein zweiter Schritt zeigt im selben Lauf alle Befunde ungefiltert in der
-Zusammenfassung — die Nummer verschwindet also nicht aus dem Blick. Sobald
-`drizzle-kit` oder `vitest` ein esbuild über 0.24.2 mitbringen, fällt die
-Ausnahme weg.
+- **Paket:** `esbuild` 0.18.20 über
+  `drizzle-kit → @esbuild-kit/esm-loader → @esbuild-kit/core-utils`. `bun audit`
+  nennt zusätzlich einen Weg über `tsx`; der bringt aber esbuild 0.28 mit und
+  ist nicht betroffen.
+- **Stufe:** moderat
+- **Art:** Werkzeug, keine Laufzeit
+- **Grund:** Der Befund betrifft den Entwicklungsserver von esbuild, der
+  Anfragen beliebiger Webseiten annimmt und die Antwort preisgibt. In diesem
+  Projekt läuft keiner: `drizzle-kit` übersetzt mit esbuild nur beim Erzeugen
+  von Migrationen die Schemadatei, ein kurzer Vorgang ohne offenen Port. Der
+  Entwicklungsserver der Anwendung ist Next mit Turbopack.
+- **Kein Update:** Auch das neueste `drizzle-kit` (0.31.11) hängt noch an
+  `@esbuild-kit`.
+- **Bewertet:** 17.09.2026, nachgeprüft 10.10.2026
+- **Prüfen bis:** 10.11.2026
 
 ## Im Produkt
 
