@@ -4,45 +4,65 @@ Ab dem ersten Commit, nicht nachträglich.
 
 ## Automatische Prüfungen
 
-| Wann                | Was                                                                           | Datei                                           |
-| ------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------- |
-| Täglich 06:17 UTC   | gitleaks über die ganze Historie, `bun audit` ab «moderat»                    | `.github/workflows/sicherheit-taeglich.yml`     |
-| Jeder Push und PR   | Format, Dateilänge, Schrift, Lint, Typen, Tests, Build, `bun audit` ab «hoch» | `.github/workflows/ci.yml`                      |
-| Wöchentlich montags | Dependabot, Minor und Patch als Sammel-PR, sieben Tage Wartezeit              | `.github/dependabot.yml`                        |
-| Wöchentlich montags | Erinnerung, **nur** wenn Update-PRs offen sind                                | `.github/workflows/erinnerung-woechentlich.yml` |
-| Monatlich am Ersten | Wartungscheckliste für das, was am Server passiert                            | `.github/workflows/erinnerung-monatlich.yml`    |
+| Wann                | Was                                                                                                                                                                      | Datei                                           |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- |
+| Täglich 06:17 UTC   | gitleaks über die ganze Historie; `scripts/audit.sh moderate` meldet Befunde in einem Issue «Sicherheitsmeldungen»; rot nur bei einem Geheimnis oder gescheitertem Audit | `.github/workflows/sicherheit-taeglich.yml`     |
+| Jeder Push und PR   | Format, Dateilänge, Schrift, Lint, Typen, Tests, Build, `scripts/audit.sh high` (blockiert)                                                                              | `.github/workflows/ci.yml`                      |
+| Wöchentlich montags | Dependabot, Minor und Patch als Sammel-PR, sieben Tage Wartezeit                                                                                                         | `.github/dependabot.yml`                        |
+| Wöchentlich montags | Erinnerung, **nur** wenn Update-PRs offen sind                                                                                                                           | `.github/workflows/erinnerung-woechentlich.yml` |
+| Monatlich am Ersten | Wartungscheckliste für das, was am Server passiert, und die Ausnahmen                                                                                                    | `.github/workflows/erinnerung-monatlich.yml`    |
 
-Die Meldung geht an Adam, nicht an ein Werkzeug: `assignees` in Dependabot,
-`--assignee` bei den Erinnerungs-Issues, GitHub-Benachrichtigung für
-fehlgeschlagene geplante Läufe.
+Die Meldung geht an Adam, nicht an ein Werkzeug: Das Issue
+«Sicherheitsmeldungen» ist ihm zugewiesen, dazu `assignees` in Dependabot und
+`--assignee` bei den Erinnerungs-Issues.
 
-## Bewertete Befunde und Ausnahmen
+## Umgang mit Befunden
 
-Ausnahmen werden **namentlich** als GHSA-Nummer eingetragen, nie als ganze
-Schweregrad-Stufe. Ein täglich roter Lauf verdeckt sonst die echte Meldung.
-Fällt ein Befund weg, fällt seine Ausnahme weg.
+Regel seit dem 10.10.2026: Rot heisst handeln, alles andere ist eine Meldung.
+
+- **Täglicher Lauf:** rot nur bei einem Geheimnis (gitleaks) oder wenn der
+  Audit selbst scheitert. Befunde ab «moderate» stehen in der
+  Laufzusammenfassung und im Issue «Sicherheitsmeldungen» — angelegt beim
+  ersten Fund, ergänzt nur, wenn sich die Liste der Kennungen ändert,
+  geschlossen von selbst, sobald alles sauber ist. Eine Mail je Änderung,
+  keine je Tag, kein rotes Kreuz auf `main`.
+- **Push und Pull Request** blockieren ab «high». «moderate» und «low» erledigt
+  der nächste Update-PR.
+- **Beheben** in dieser Reihenfolge: Lockfile-Eintrag anheben, wenn der Bereich
+  der Abhängigen die Korrektur erlaubt; sonst ein `overrides` für genau das
+  Paket auf genau eine Fassung; danach prüfen, dass die Anwendung läuft. Ohne
+  Korrektur: Ausnahme, siehe unten.
+- **Wartezeit** von sieben Tagen bleibt (`bunfig.toml`, Dependabot). Eine
+  Ausnahme nur für eine Korrektur in einem erreichbaren Laufzeitpaket, mit
+  Datum in `minimumReleaseAgeExcludes`; Werkzeuge warten auf den regulären
+  Update-PR.
+
+## Ausnahmen
+
+Regel seit dem 10.10.2026: Eine Ausnahme gilt für genau eine GHSA-Nummer, nie
+für eine ganze Stufe. Sie steht mit ihrer Kennung in `scripts/audit.sh` — der
+einen Stelle, die CI und täglicher Lauf nutzen — und hier mit Paket, Stufe,
+Art, Grund, Datum und «prüfen bis», höchstens einen Monat voraus. Die
+monatliche Erinnerung prüft die Liste, ein Test hält Skript und diese Datei
+gleich. Fällt ein Befund weg, fällt seine Ausnahme weg.
 
 ### GHSA-67mh-4wv8-2f99 — esbuild ≤ 0.24.2
 
-_Bewertet 17.09.2026. Schweregrad moderat. Kein Update verfügbar._
-
-**Woher:** `drizzle-kit → esbuild` und `vitest → @vitest/mocker → vite → tsx → esbuild`.
-Beide sind Entwicklungswerkzeuge, keine Laufzeitabhängigkeiten.
-
-**Was der Befund besagt:** Der **Entwicklungsserver von esbuild** nimmt Anfragen
-beliebiger Webseiten an und gibt die Antwort preis.
-
-**Warum nicht anwendbar:** In diesem Projekt läuft kein esbuild-Entwicklungsserver.
-`drizzle-kit` nutzt esbuild nur, um beim Erzeugen von Migrationen die
-Schemadatei zu übersetzen; `vitest` übersetzt damit Testdateien. Beides sind
-kurzlebige Vorgänge ohne offenen Port. Der Entwicklungsserver der Anwendung
-ist Next mit Turbopack und hat mit esbuild nichts zu tun.
-
-**Folge:** namentlich ausgenommen in `.github/workflows/sicherheit-taeglich.yml`.
-Ein zweiter Schritt zeigt im selben Lauf alle Befunde ungefiltert in der
-Zusammenfassung — die Nummer verschwindet also nicht aus dem Blick. Sobald
-`drizzle-kit` oder `vitest` ein esbuild über 0.24.2 mitbringen, fällt die
-Ausnahme weg.
+- **Paket:** `esbuild` 0.18.20 über
+  `drizzle-kit → @esbuild-kit/esm-loader → @esbuild-kit/core-utils`. `bun audit`
+  nennt zusätzlich einen Weg über `tsx`; der bringt aber esbuild 0.28 mit und
+  ist nicht betroffen.
+- **Stufe:** moderat
+- **Art:** Werkzeug, keine Laufzeit
+- **Grund:** Der Befund betrifft den Entwicklungsserver von esbuild, der
+  Anfragen beliebiger Webseiten annimmt und die Antwort preisgibt. In diesem
+  Projekt läuft keiner: `drizzle-kit` übersetzt mit esbuild nur beim Erzeugen
+  von Migrationen die Schemadatei, ein kurzer Vorgang ohne offenen Port. Der
+  Entwicklungsserver der Anwendung ist Next mit Turbopack.
+- **Kein Update:** Auch das neueste `drizzle-kit` (0.31.11) hängt noch an
+  `@esbuild-kit`.
+- **Bewertet:** 17.09.2026, nachgeprüft 10.10.2026
+- **Prüfen bis:** 10.11.2026
 
 ## Im Produkt
 
@@ -94,6 +114,37 @@ Ausnahme weg.
 
 ## Behobene Befunde
 
+### Oktober-Welle: next, sharp, source-map-js · **behoben 10.10.2026**
+
+Acht Befunde, drei davon «hoch». Im Audit erschienen sie ab dem 05.10.2026:
+source-map-js (gemeldet am 18.09., von GitHub erst am 05.10. geprüft), sharp
+am 06.10., next am 07.10. Der tägliche Lauf war ab dem 06.10.2026 rot.
+
+| Nummer              | Paket und Befund                             | Stufe   | Art                           | Behoben mit           |
+| ------------------- | -------------------------------------------- | ------- | ----------------------------- | --------------------- |
+| GHSA-cjq9-62q9-8jv4 | next, SSRF in der Bildoptimierung            | hoch    | Laufzeit                      | `next` 16.3.8         |
+| GHSA-f87g-xv8r-7p7x | next, Metadaten-Bildrouten                   | moderat | Laufzeit                      | `next` 16.3.8         |
+| GHSA-mcj8-r9mp-w47p | next, Cache bei SSG und ISR                  | moderat | Laufzeit                      | `next` 16.3.8         |
+| GHSA-3w37-wq28-93x7 | next, Draft Mode im Cache                    | moderat | Laufzeit                      | `next` 16.3.8         |
+| GHSA-4jqv-mc3x-m676 | next, Cache bei SSG und ISR, selbst gehostet | moderat | Laufzeit                      | `next` 16.3.8         |
+| GHSA-39w2-rjm5-chcv | next, MCP-Endpunkt des Entwicklungsservers   | niedrig | Werkzeug                      | `next` 16.3.8         |
+| GHSA-wq5f-xc86-pv6w | sharp, librsvg in libvips                    | hoch    | Laufzeit (transformers, next) | `sharp` 0.35.5        |
+| GHSA-68fv-2mgg-jv7q | source-map-js, Denial of Service             | hoch    | Werkzeug (Build)              | `source-map-js` 1.2.2 |
+
+**Wie:** `next` direkt angehoben, `sharp` und `source-map-js` nur im Lockfile,
+weil alle Abhängigen die Korrektur erlauben (`^0.35.4`, `^1.2.1`). Der Override
+auf `sharp` 0.35.4 vom 17.09.2026 ist entfernt: Er schützte vor sharp < 0.35.0,
+das verlangt heute niemand mehr, und er hätte jedes weitere sharp-Update
+eingefroren.
+
+**Keine Wartezeit-Ausnahme nötig:** Die Fassungen waren schon älter als sieben
+Tage — `next` 16.3.8 vom 30.09., `sharp` 0.35.5 vom 27.09., `source-map-js`
+1.2.2 vom 30.09.2026.
+
+**Geprüft:** `bun audit` ohne Befund ausser der esbuild-Ausnahme, Build mit
+Next 16.3.8, sharp lädt (libvips 8.18.7), das Embedding-Modell bettet ein
+(384 Dimensionen, Ähnlichkeit derselben Testfrage wie am 30.09.2026).
+
 ### GHSA-qhr7-859c-m2p7, GHSA-6j4f-fj2g-mc7p, GHSA-q2hr-2g5m-vwhr — brace-expansion · **behoben 30.09.2026**
 
 Drei Meldungen vom 29.09.2026, zwei «hoch», eine «moderat»: Verschachtelte
@@ -136,7 +187,7 @@ Sekunden ab Veröffentlichung, nicht in Kalendertagen; der erste Versuch am
 Morgen scheiterte noch. Ein befristeter Eintrag gehört mit Uhrzeit versehen.
 
 Nicht ausgenommen, sondern behoben — über eng gefasste `overrides` in
-`package.json`:
+`package.json` (der für `sharp` ist seit dem 10.10.2026 entfernt, siehe oben):
 
 | Nummer              | Paket           | Weg                                 | Behoben mit     |
 | ------------------- | --------------- | ----------------------------------- | --------------- |

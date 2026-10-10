@@ -973,3 +973,26 @@ N3 (kein Gesundheitsendpunkt, keine Healthchecks).
   wenn der Worker danach am Modell scheiterte.
 
 Offen: eine Kopie ausser Haus. Alle Sicherungen liegen auf vps1.
+
+## E46 — Der tägliche Lauf meldet, statt rot zu werden
+
+_10.10.2026._ Eine Welle neuer Meldungen machte den täglichen Lauf ab dem
+06.10.2026 rot. Ein roter geplanter Lauf schickt jeden Tag eine Mail und hängt
+ein rotes Kreuz an den letzten Commit auf `main`; nach drei Wochen liest
+niemand mehr mit, und die echte Meldung geht unter.
+
+- **Rot heisst handeln.** Der tägliche Lauf wird rot bei einem Geheimnis oder
+  wenn der Audit selbst scheitert, nie wegen einer Abhängigkeit. Befunde ab
+  «moderate» kommen in ein Issue «Sicherheitsmeldungen», das sich nur meldet,
+  wenn sich die Liste der Kennungen ändert. Push und Pull Request blockieren ab
+  «high».
+- **Eine Stelle für Stufe und Ausnahmen:** `scripts/audit.sh`, genutzt von
+  CI und täglichem Lauf. Jede Ausnahme hat ein «prüfen bis», ein Test hält
+  Skript und `docs/SECURITY.md` gleich.
+- **Gescheitert ist nicht sauber.** `bun audit` gibt bei «sauber» nur die
+  Kopfzeile aus, bei einem Netzfehler ebenfalls keine Kennung. Die Meldung
+  bekommt darum den Exit-Code mit; ohne ihn hätte ein Ausfall der Registry das
+  Issue geschlossen. Ein Wächter, der still aufhört, ist schlechter als ein
+  roter Lauf.
+
+Vorlage für alle eigenen Repositories, Evidarium setzt sie als erstes um.

@@ -24,8 +24,9 @@ updates:
   #
   # Achtung, Grenze: Der Dependency Graph von GitHub liest bun.lock nicht.
   # Für Bun gibt es hier also nur diese Versions-Updates und keine
-  # Security-Updates. Den Alarm bei Schwachstellen liefert allein
-  # .github/workflows/sicherheit-taeglich.yml mit `bun audit`.
+  # Security-Updates. Den Alarm bei Schwachstellen liefert allein der
+  # tägliche Lauf (.github/workflows/sicherheit-taeglich.yml) über
+  # scripts/audit.sh, als Issue «Sicherheitsmeldungen».
   - package-ecosystem: bun
     directory: '/'
     schedule:

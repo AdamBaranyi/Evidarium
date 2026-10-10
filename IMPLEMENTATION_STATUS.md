@@ -140,6 +140,17 @@ Befehle: `bun scripts/korpus-erzeugen.ts` erzeugt den Korpus,
 `… scripts/evaluieren.ts E09 E10`.
 `bun --env-file=.env scripts/demo-korpus-laden.ts` befüllt das Demo-Konto.
 
+## Sicherheitsrunde Oktober · **auf dem Branch** (10.10.2026)
+
+| Punkt                                                                 | Stand  |
+| --------------------------------------------------------------------- | ------ |
+| next 16.3.8, sharp 0.35.5, source-map-js 1.2.2 (acht Befunde, 3 hoch) | fertig |
+| Override auf sharp entfernt, keine Wartezeit-Ausnahme nötig           | fertig |
+| `scripts/audit.sh`: Stufe und Ausnahmen an einer Stelle               | fertig |
+| Täglicher Lauf meldet als Issue «Sicherheitsmeldungen» statt rot      | fertig |
+| `ci.yml` blockiert ab high über `scripts/audit.sh high`               | fertig |
+| Merge, Probelauf über `workflow_dispatch`, Ausrollen auf vps1         | offen  |
+
 ## Abnahmeliste — womit jeder Punkt belegt ist
 
 Nicht «erledigt», sondern **wodurch nachprüfbar**. Punkte, die nur einmal von
@@ -161,7 +172,7 @@ Rechner.
 | Schlüssel taucht nirgends auf                                 | `tests/abnahme.test.ts`, gitleaks im täglichen Lauf                                      |
 | Hauptablauf bei 320, 768, 1440                                | 478 Playwright-Prüfungen in Chromium, Firefox, Safari und auf dem iPhone, auch in der CI |
 | Keine Datei über 400 Zeilen, Format, Lint, Typen              | `bun run verify`, CI                                                                     |
-| Täglicher Sicherheitslauf grün oder begründete Ausnahme       | `.github/workflows/sicherheit-taeglich.yml`                                              |
+| Täglicher Sicherheitslauf grün, Befunde als ein Issue         | `.github/workflows/sicherheit-taeglich.yml`, `tests/sicherheits-meldung.test.ts`         |
 
 Messung auf vps1 am 23.09.2026: Suche 0,1 s, Modellaufruf 2,2 s, ganze
 Antwort 2,3 bis 4,1 s (`docs/BETRIEB.md`).
