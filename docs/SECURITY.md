@@ -112,8 +112,9 @@ gleich. Fällt ein Befund weg, fällt seine Ausnahme weg.
 - Sicherheits-Header in `next.config.ts`
 - Bildoptimierung von Next abgeschaltet (`images.unoptimized`): Die Anwendung
   nutzt `next/image` nicht, `/_next/image` antwortet mit 404 statt Bilder zu
-  holen (`e2e/bildoptimierung.spec.ts`). Seit dem 10.10.2026, nach der SSRF in
+  holen (`e2e/angriffsflaeche.spec.ts`). Seit dem 10.10.2026, nach der SSRF in
   genau diesem Endpunkt (GHSA-cjq9-62q9-8jv4)
+- Kein `X-Powered-By`-Kopf (`poweredByHeader: false`), seit dem 10.10.2026
 - Geheimnisse nur in Umgebungsvariablen, `.env*` in `.gitignore`
 
 ## Behobene Befunde
