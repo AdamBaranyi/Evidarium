@@ -12,7 +12,7 @@
 # Neustartschleife.
 services:
   db:
-    image: pgvector/pgvector:0.8.6-pg18
+    image: pgvector/pgvector:0.8.7-pg18
     container_name: evidarium-db
     restart: unless-stopped
     environment:
@@ -32,7 +32,7 @@ services:
       retries: 10
 
   db-test:
-    image: pgvector/pgvector:0.8.6-pg18
+    image: pgvector/pgvector:0.8.7-pg18
     container_name: evidarium-db-test
     restart: unless-stopped
     environment:
