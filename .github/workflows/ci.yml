@@ -127,6 +127,13 @@ jobs:
             echo "Abbild vollstaendig"
           '
 
+      # Das Abbild auch starten, nicht nur hineinschauen: Laufzeit-Optionen aus
+      # next.config.ts (Bildoptimierung aus, kein X-Powered-By) greifen erst
+      # beim Start. Am 10.10.2026 fehlte die Datei im Abbild, und live galten
+      # still die Vorgaben von Next, während alle Tests gegen den Checkout liefen.
+      - name: Abbild antwortet wie konfiguriert
+        run: bash infra/abbild-pruefen.sh evidarium:ci
+
       # Die Demo ist das, was Besucher zuerst sehen. Ihre Tests brauchen den
       # Demo-Korpus, der Korpus braucht den Worker, und der Worker braucht das
       # Embedding-Modell (rund 470 MB). Einmal geladen, kommt es danach aus
