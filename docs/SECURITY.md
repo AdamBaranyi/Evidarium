@@ -110,6 +110,10 @@ gleich. Fällt ein Befund weg, fällt seine Ausnahme weg.
   Anmeldeversuche aufgeräumt — im selben geplanten Auftrag
 - `security.txt` nach RFC 9116; `Expires` fest auf den 21.09.2027
 - Sicherheits-Header in `next.config.ts`
+- Bildoptimierung von Next abgeschaltet (`images.unoptimized`): Die Anwendung
+  nutzt `next/image` nicht, `/_next/image` antwortet mit 404 statt Bilder zu
+  holen (`e2e/bildoptimierung.spec.ts`). Seit dem 10.10.2026, nach der SSRF in
+  genau diesem Endpunkt (GHSA-cjq9-62q9-8jv4)
 - Geheimnisse nur in Umgebungsvariablen, `.env*` in `.gitignore`
 
 ## Behobene Befunde

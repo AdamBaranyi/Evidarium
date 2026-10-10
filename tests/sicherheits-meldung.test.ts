@@ -16,7 +16,7 @@ import {
  * beim ersten Fund, ergänzt nur bei geänderten Kennungen, geschlossen ohne
  * Befund. Jede Mail an Adam soll eine Änderung bedeuten, nie eine Wiederholung.
  */
-const GH = readFileSync('tests/fixtures/gh-attrappe.sh', 'utf8');
+const GH = readFileSync('tests/gh-attrappe.sh', 'utf8');
 
 const KOPF = 'bun audit v1.3.14 (0d9b296a)\n';
 const NEXT =

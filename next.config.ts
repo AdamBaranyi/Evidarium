@@ -11,6 +11,12 @@ const nextConfig: NextConfig = {
   // Lint-Schritt in .github/workflows/ci.yml ersetzt das.
   typescript: { ignoreBuildErrors: false },
 
+  // Die Anwendung nutzt `next/image` nicht. Ohne diese Zeile beantwortet der
+  // Server trotzdem `/_next/image` und holt dafür Bilder — Angriffsfläche ohne
+  // Nutzen, im Oktober 2026 mit einer SSRF (GHSA-cjq9-62q9-8jv4). Abgeschaltet
+  // antwortet der Endpunkt mit 404 (e2e/bildoptimierung.spec.ts).
+  images: { unoptimized: true },
+
   // Next erwartet hier ein Promise. Ohne `await` im Rumpf wäre `async` nur
   // Dekoration, darum ausdrücklich Promise.resolve.
   headers: () =>
