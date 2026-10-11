@@ -85,6 +85,10 @@ selbst.
   antwortet Evidarium nicht mehr, sondern meldet einen Fehler — ein stiller
   Rückfall auf den Demo-Modus wäre schlimmer als eine ehrliche Meldung.
 - **Sicherung zurückspielen proben:** `sudo /opt/evidarium/infra/sicherung-pruefen.sh`.
+- **Sicherheitsmeldungen und Ausnahmen:** Ist das Issue «Sicherheitsmeldungen»
+  offen, die Befunde nach der Regel in `docs/SECURITY.md` erledigen. Jede
+  Ausnahme in `scripts/audit.sh`, deren «prüfen bis» in diesem Monat liegt, neu
+  bewerten: Update da, Befund weg? Sonst höchstens einen Monat verlängern.
 
 ## Jaehrlich
 

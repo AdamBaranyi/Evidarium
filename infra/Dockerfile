@@ -56,6 +56,11 @@ COPY --from=build --chown=node:node /app/scripts ./scripts
 # Der Demo-Korpus wird auf dem Server geladen, nicht mitgeliefert im Volume.
 COPY --from=build --chown=node:node /app/eval ./eval
 COPY --from=build --chown=node:node /app/package.json /app/tsconfig.json ./
+# `next start` liest Laufzeit-Optionen wie die abgeschaltete Bildoptimierung
+# und `poweredByHeader` beim Start aus dieser Datei, nicht aus dem Build. Ohne
+# sie galten live still die Vorgaben von Next (gefunden am 10.10.2026, geprüft
+# von infra/abbild-pruefen.sh in der CI).
+COPY --from=build --chown=node:node /app/next.config.ts ./
 
 # Speicher für Uploads und Modellcache; im Betrieb liegen dort Volumes.
 RUN mkdir -p /app/storage /app/.modelle && chown -R node:node /app/storage /app/.modelle

@@ -140,16 +140,23 @@ Befehle: `bun scripts/korpus-erzeugen.ts` erzeugt den Korpus,
 `… scripts/evaluieren.ts E09 E10`.
 `bun --env-file=.env scripts/demo-korpus-laden.ts` befüllt das Demo-Konto.
 
-## Sicherheitsrunde Oktober · **auf dem Branch** (10.10.2026)
+## Sicherheitsrunde Oktober · **gemergt** (10.10.2026)
 
-| Punkt                                                                 | Stand  |
-| --------------------------------------------------------------------- | ------ |
-| next 16.3.8, sharp 0.35.5, source-map-js 1.2.2 (acht Befunde, 3 hoch) | fertig |
-| Override auf sharp entfernt, keine Wartezeit-Ausnahme nötig           | fertig |
-| `scripts/audit.sh`: Stufe und Ausnahmen an einer Stelle               | fertig |
-| Täglicher Lauf meldet als Issue «Sicherheitsmeldungen» statt rot      | fertig |
-| `ci.yml` blockiert ab high über `scripts/audit.sh high`               | fertig |
-| Merge, Probelauf über `workflow_dispatch`, Ausrollen auf vps1         | offen  |
+| Punkt                                                                            | Stand   |
+| -------------------------------------------------------------------------------- | ------- |
+| next 16.3.8, sharp 0.35.5, source-map-js 1.2.2 (acht Befunde, 3 hoch)            | fertig  |
+| Override auf sharp entfernt, keine Wartezeit-Ausnahme nötig                      | fertig  |
+| `scripts/audit.sh`: Stufe und Ausnahmen an einer Stelle                          | fertig  |
+| Täglicher Lauf meldet als Issue «Sicherheitsmeldungen» statt rot                 | fertig  |
+| `ci.yml` blockiert ab high über `scripts/audit.sh high`                          | fertig  |
+| Merge #12, Probelauf über `workflow_dispatch` grün                               | fertig  |
+| Issue-Weg echt geprüft: #13 angelegt, zweiter Lauf still, auf `main` zu          | fertig  |
+| #14: Bildoptimierung von Next aus, kein `X-Powered-By`                           | fertig  |
+| Update-PRs #15 (pgvector 0.8.7) und #16 (neun Updates, pg-boss 12.36)            | fertig  |
+| Ausrollen auf vps1 (`e9b6933`), Abnahme von aussen                               | fertig  |
+| Abnahme fand: `next.config.ts` fehlte im Abbild, Laufzeit-Optionen griffen nicht | behoben |
+| `infra/abbild-pruefen.sh` startet das Abbild in der CI und prüft es              | fertig  |
+| Zweites Ausrollen mit der Korrektur, Abnahme von aussen                          | offen   |
 
 ## Abnahmeliste — womit jeder Punkt belegt ist
 
