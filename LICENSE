@@ -1,0 +1,41 @@
+Copyright (c) 2026 Adam Baranyi. Alle Rechte vorbehalten.
+
+Der Quelltext dieses Repositorys ist öffentlich, damit er gelesen und beurteilt
+werden kann. Das ist keine Lizenz: Nutzung, Veränderung und Weitergabe, ganz
+oder in Teilen, sind ohne schriftliche Erlaubnis nicht gestattet.
+
+Bestandteile Dritter stehen unter ihren eigenen Lizenzen:
+
+- Die Schriften Archivo (The Archivo Project Authors) und Source Serif 4 (The
+  Source Serif 4 Project Authors) unter der SIL Open Font License 1.1, siehe
+  public/schriften/OFL-archivo.txt und public/schriften/OFL-source-serif-4.txt
+- Die Abhängigkeiten aus package.json und bun.lock unter ihren jeweiligen
+  Lizenzen, überwiegend MIT, Apache-2.0, ISC und BSD. Eigene Bedingungen
+  haben: libvips in den vorkompilierten Paketen @img/sharp-libvips-* unter der
+  LGPL-3.0-or-later (zur Laufzeit über sharp), lightningcss und axe-core unter
+  der MPL-2.0 (Build und Tests), caniuse-lite unter der CC BY 4.0 (Build)
+- Das Embedding-Modell intfloat/multilingual-e5-small unter der MIT-Lizenz. Es
+  liegt nicht im Repository, sondern wird zur Laufzeit von Hugging Face geladen
+
+Für dieses Projekt erstellt und damit ebenfalls unter dem Vorbehalt oben: der
+Demo- und Evaluationskorpus in eval/ (die Firma Nordstern Digital und alle
+Fakten darin sind erfunden), die Testdateien in tests/fixtures/, die
+Bildschirmfotos in docs/bilder/ sowie Icon und Vorschaubild in src/app/.
+
+---
+
+Copyright (c) 2026 Adam Baranyi. All rights reserved.
+
+The source code in this repository is public so that it can be read and
+assessed. This is not a licence: use, modification and distribution, in whole
+or in part, require written permission. Third-party components remain under
+their own licences: the Archivo and Source Serif 4 fonts under the SIL Open
+Font License 1.1 (public/schriften/), the dependencies in package.json and
+bun.lock under their respective licences (mostly MIT, Apache-2.0, ISC and BSD;
+libvips in @img/sharp-libvips-* under LGPL-3.0-or-later, lightningcss and
+axe-core under MPL-2.0, caniuse-lite under CC BY 4.0), and the embedding model
+intfloat/multilingual-e5-small under the MIT licence, which is downloaded at
+runtime and not part of this repository. The demo and evaluation corpus, the
+test files, the screenshots, the icon and the preview image were created for
+this project; the company Nordstern Digital and all facts in the corpus are
+fictional.
