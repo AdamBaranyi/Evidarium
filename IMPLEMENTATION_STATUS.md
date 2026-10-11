@@ -140,7 +140,7 @@ Befehle: `bun scripts/korpus-erzeugen.ts` erzeugt den Korpus,
 `… scripts/evaluieren.ts E09 E10`.
 `bun --env-file=.env scripts/demo-korpus-laden.ts` befüllt das Demo-Konto.
 
-## Sicherheitsrunde Oktober · **gemergt** (10.10.2026)
+## Sicherheitsrunde Oktober · **fertig** (10.10. und 11.10.2026)
 
 | Punkt                                                                            | Stand   |
 | -------------------------------------------------------------------------------- | ------- |
@@ -156,7 +156,7 @@ Befehle: `bun scripts/korpus-erzeugen.ts` erzeugt den Korpus,
 | Ausrollen auf vps1 (`e9b6933`), Abnahme von aussen                               | fertig  |
 | Abnahme fand: `next.config.ts` fehlte im Abbild, Laufzeit-Optionen griffen nicht | behoben |
 | `infra/abbild-pruefen.sh` startet das Abbild in der CI und prüft es              | fertig  |
-| Zweites Ausrollen mit der Korrektur, Abnahme von aussen                          | offen   |
+| Zweites Ausrollen (`054da3f`), Abnahme: `/_next/image` 404, kein `X-Powered-By`  | fertig  |
 
 ## Abnahmeliste — womit jeder Punkt belegt ist
 
