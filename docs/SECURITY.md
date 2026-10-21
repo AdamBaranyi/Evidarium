@@ -119,6 +119,40 @@ gleich. Fällt ein Befund weg, fällt seine Ausnahme weg.
 
 ## Behobene Befunde
 
+### Next.js 16.4.1 und vite 8.2.4 · **behoben 21.10.2026**
+
+| Nummer              | Paket und Befund                             | Stufe    | Art               | Erreichbar                                         | Behoben mit   |
+| ------------------- | -------------------------------------------- | -------- | ----------------- | -------------------------------------------------- | ------------- |
+| GHSA-p3m5-59mp-jv5r | next, Denial of Service über Server Actions  | hoch     | Laufzeit          | **ja**: fünf Server Actions, Sprachwahl öffentlich | `next` 16.4.1 |
+| GHSA-673q-mjm6-r5xr | next, RCE über `use cache` mit Typed Arrays  | kritisch | Laufzeit          | nein, kein `use cache`                             | `next` 16.4.1 |
+| GHSA-2464-fhr4-w9xw | next, RCE in der Bildoptimierung mit SVG     | kritisch | Laufzeit          | nein, Bildoptimierung seit 11.10.2026 aus          | `next` 16.4.1 |
+| GHSA-587h-7wmj-h5pm | vite (launch-editor), Prüfung umgehbar       | hoch     | Werkzeug (vitest) | nein                                               | `vite` 8.2.4  |
+| GHSA-r825-w8mm-5pxw | vite (launch-editor), Editor-Aufruf          | moderat  | Werkzeug (vitest) | nein                                               | `vite` 8.2.4  |
+| GHSA-698v-4r3x-3vcv | vite (launch-editor), Escaping unter Windows | moderat  | Werkzeug (vitest) | nein                                               | `vite` 8.2.4  |
+
+**Die drei Next-Befunde sah kein Audit.** Vercel hat sie am 14.10.2026 nur als
+Advisories im eigenen Repository veröffentlicht; in der globalen Datenbank, die
+`bun audit` liest, standen sie am 21.10.2026 noch nicht. Gefunden bei der
+Durchsicht über die Release-Hinweise von Next 16.4.1. Bei Laufzeit-Frameworks
+darum auch den Sicherheitsteil der Release-Hinweise lesen, nicht nur den Audit.
+Die vite-Befunde meldete der tägliche Lauf als Issue #21.
+
+**Wartezeit-Ausnahme:** `next` 16.4.1 war 6 Tage und 20 Stunden alt. Weil die
+DoS-Lücke live erreichbar ist, wurde es am 21.10.2026 um 13:4x UTC mit
+`minimumReleaseAgeExcludes` für `next` und seine `@next/*`-Pakete installiert,
+nur für diese eine Installation; die Ausnahme ist danach sofort entfernt.
+`--frozen-lockfile` prüft die Wartezeit nicht mehr.
+
+**vite 8.2.4** (vom 06.10.2026) nur im Lockfile gehoben; Abhängigkeiten, Peers
+und Binärdateien sind dieselben wie bei 8.2.2. Ein neu gesetzter Override wurde
+von Bun vermerkt, aber nicht angewandt, weil der Eintrag schon fest im Lockfile
+stand.
+
+**Geprüft:** Audit nur noch mit der esbuild-Ausnahme, Build mit Next 16.4.1,
+168 Unit-Tests, das gestartete Abbild (`/_next/image` 404, kein
+`X-Powered-By`, sharp lädt), E2E für CSP, Angriffsfläche und Sprachwahl lokal,
+die ganze Suite in der CI.
+
 ### Oktober-Welle: next, sharp, source-map-js · **behoben 10.10.2026**
 
 Acht Befunde, drei davon «hoch». Im Audit erschienen sie ab dem 05.10.2026:
