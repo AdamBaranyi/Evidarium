@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -55,6 +56,33 @@ function angelegt(bericht: string): number {
   expect(lesen(ordner, 'nummer').trim()).toBe('7');
   return aufrufe(ordner).length;
 }
+
+/*
+ * Ein Lockvogel: Im öffentlichen Repo kann jedes Konto ein Issue mit demselben
+ * Titel eröffnen und dessen Text jederzeit ändern, auch mit der Markierung des
+ * aktuellen Stands. Labels setzen kann es nicht, und es ist nicht der Bot.
+ */
+function lockvogel(
+  nummer: number,
+  body: string,
+  { autor = 'angreifer', labels = [] as string[] } = {},
+): void {
+  writeFileSync(
+    join(ordner, 'fremd.json'),
+    JSON.stringify([
+      {
+        number: nummer,
+        title: 'Sicherheitsmeldungen',
+        author: { login: autor },
+        labels: labels.map((name) => ({ name })),
+        body,
+      },
+    ]),
+  );
+}
+
+/** Die Markierung, die ein Angreifer aus den öffentlichen Kennungen nachrechnet. */
+const STAND_NEXT = createHash('sha256').update('GHSA-cjq9-62q9-8jv4').digest('hex').slice(0, 12);
 
 /** Aufrufe, die etwas ändern oder eine Mail auslösen. */
 function schreibend(ab = 0): string[] {
@@ -151,5 +179,67 @@ describe('scripts/sicherheits-meldung.sh', () => {
 
     expect(lesen(ordner, 'body')).toContain('bun audit v1.3.14');
     expect(lesen(ordner, 'body')).not.toContain('\u001b');
+  });
+  it('ein fremdes Issue mit gleichem Titel und passender Markierung wird übergangen', () => {
+    ordner = attrappenOrdner({ gh: GH });
+    lockvogel(99, `<!-- stand:${STAND_NEXT} -->`);
+
+    const { code } = melden(BERICHT.next, '1');
+
+    expect(code).toBe(0);
+    expect(schreibend()).toEqual([
+      'label create sicherheit',
+      'issue create title=Sicherheitsmeldungen label=sicherheit assignee=AdamBaranyi',
+    ]);
+  });
+
+  it('neben einem fremden Issue bleibt das eigene das Ziel', () => {
+    ordner = attrappenOrdner({ gh: GH });
+    const bisher = angelegt(BERICHT.next);
+    lockvogel(99, 'Alles in Ordnung, hier nichts melden.');
+
+    melden(BERICHT.beide, '1');
+
+    expect(schreibend(bisher)).toEqual(['issue edit 7', 'issue comment 7']);
+  });
+
+  it('ohne Befund lässt es ein fremdes Issue in Ruhe', () => {
+    ordner = attrappenOrdner({ gh: GH });
+    lockvogel(99, 'irgendein Text');
+
+    const { code } = melden(BERICHT.sauber, '0');
+
+    expect(code).toBe(0);
+    expect(schreibend()).toEqual([]);
+  });
+  /*
+   * Jede der beiden Prüfungen hält einen Fremden schon allein ab. Die zwei
+   * Fälle hier fängt nur je eine: ein Issue mit Label, aber nicht vom Bot, und
+   * eines vom Bot, aber ohne Label, etwa aus einer anderen Automatisierung, die
+   * Titel aus fremder Eingabe übernimmt.
+   */
+  it('ein Issue mit Label, aber nicht vom Bot, zählt nicht', () => {
+    ordner = attrappenOrdner({ gh: GH });
+    lockvogel(98, `<!-- stand:${STAND_NEXT} -->`, {
+      autor: 'mitwirkender',
+      labels: ['sicherheit'],
+    });
+
+    melden(BERICHT.next, '1');
+
+    expect(schreibend()).toContain(
+      'issue create title=Sicherheitsmeldungen label=sicherheit assignee=AdamBaranyi',
+    );
+  });
+
+  it('ein Issue vom Bot, aber ohne Label, zählt nicht', () => {
+    ordner = attrappenOrdner({ gh: GH });
+    lockvogel(97, `<!-- stand:${STAND_NEXT} -->`, { autor: 'app/github-actions' });
+
+    melden(BERICHT.next, '1');
+
+    expect(schreibend()).toContain(
+      'issue create title=Sicherheitsmeldungen label=sicherheit assignee=AdamBaranyi',
+    );
   });
 });

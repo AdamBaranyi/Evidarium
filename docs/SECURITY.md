@@ -119,6 +119,23 @@ gleich. Fällt ein Befund weg, fällt seine Ausnahme weg.
 
 ## Behobene Befunde
 
+### Lockvogel-Issue konnte den täglichen Alarm stumm schalten · **behoben 21.10.2026**
+
+Gefunden bei der Prüfung nach security-guidance von Anthropic (zwei Stufen:
+suchen, dann widerlegen; der Befund hielt). `scripts/sicherheits-meldung.sh`
+nahm das neueste offene Issue mit dem Titel «Sicherheitsmeldungen». Im
+öffentlichen Repo kann jedes Konto so ein Issue eröffnen und seinen Text mit
+der Markierung des aktuellen Stands füllen; die Markierung steht im echten Issue
+und lässt sich aus den öffentlichen Kennungen nachrechnen. Der Lauf hielte dann
+jede neue Meldung für bekannt und bliebe still, und das ist der einzige Alarm
+für die Bun-Abhängigkeiten.
+
+**Behoben:** Gezählt wird nur ein Issue, das der Bot dieses Workflows angelegt
+hat (`app/github-actions`) und das das Label `sicherheit` trägt; Labels setzen
+Konten ohne Rechte im Repo nicht. Gefiltert wird weiter erst nach dem Lesen,
+ohne Suchindex. Fünf neue Tests mit fremden Issues; ohne Autor- oder
+Label-Prüfung wird je einer rot.
+
 ### Next.js 16.4.1 und vite 8.2.4 · **behoben 21.10.2026**
 
 | Nummer              | Paket und Befund                             | Stufe    | Art               | Erreichbar                                         | Behoben mit   |
