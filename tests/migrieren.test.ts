@@ -13,6 +13,8 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 const url = process.env.TEST_DATABASE_URL ?? '';
 const pool = new Pool({ connectionString: url });
 const PROBE = 'bam_probe_build';
+// Im Schema von pg-boss wie die echten Bauten: Ab 12.38 prüft pg-boss nach dem
+// Bau, ob der Index dort existiert.
 
 function migrieren() {
   return spawnSync('bun', ['scripts/migrieren.ts'], {
@@ -58,20 +60,20 @@ beforeAll(async () => {
   );
   const erster = migrieren();
   expect(erster.status, erster.stderr).toBe(0);
-  await pool.query('CREATE TABLE IF NOT EXISTS public.bam_probe (id int)');
+  await pool.query('CREATE TABLE IF NOT EXISTS pgboss.bam_probe (id int)');
 }, 180_000);
 
 afterEach(async () => {
   await pool.query('DELETE FROM pgboss.bam WHERE name = $1', [PROBE]);
-  await pool.query('DROP INDEX IF EXISTS public.bam_probe_i1');
+  await pool.query('DROP INDEX IF EXISTS pgboss.bam_probe_i1');
 });
 
 afterAll(async () => {
-  await pool.query('DROP TABLE IF EXISTS public.bam_probe');
+  await pool.query('DROP TABLE IF EXISTS pgboss.bam_probe');
   await pool.end();
 });
 
-const INDEX = 'CREATE INDEX CONCURRENTLY IF NOT EXISTS bam_probe_i1 ON public.bam_probe (id)';
+const INDEX = 'CREATE INDEX CONCURRENTLY IF NOT EXISTS bam_probe_i1 ON pgboss.bam_probe (id)';
 
 describe('scripts/migrieren.ts und die Hintergrund-Migrationen von pg-boss', () => {
   it('baut einen offenen Hintergrund-Index fertig, bevor der Lauf endet', async () => {
@@ -81,7 +83,9 @@ describe('scripts/migrieren.ts und die Hintergrund-Migrationen von pg-boss', () 
 
     expect(lauf.status, lauf.stderr).toBe(0);
     expect(await zustand()).toBe('completed');
-    const index = await pool.query("SELECT 1 FROM pg_indexes WHERE indexname = 'bam_probe_i1'");
+    const index = await pool.query(
+      "SELECT 1 FROM pg_indexes WHERE schemaname = 'pgboss' AND indexname = 'bam_probe_i1'",
+    );
     expect(index.rowCount).toBe(1);
   }, 180_000);
 
