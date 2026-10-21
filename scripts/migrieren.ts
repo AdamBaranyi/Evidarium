@@ -27,6 +27,45 @@ const verbindung: string = url;
 const pool = new Pool({ connectionString: verbindung, max: 1 });
 
 /*
+ * Hintergrund-Migrationen gehören in diesen Lauf.
+ *
+ * Nach einem Update baut pg-boss manche Indizes im Hintergrund (BAM), und zwar
+ * «die nächste Instanz mit migrate». Live sind das Web und Worker als
+ * Anwendungsrolle; die darf auf Tabellen des Eigentümers keine Indizes bauen
+ * und scheiterte mit «must be owner of table», bei jedem Takt aufs Neue
+ * (nachgestellt am 21.10.2026). Darum baut der Eigentümer hier alles fertig.
+ *
+ * Gescheitert heisst: in diesem Lauf als Eigentümer gescheitert. Ältere
+ * Fehlschläge der Anwendungsrolle holt pg-boss selbst nach. Scheitert ein Bau
+ * auch hier, endet die Migration mit Fehler, und `deploy.sh` startet die neue
+ * Anwendung nicht.
+ */
+const HINTERGRUND_FRIST_MS = 5 * 60_000;
+
+async function hintergrundAbwarten(boss: PgBoss, beginn: Date): Promise<void> {
+  const ende = Date.now() + HINTERGRUND_FRIST_MS;
+  for (;;) {
+    const offen = (await boss.getBamEntries()).filter((eintrag) => eintrag.status !== 'completed');
+    if (offen.length === 0) return;
+
+    const gescheitert = offen.filter(
+      (eintrag) =>
+        eintrag.status === 'failed' && eintrag.completedOn && eintrag.completedOn >= beginn,
+    );
+    if (gescheitert.length > 0 || Date.now() > ende) {
+      for (const eintrag of gescheitert.length > 0 ? gescheitert : offen) {
+        console.error(
+          `Hintergrund-Migration ${eintrag.name} (${eintrag.status}): ${eintrag.error ?? 'Frist abgelaufen'}`,
+        );
+        console.error(`  ${eintrag.command}`);
+      }
+      throw new Error('pg-boss: Hintergrund-Migrationen nicht fertig, Ausrollen angehalten.');
+    }
+    await new Promise((weiter) => setTimeout(weiter, 1000));
+  }
+}
+
+/*
  * pg-boss legt sein Schema beim ersten Start selbst an — und braucht dafür
  * Rechte, die die Anwendungsrolle nicht hat und nicht haben soll.
  *
@@ -42,9 +81,15 @@ const pool = new Pool({ connectionString: verbindung, max: 1 });
  * bleibt Nicht-Eigentümerin: Row Level Security umgeht sie weiterhin nicht.
  */
 async function warteschlangeEinrichten(datenbank: NodePgDatabase): Promise<void> {
-  const boss = new PgBoss({ connectionString: verbindung });
+  const boss = new PgBoss({ connectionString: verbindung, bamIntervalSeconds: 10 });
+  boss.on('error', (fehler: Error) => console.error('[migration] pg-boss:', fehler.message));
+  const beginn = new Date();
   await boss.start();
-  await boss.stop({ graceful: false });
+  try {
+    await hintergrundAbwarten(boss, beginn);
+  } finally {
+    await boss.stop({ graceful: true, timeout: 30_000 });
+  }
 
   await datenbank.execute(sql`
     GRANT USAGE, CREATE ON SCHEMA pgboss TO evidarium_app;

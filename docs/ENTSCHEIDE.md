@@ -996,3 +996,19 @@ niemand mehr mit, und die echte Meldung geht unter.
   roter Lauf.
 
 Vorlage für alle eigenen Repositories, Evidarium setzt sie als erstes um.
+
+## E47 — pg-boss migriert nur als Eigentümer, und zu Ende
+
+_21.10.2026._ Beim Prüfen eines Updates auf pg-boss 12.38 nachgestellt: Nach
+einem Schema-Wechsel baut pg-boss Indizes im Hintergrund, durch «die nächste
+Instanz mit migrate». Das Migrationsskript startete pg-boss als Eigentümer und
+stoppte sofort; die Bauten blieben offen. Web und Worker übernahmen sie als
+Anwendungsrolle und scheiterten bei jedem Takt mit «must be owner of table».
+
+- **Der Eigentümer baut fertig.** `scripts/migrieren.ts` wartet, bis alle
+  Hintergrund-Bauten erledigt sind, und hält das Ausrollen an, wenn einer auch
+  als Eigentümer scheitert. Alte Fehlschläge der Anwendungsrolle holt er nach.
+- **Die Anwendungsrolle versucht es gar nicht.** Web und Worker laufen live mit
+  `PGBOSS_MIGRIEREN=false`; pg-boss prüft dann nur, ob das Schema aktuell ist,
+  und bricht sonst laut ab. Entwicklung und CI verbinden sich als Eigentümer
+  und behalten die Vorgabe.

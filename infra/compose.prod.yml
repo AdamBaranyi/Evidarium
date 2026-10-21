@@ -32,6 +32,9 @@ services:
       SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET fehlt}
       APP_ORIGIN: ${APP_ORIGIN:?APP_ORIGIN fehlt}
       STORAGE_PATH: /app/storage
+      # Als Anwendungsrolle kein Schema und keine Hintergrund-Bauten von
+      # pg-boss; das macht scripts/migrieren.ts als Eigentümer.
+      PGBOSS_MIGRIEREN: 'false'
       WORKER_INTERN_URL: http://worker:3101
       TRUST_PROXY: 'true'
       AI_MODE: ${AI_MODE:-demo}
@@ -83,6 +86,7 @@ services:
       SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET fehlt}
       APP_ORIGIN: ${APP_ORIGIN:?APP_ORIGIN fehlt}
       STORAGE_PATH: /app/storage
+      PGBOSS_MIGRIEREN: 'false'
       # Der interne Endpunkt. Web und Worker haben getrennte Netz-Namensräume;
       # mit der Vorgabe 127.0.0.1 erreichte die Weboberfläche ihn nicht
       # (ECONNREFUSED, gefunden am 18.09.2026 im ersten Produktionslauf).
