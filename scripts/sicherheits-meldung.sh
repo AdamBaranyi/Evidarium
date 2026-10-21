@@ -25,8 +25,15 @@ stand=$(printf '%s' "$ids" | sha256sum | cut -c1-12)
 # Ohne --label und ohne --search: Beide schicken gh über den Suchindex, und der
 # hinkt nach — ein zweiter Lauf kurz nach dem ersten fände das neue Issue nicht
 # und legte ein zweites an. Ohne Filter liest gh die Issues direkt.
-nummer=$(gh issue list --state open --limit 200 --json number,title \
-  --jq "[.[] | select(.title == \"$titel\")][0].number // empty")
+#
+# Gefiltert wird darum erst hier, und nicht nur nach dem Titel: Im öffentlichen
+# Repo kann jedes Konto ein Issue «Sicherheitsmeldungen» eröffnen und seinen
+# Text mit der Markierung des aktuellen Stands füllen; der Lauf hielte dann
+# jede neue Meldung für bekannt und bliebe stumm. Gezählt wird nur ein Issue,
+# das der Bot dieses Workflows angelegt hat und das das Label trägt; Labels
+# setzen Konten ohne Rechte im Repo nicht.
+nummer=$(gh issue list --state open --limit 200 --json number,title,author,labels \
+  --jq "[.[] | select(.title == \"$titel\" and .author.login == \"app/github-actions\" and any(.labels[]; .name == \"$label\"))][0].number // empty")
 
 if [ -z "$ids" ]; then
   # Keine Kennung, aber ein Fehlercode: Der Audit selbst ist gescheitert, etwa
