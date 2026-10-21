@@ -104,3 +104,12 @@ lokalen Anmeldung, damit der Rundgang unabhängig bleibt.
 | `docs/EVALUATION.md`       | Ergebnis des letzten Prüflaufs, Antworten im Wortlaut |
 | `docs/SCREENREADER.md`     | VoiceOver automatisch in der CI und von Hand          |
 | `docs/FALLSTUDIE.md`       | Die Fallstudie für die Portfolio-Seite                |
+
+## Lizenz
+
+Alle Rechte vorbehalten. Der Quelltext ist öffentlich, damit er gelesen und
+beurteilt werden kann; Nutzung, Veränderung und Weitergabe brauchen eine
+schriftliche Erlaubnis. Schriften, Abhängigkeiten und das Embedding-Modell
+stehen unter ihren eigenen Lizenzen, Einzelheiten und Herkunft in
+[LICENSE](LICENSE). Die Antworten erzeugt die Anthropic API als Dienst; sie
+ist kein Bestandteil des Repositorys.
