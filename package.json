@@ -30,20 +30,20 @@
     "dev:all": "bun run worker & bun run dev"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "0.133.0",
+    "@anthropic-ai/sdk": "0.134.0",
     "@huggingface/transformers": "4.3.1",
     "@node-rs/argon2": "2.2.2",
     "drizzle-orm": "0.45.4",
     "next": "16.4.1",
     "pg": "8.23.1",
     "pg-boss": "12.38.0",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
-    "unpdf": "1.8.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "unpdf": "1.9.0",
     "zod": "4.6.7"
   },
   "devDependencies": {
-    "@axe-core/playwright": "4.13.0",
+    "@axe-core/playwright": "4.14.0",
     "@eslint/js": "10.0.1",
     "@guidepup/guidepup": "0.35.0",
     "@guidepup/playwright": "0.19.1",
@@ -64,7 +64,7 @@
     "tailwindcss": "4.3.3",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.2",
-    "vitest": "5.0.4"
+    "vitest": "5.0.5"
   },
   "overrides": {
     "adm-zip": "0.6.1"
