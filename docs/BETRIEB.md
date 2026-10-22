@@ -26,6 +26,13 @@ Migrationen laufen als `evidarium_owner`, die Anwendung arbeitet als
 `evidarium_app`. Die Anwendungsrolle darf keine Tabellen anlegen — das ist
 beabsichtigt, siehe `docs/ENTSCHEIDE.md`, E6.
 
+**pg-boss migriert nur hier.** Nach einem Update baut pg-boss manche Indizes im
+Hintergrund. `scripts/migrieren.ts` wartet als Eigentümer, bis alle fertig sind
+(Frist fünf Minuten), und endet mit Fehler, wenn ein Bau scheitert; dann
+startet `deploy.sh` die neue Anwendung nicht, und die alte läuft weiter. Web
+und Worker laufen mit `PGBOSS_MIGRIEREN=false` und fassen Schema und
+Hintergrund-Bauten nicht an. Siehe E47.
+
 ## Konten
 
 Es gibt kein öffentliches Registrierungssystem. Konten entstehen über einen

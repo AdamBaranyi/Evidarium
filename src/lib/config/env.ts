@@ -90,6 +90,16 @@ const Schema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((value) => value === 'true'),
+  /*
+   * Ob pg-boss beim Start sein Schema migriert und Hintergrund-Bauten
+   * übernimmt. Live laufen Web und Worker als Anwendungsrolle und dürfen das
+   * nicht; dort steht `false`, und scripts/migrieren.ts macht es als
+   * Eigentümer. Entwicklung und CI verbinden sich als Eigentümer.
+   */
+  PGBOSS_MIGRIEREN: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((wert) => wert === 'true'),
 });
 
 const Geprueft = Schema.refine(

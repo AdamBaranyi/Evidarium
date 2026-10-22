@@ -46,7 +46,10 @@ let boss: PgBoss | null = null;
 export async function queue(): Promise<PgBoss> {
   if (boss) return boss;
 
-  const neu = new PgBoss({ connectionString: env.DATABASE_URL_OWNER ?? env.DATABASE_URL });
+  const neu = new PgBoss({
+    connectionString: env.DATABASE_URL_OWNER ?? env.DATABASE_URL,
+    migrate: env.PGBOSS_MIGRIEREN,
+  });
   neu.on('error', (fehler: Error) => {
     console.error('[queue] Fehler', fehler);
   });
