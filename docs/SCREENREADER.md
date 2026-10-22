@@ -43,9 +43,9 @@ Je Punkt: tun, hinhören, abhaken. Stimmt etwas nicht, notieren: Seite, was du
 getan hast, was VoiceOver sagte, was du erwartet hättest.
 
 1. **Startseite.** Die Hauptüberschrift ist über den Rotor zu finden. Die
-   Sprachknöpfe sagen ihre Sprache («Deutsch», «Français» …) und welche gewählt
-   ist. Die Vorführung redet nicht ununterbrochen dazwischen; «Anhalten» ist
-   erreichbar.
+   Sprachknöpfe sagen ihr Kürzel und ihre Sprache («DE Deutsch»,
+   «FR Français» …) und welche gewählt ist. Die Vorführung redet nicht
+   ununterbrochen dazwischen; «Anhalten» ist erreichbar.
 2. **Rundgang in der Demo** (beim ersten Besuch, sonst Knopf «Rundgang»). Der
    Dialog nennt seinen Namen, der Text des Schritts wird gelesen. Weiter mit
    Enter oder Doppeltippen; jeder Schritt wird angesagt. Escape beendet ihn
