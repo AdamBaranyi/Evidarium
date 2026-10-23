@@ -45,6 +45,29 @@ test('der Knopf wechselt die Sprache, und sie bleibt', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(TITEL.en);
 });
 
+/*
+ * WCAG 2.5.3 «Label in Name»: Wer per Sprache steuert, sagt, was er sieht,
+ * etwa «FR», und der Knopf muss auf dieses Wort hören. Dahinter steht der
+ * Name der Sprache in ihr selbst, mit `lang`, damit ein Screenreader
+ * «Français» französisch vorliest.
+ */
+test('Sprachknöpfe beginnen mit dem sichtbaren Kürzel und nennen die Sprache', async ({ page }) => {
+  await page.goto('/');
+  for (const [kuerzel, sprachname, lang] of [
+    ['DE', 'Deutsch', 'de'],
+    ['FR', 'Français', 'fr'],
+    ['IT', 'Italiano', 'it'],
+    ['EN', 'English', 'en'],
+  ] as const) {
+    const knopf = page.getByRole('group', { name: 'Sprache' }).getByRole('button', {
+      name: sprachname,
+    });
+    await expect(knopf).toHaveText(kuerzel);
+    await expect(knopf).toHaveAccessibleName(new RegExp(`^${kuerzel}\\b.*${sprachname}`));
+    await expect(knopf).toHaveAttribute('lang', lang);
+  }
+});
+
 test.describe('ohne eigene Wahl zählt der Browser', () => {
   test.use({ locale: 'fr-CH' });
 

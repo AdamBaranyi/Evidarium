@@ -12,7 +12,10 @@ import { GEMEINSAM } from './texte';
  * ohne JavaScript, weil er ein Formular abschickt.
  *
  * Jeder Knopf trägt den Namen der Sprache in ihr selbst und `lang` dazu —
- * so liest ein Screenreader «Français» französisch vor.
+ * so liest ein Screenreader «Français» französisch vor. Vorne steht das
+ * sichtbare Kürzel (WCAG 2.5.3): Wer per Sprache steuert, sagt «FR», und der
+ * Knopf muss darauf hören. Als `aria-label` wie in projekt-eintrag.tsx, weil
+ * eine versteckte Spanne je nach Browser falsche Leerzeichen ergab.
  */
 export async function Sprachwahl({ rechts = false }: { rechts?: boolean }) {
   const aktiv = await sprache();
@@ -30,7 +33,7 @@ export async function Sprachwahl({ rechts = false }: { rechts?: boolean }) {
           name="sprache"
           value={wahl}
           lang={wahl}
-          aria-label={SPRACHNAME[wahl]}
+          aria-label={`${wahl.toUpperCase()} ${SPRACHNAME[wahl]}`}
           aria-current={wahl === aktiv ? 'true' : undefined}
         >
           {wahl.toUpperCase()}
