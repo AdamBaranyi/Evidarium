@@ -3,9 +3,9 @@
 #
 # Ports bewusst 5450/5451: Tallyroom belegt auf derselben Maschine 5440/5441.
 #
-# PostgreSQL 18 mit pgvector. Die Hauptversion ist an vps1 angeglichen, wo
-# postgres:18.1-alpine läuft — CI, Entwicklung und Produktion müssen dieselbe
-# Hauptversion fahren.
+# PostgreSQL 18 mit pgvector, dasselbe Abbild wie auf vps1
+# (infra/compose.prod.yml) und in der CI; tests/wartung.test.ts hält die drei
+# gleich.
 #
 # Postgres 18 erwartet den Mount auf /var/lib/postgresql, nicht mehr auf dem
 # Unterverzeichnis data. Mit dem alten Pfad startet der Container in einer

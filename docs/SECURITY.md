@@ -121,6 +121,23 @@ gleich. Fällt ein Befund weg, fällt seine Ausnahme weg.
 
 ## Behobene Befunde
 
+### Sicherung vor dem Ausrollen für alle Konten lesbar · **behoben 25.10.2026**
+
+Gefunden bei der Durchsicht am 25.10.2026, Prüfung nach der Methode von
+security-guidance von Hand. `infra/deploy.sh` legt vor jeder Migration einen
+Abzug der Datenbank nach `/var/backups/evidarium` (Konten, Dokumenttext). Mit
+der gewöhnlichen umask von root entstand die Datei mit 644 in einem Ordner mit
+755: lesbar für jedes Konto auf vps1, nicht nur für root. Die nächtliche
+Sicherung (`infra/sichern.sh`) setzte 700 und 600 schon. Von aussen nicht
+erreichbar; es braucht ein Konto auf dem Server.
+
+**Behoben:** Der Ordner bekommt 700 und sperrt damit auch die älteren Dateien
+darin; die neue Datei entsteht mit `umask 077` gleich mit 600, ohne
+Zeitfenster. Test in `tests/deploy-skript.test.ts`, rot vorher (755). Wirkt
+ab dem zweiten Ausrollen nach dem Merge, weil das laufende Skript noch die
+alte Fassung liest; bis dahin einmal von Hand:
+`sudo chmod 700 /var/backups/evidarium`.
+
 ### Lockvogel-Issue konnte den täglichen Alarm stumm schalten · **behoben 21.10.2026**
 
 Gefunden bei der Prüfung nach security-guidance von Anthropic (zwei Stufen:

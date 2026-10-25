@@ -91,6 +91,10 @@ selbst.
   Das Restguthaben steht nur in der Konsole von Anthropic; ist es leer,
   antwortet Evidarium nicht mehr, sondern meldet einen Fehler — ein stiller
   Rückfall auf den Demo-Modus wäre schlimmer als eine ehrliche Meldung.
+- **Abbilder erneuern:** `sudo /opt/evidarium/infra/deploy.sh`, auch ohne neuen
+  Commit. Es baut mit `--pull` und holt `pgvector/pgvector` neu: Beide Abbilder
+  baut der Hersteller unter derselben Nummer neu, wenn darunter eine Lücke
+  geschlossen wird, und Dependabot sieht nur Nummern.
 - **Sicherung zurückspielen proben:** `sudo /opt/evidarium/infra/sicherung-pruefen.sh`.
 - **Sicherheitsmeldungen und Ausnahmen:** Ist das Issue «Sicherheitsmeldungen»
   offen, die Befunde nach der Regel in `docs/SECURITY.md` erledigen. Jede

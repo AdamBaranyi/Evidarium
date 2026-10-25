@@ -41,13 +41,19 @@ jobs:
             --body "$(cat <<'EOF'
           Rund 15 Minuten. Der Reihe nach:
 
-          - [ ] **Container-Images erneuern** — `ssh vps1` (Tunnel vorher einschalten!), dann
-                `sudo /opt/evidarium/infra/images-erneuern.sh`.
+          - [ ] **Abbilder erneuern** — Tunnel einschalten, dann
+                `ssh -t vps1 'sudo /opt/evidarium/infra/deploy.sh'`. Das Ausrollen zieht
+                `pgvector/pgvector` und die Basis-Abbilder frisch, auch ohne neuen Commit.
                 Warum das sein muss: Der Server pflegt sich selbst, Container nicht. Und
-                `postgres:18.1-alpine` wird unter derselben Nummer neu gebaut — auf neue
+                die Abbilder werden unter derselben Nummer neu gebaut — auf neue
                 Versionsnummern zu warten bringt hier nichts.
-          - [ ] **Sicherung ansehen** — die Anmeldezeile beim `ssh vps1` sagt, wie der letzte
-                nächtliche Lauf ausging.
+          - [ ] **Sicherung zurückspielen proben** —
+                `ssh -t vps1 'sudo /opt/evidarium/infra/sicherung-pruefen.sh'`. Lädt die
+                neueste nächtliche Sicherung in eine eigene Probe-Datenbank, zählt und
+                räumt auf. Eine Sicherung, aus der nie etwas zurückgespielt wurde, ist eine
+                Vermutung.
+          - [ ] **Guthaben** — Restguthaben in der Konsole von Anthropic. Ist es leer,
+                antwortet Evidarium nicht mehr (docs/BETRIEB.md, «Monatlich»).
           - [ ] **Offene Pull Requests** hier und in
                 [Signature-Style](https://github.com/AdamBaranyi/Signature-Style/pulls):
                 grüne mergen. Das hält nebenbei die geplanten Läufe am Leben — GitHub schaltet
@@ -61,8 +67,6 @@ jobs:
 
           Alle drei Monate zusätzlich:
 
-          - [ ] **Probe-Wiederherstellung** — `sudo /opt/evidarium/infra/restore-test.sh`.
-                Eine Sicherung, aus der nie etwas zurückgespielt wurde, ist eine Vermutung.
           - [ ] **Header von aussen prüfen** — securityheaders.com oder ein eigener Durchgang.
 
           Erledigt? Issue schliessen. Am Ersten des nächsten Monats kommt das nächste.

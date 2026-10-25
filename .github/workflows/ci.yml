@@ -26,12 +26,13 @@ jobs:
     name: Format, Regeln, Typen, Tests, Build
     runs-on: ubuntu-24.04
 
-    # Dieselbe Hauptversion wie auf vps1 (dort postgres:18.1-alpine) und wie
-    # in infra/docker-compose.yml. Eine abweichende Version in der CI prüft
-    # etwas anderes als das, was in Produktion läuft.
+    # Dasselbe Abbild wie auf vps1 (infra/compose.prod.yml) und in
+    # infra/docker-compose.yml; tests/wartung.test.ts hält die drei gleich.
+    # Eine abweichende Version in der CI prüft etwas anderes als das, was in
+    # Produktion läuft.
     services:
       postgres:
-        image: pgvector/pgvector:0.8.6-pg18
+        image: pgvector/pgvector:0.8.7-pg18
         env:
           POSTGRES_USER: evidarium_owner
           POSTGRES_PASSWORD: ci
