@@ -13,8 +13,9 @@ Ab dem ersten Commit, nicht nachträglich.
 | Monatlich am Ersten | Wartungscheckliste für das, was am Server passiert, und die Ausnahmen                                                                                                    | `.github/workflows/erinnerung-monatlich.yml`    |
 
 Die Meldung geht an Adam, nicht an ein Werkzeug: Das Issue
-«Sicherheitsmeldungen» ist ihm zugewiesen, dazu `assignees` in Dependabot und
-`--assignee` bei den Erinnerungs-Issues.
+«Sicherheitsmeldungen» ist ihm zugewiesen, dazu `--assignee` bei den
+Erinnerungs-Issues. Dependabot-PRs weist seit 25.10.2026 niemand mehr zu: Jede
+Zuweisung war eine Mail je PR, die Erinnerung am Montag reicht.
 
 ## Umgang mit Befunden
 
@@ -24,8 +25,9 @@ Regel seit dem 10.10.2026: Rot heisst handeln, alles andere ist eine Meldung.
   Audit selbst scheitert. Befunde ab «moderate» stehen in der
   Laufzusammenfassung und im Issue «Sicherheitsmeldungen» — angelegt beim
   ersten Fund, ergänzt nur, wenn sich die Liste der Kennungen ändert,
-  geschlossen von selbst, sobald alles sauber ist. Eine Mail je Änderung,
-  keine je Tag, kein rotes Kreuz auf `main`.
+  bleibt bei sauberem Stand offen und sagt «keine Befunde» (seit 25.10.2026;
+  Schliessen und Neuanlegen hiess jedes Mal zuweisen und mailen). Eine Mail je
+  Änderung, keine je Tag, kein rotes Kreuz auf `main`.
 - **Push und Pull Request** blockieren ab «high». «moderate» und «low» erledigt
   der nächste Update-PR.
 - **Beheben** in dieser Reihenfolge: Lockfile-Eintrag anheben, wenn der Bereich
