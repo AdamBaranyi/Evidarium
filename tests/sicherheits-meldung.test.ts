@@ -14,8 +14,8 @@ import {
 /*
  * Der tägliche Lauf wird nicht mehr rot, wenn eine Abhängigkeit eine Meldung
  * hat. Stattdessen hält scripts/sicherheits-meldung.sh genau ein Issue: neu
- * beim ersten Fund, ergänzt nur bei geänderten Kennungen, geschlossen ohne
- * Befund. Jede Mail an Adam soll eine Änderung bedeuten, nie eine Wiederholung.
+ * beim ersten Fund, ergänzt nur bei geänderten Kennungen, offen und mit
+ * «keine Befunde» beschriftet, sobald nichts mehr ansteht. Jede Mail an Adam soll eine Änderung bedeuten, nie eine Wiederholung.
  */
 const GH = readFileSync('tests/gh-attrappe.sh', 'utf8');
 
@@ -136,14 +136,29 @@ describe('scripts/sicherheits-meldung.sh', () => {
     expect(lesen(ordner, 'kommentar')).toContain('GHSA-wq5f-xc86-pv6w');
   });
 
-  it('ohne Befund schliesst es das offene Issue', () => {
+  it('ohne Befund bleibt das Issue offen und sagt «keine Befunde»', () => {
     ordner = attrappenOrdner({ gh: GH });
     const bisher = angelegt(BERICHT.next);
 
     const { code } = melden(BERICHT.sauber, '0');
 
     expect(code).toBe(0);
-    expect(schreibend(bisher)).toEqual(['issue close 7']);
+    expect(schreibend(bisher)).toEqual(['issue edit 7']);
+    expect(lesen(ordner, 'body')).toContain('keine Befunde');
+    const danach = aufrufe(ordner).length;
+    melden(BERICHT.sauber, '0');
+    expect(schreibend(danach)).toEqual([]);
+  });
+
+  it('nach einem sauberen Tag ergänzt ein neuer Fund dasselbe Issue', () => {
+    ordner = attrappenOrdner({ gh: GH });
+    angelegt(BERICHT.next);
+    melden(BERICHT.sauber, '0');
+    const danach = aufrufe(ordner).length;
+
+    melden(BERICHT.beide, '1');
+
+    expect(schreibend(danach)).toEqual(['issue edit 7', 'issue comment 7']);
   });
 
   it('ohne Befund und ohne offenes Issue bleibt es still', () => {
