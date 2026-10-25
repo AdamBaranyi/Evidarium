@@ -56,9 +56,12 @@ jobs:
 
       # Die VoiceOver-Einstellungen, die zur installierten Guidepup-Fassung
       # gehören (Manifest mit Prüfsumme in @guidepup/guidepup). Ohne sie
-      # startet VoiceOver nicht: «Failed to mount Guidepup preferences».
+      # startet VoiceOver nicht: «Failed to mount Guidepup preferences» –
+      # so geschehen am 25.10.2026, als @guidepup/setup 0.25.3 fest hier
+      # stand und Guidepup 0.36.3 ein neues Manifest brachte. Darum kommt
+      # @guidepup/setup aus dem Lockfile, wie in Tallyroom.
       - name: Guidepup-Einstellungen für VoiceOver
-        run: bunx @guidepup/setup@0.25.3 install voiceover
+        run: bunx guidepup install voiceover
 
       # Auf den Mac-Rechnern gibt es kein Docker: Postgres 18 mit pgvector aus
       # Homebrew, dieselbe Hauptversion wie in der übrigen CI und auf vps1.
