@@ -30,11 +30,11 @@
     "dev:all": "bun run worker & bun run dev"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "0.134.0",
+    "@anthropic-ai/sdk": "0.135.0",
     "@huggingface/transformers": "4.3.1",
     "@node-rs/argon2": "2.2.2",
     "drizzle-orm": "0.45.4",
-    "next": "16.4.1",
+    "next": "16.4.2",
     "pg": "8.23.1",
     "pg-boss": "12.38.0",
     "react": "19.3.1",
@@ -45,8 +45,8 @@
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
     "@eslint/js": "10.0.1",
-    "@guidepup/guidepup": "0.35.0",
-    "@guidepup/playwright": "0.19.1",
+    "@guidepup/guidepup": "0.36.3",
+    "@guidepup/playwright": "0.20.0",
     "@playwright/test": "1.64.1",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "26.6.5",
