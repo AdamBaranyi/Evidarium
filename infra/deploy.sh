@@ -19,7 +19,9 @@ unset ANTHROPIC_API_KEY AI_MODE DEMO_AKTIV POSTGRES_PASSWORD APP_ROLE_PASSWORD
 
 WURZEL="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 UMGEBUNG="$WURZEL/infra/.env.production"
-SICHERUNG="/var/backups/evidarium"
+# Anders nur im Test (tests/deploy-skript.test.ts). `sudo` setzt die Umgebung
+# zurück; aufgerufen wie oben gilt immer der feste Pfad.
+SICHERUNG="${EVIDARIUM_SICHERUNG:-/var/backups/evidarium}"
 COMPOSE=(docker compose -f "$WURZEL/infra/compose.prod.yml" --env-file "$UMGEBUNG")
 ZIEL="${1:-main}"
 
@@ -92,18 +94,34 @@ VERSION="$(git -C "$WURZEL" rev-parse --short HEAD)"
 echo "HEAD steht auf $VERSION"
 
 # ------------------------------------------------------------------- Bauen --
+# Mit `--pull`: Die Basis-Abbilder (node, bun) baut der Hersteller unter
+# derselben Nummer neu, wenn darunter eine Lücke geschlossen wird. Ohne
+# `--pull` darf Docker die nehmen, die schon auf der Platte liegen.
 melde "Abbild bauen: evidarium:$VERSION"
-docker build -f "$WURZEL/infra/Dockerfile" -t "evidarium:$VERSION" "$WURZEL"
+docker build --pull -f "$WURZEL/infra/Dockerfile" -t "evidarium:$VERSION" "$WURZEL"
 export EVIDARIUM_VERSION="$VERSION"
+
+# Dasselbe gilt für pgvector/pgvector:<nummer>-pg18, und Compose zieht ein
+# vorhandenes Abbild nie von selbst neu. Hier nur holen: Getauscht wird die
+# Datenbank erst unten beim Start, nach der Sicherung. So erneuert jedes
+# Ausrollen alle Abbilder, auch ohne neuen Commit (docs/BETRIEB.md, monatlich).
+melde "Datenbank-Abbild holen"
+"${COMPOSE[@]}" pull db
 
 # --------------------------------------------------------------- Sicherung --
 # Vor jeder Migration, nicht danach. Eine Sicherung, die nach dem Schema-
 # umbau entsteht, hilft beim Zurückrollen genau nicht.
+#
+# Die Sicherung enthält Konten und den Text aller Dokumente: nur für root,
+# wie die nächtliche in infra/sichern.sh. Der Ordner mit 700 sperrt auch
+# ältere Dateien darin; die umask im Unterprozess legt die neue gleich mit
+# 600 an, ohne Zeitfenster dazwischen.
 melde "Datenbank sichern"
 mkdir -p "$SICHERUNG"
+chmod 700 "$SICHERUNG"
 if "${COMPOSE[@]}" ps --status running --services 2>/dev/null | grep -qx db; then
   DATEI="$SICHERUNG/evidarium-$(date +%Y%m%d-%H%M%S)-vor-$VERSION.sql.gz"
-  "${COMPOSE[@]}" exec -T db pg_dump -U evidarium_owner evidarium | gzip > "$DATEI"
+  (umask 077 && "${COMPOSE[@]}" exec -T db pg_dump -U evidarium_owner evidarium | gzip > "$DATEI")
   echo "Gesichert nach $DATEI"
   # Ältere Sicherungen bleiben liegen; aufgeräumt wird bewusst von Hand.
 else
