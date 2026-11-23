@@ -62,9 +62,10 @@ gleich. Fällt ein Befund weg, fällt seine Ausnahme weg.
   von Migrationen die Schemadatei, ein kurzer Vorgang ohne offenen Port. Der
   Entwicklungsserver der Anwendung ist Next mit Turbopack.
 - **Kein Update:** Auch das neueste `drizzle-kit` (0.31.11) hängt noch an
-  `@esbuild-kit`.
-- **Bewertet:** 17.09.2026, nachgeprüft 10.10.2026
-- **Prüfen bis:** 10.11.2026
+  `@esbuild-kit`, und `@esbuild-kit/core-utils` legt esbuild auf `~0.18.20`
+  fest; die Korrektur steckt erst in 0.25.0.
+- **Bewertet:** 17.09.2026, nachgeprüft 10.10.2026 und 23.11.2026
+- **Prüfen bis:** 23.12.2026
 
 ## Im Produkt
 

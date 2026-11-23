@@ -5,7 +5,7 @@
 set -euo pipefail
 stufe="${1:-high}"
 ausnahmen=(
-  --ignore GHSA-67mh-4wv8-2f99   # esbuild 0.18 über drizzle-kit, nur Entwicklungsserver, kein Update – prüfen bis 10.11.2026
+  --ignore GHSA-67mh-4wv8-2f99   # esbuild 0.18 über drizzle-kit, nur Entwicklungsserver, kein Update – prüfen bis 23.12.2026
 )
 # Die Form ${a[@]+…} hält auch eine leere Liste aus: bash 3.2 (macOS) bricht
 # sonst unter set -u ab. Leer ist das Ziel, sobald keine Ausnahme mehr nötig ist.
